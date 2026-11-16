@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>やくそく差分 | YAKUSOKU DELTA</title>
+<meta name="description" content="発注条件の新旧テキストをローカルで比較。金額・日付の差分を確認しレポートを出力。">
+<style>
+:root{font-family:system-ui,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.6;background:#f5f8f6;color:#193c3c}
+*{box-sizing:border-box}body{margin:0}header{background:#123e43;color:white;padding:17px max(20px,calc((100vw - 1110px)/2))}
+nav{font-weight:800;letter-spacing:.04em}small{font-size:12px;font-weight:400;color:#7e9994}.hero{padding:42px 0 18px}.eyebrow{color:#a9ebd3;letter-spacing:.18em;font-size:11px;font-weight:800}
+h1{margin:10px 0;line-height:1.23;font-size:clamp(30px,4.2vw,49px)}h1 em{font-style:normal;color:#a9ebd3}
+.hero p{max-width:650px;color:#d2e6de;font-size:15px;margin:16px 0}
+main{max-width:1150px;margin:auto;padding:26px 20px 48px}
+h2{font-size:20px;margin:10px 0 15px}.flex{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.card{background:white;border:1px solid #dce6e0;border-radius:16px;padding:17px;box-shadow:0 7px 30px #1b483606}
+.card label{display:block;font-weight:800;margin-bottom:10px}textarea{width:100%;height:240px;resize:vertical;border-radius:10px;border:1px solid #c6d7cf;background:#fbfefc;padding:12px;font:14px/1.6 inherit}
+button,select{font:inherit}button{cursor:pointer;border:1px solid #c7d8d0;border-radius:10px;background:white;padding:9px 14px;color:#134e49;font-weight:700}
+button:hover{background:#e5f5ee}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #6abdab;outline-offset:2px}
+button.primary{background:#177b70;color:white;border-color:#177b70;padding:12px 24px}button.primary:hover{background:#096b63}
+button.filebtn{border:0;padding:0;font-size:12px}.fileholder{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:#627e75}
+.fileholder label{cursor:pointer;color:#167a6e;margin:0}.fileholder input{position:absolute;left:-10000px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 26px}.message{color:#aa4e21;font-weight:700;min-height:20px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric strong{display:block;font-size:30px;line-height:1.2}.metric span{font-size:12px;color:#58766b}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px}.toolbar select{padding:8px;border:1px solid #d3ddd6;border-radius:8px}
+#rows{display:grid;gap:10px}.line{background:white;border:1px solid #d5e4dd;border-radius:12px;overflow:hidden}
+.line.emphasis{border-left:4px solid #e4a53b}.rowhead{padding:10px 14px;background:#f0f7f2;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tag{font-size:11px;font-weight:800;color:#296656;background:#daeee4;border-radius:6px;padding:2px 8px}
+.tag.alert{color:#87500f;background:#fdf0d2}.rowhead select{margin-left:auto;padding:5px;background:white;border:1px solid #c8d9d1;border-radius:7px}
+.cells{display:grid;grid-template-columns:1fr 1fr}.cell{padding:12px 14px;overflow-wrap:anywhere;white-space:pre-wrap;font-size:14px;min-height:49px}
+.cell:first-child{background:#fff8f5;border-right:1px solid #ece5de}.cell:last-child{background:#f1faf5}
+#checks{display:flex;gap:7px;flex-wrap:wrap}.check{background:#e2f4e9;color:#246850;border-radius:30px;padding:5px 10px;font-size:12px}.check.missing{background:#fcf0e3;color:#8c5a17}
+.hidden{display:none}.privacy{background:#eaf6f0;border-radius:11px;padding:15px;margin:25px 0 10px;font-size:13px}
+.note{font-size:12px;color:#5a7770}.output{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+@media(max-width:700px){.flex,.cells{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cell:first-child{border-right:0;border-bottom:1px solid #e9e7e1}header{padding:16px 20px}.hero{padding:25px 0 13px}main{padding:18px 14px}.toolbar{align-items:start;flex-direction:column}}
+</style></head><body>
+<header><nav>≠ やくそく差分 <small style="color:#b1decf">/ YAKUSOKU DELTA</small></nav>
+<div class="hero"><span class="eyebrow">CHANGE REVIEW · 100% BROWSER SIDE</span>
+<h1>その変更、<br><em>見落としていませんか。</em></h1>
+<p>発注条件・合意メモ・取引文面の新旧を比較。金額、納期、条件語の変更を先に確認し、レビュー状況まで整理するミニツール。</p></div></header>
+<main><h2>01. 新旧のテキストを入力</h2>
+<div class="flex"><section class="card"><label for="old">変更前 / OLD</label><textarea id="old" maxlength="30000" placeholder="元の条件を1行ずつ入力"></textarea><div class="fileholder"><label>📄 .txt読込<input type="file" id="f1" accept=".txt,text/plain"></label><span id="n1">0字</span></div></section>
+<section class="card"><label for="new">変更後 / NEW</label><textarea id="new" maxlength="30000" placeholder="修正版を1行ずつ入力"></textarea><div class="fileholder"><label>📄 .txt読込<input type="file" id="f2" accept=".txt,text/plain"></label><span id="n2">0字</span></div></section></div>
+<div class="actions"><button class="primary" id="go">変更点をチェック →</button><button id="demo">サンプルで試す</button><button id="swap">⇄ 新旧を交換</button><button id="reset">クリア</button></div>
+<div class="message" id="message" role="status" aria-live="polite"></div>
+<section class="hidden" id="results">
+<h2>02. 変更サマリー</h2>
+<div class="metrics"><div class="card metric"><span>重点確認候補</span><strong id="alerts">0</strong></div>
+<div class="card metric"><span>変更行</span><strong id="modified">0</strong></div>
+<div class="card metric"><span>追加・削除</span><strong id="insertions">0 / 0</strong></div>
+<div class="card metric"><span>確認済み・質問中</span><strong id="progress">0 / 0</strong></div></div>
+<div class="toolbar"><h2>03. 変更ごとの確認</h2><select id="filter" aria-label="差分フィルター"><option value="all">すべての変更</option><option value="priority">重点確認候補</option><option value="unread">未確認のみ</option></select></div>
+<div id="rows"></div>
+<div class="card" style="margin-top:19px"><strong>新しい文面のチェックキーワード</strong><p class="note">単語の有無を表示するだけです。法令適合や契約の有効性を判定しません。</p><div id="checks"></div></div>
+<div class="output"><button id="csv">CSVレポート</button><button id="md">Markdownメモ</button><button id="json">JSONバックアップ</button><button id="openjson">JSONから復元</button><input type="file" id="jsonfile" accept=".json,application/json" style="display:none"></div>
+</section>
+<div class="privacy">🔒 比較はブラウザ内で完結。入力内容の送信・自動保存・分析SDK・ログイン機能はありません。手動出力には入力した文面が含まれます。</div>
+<div class="note">⚠️ あくまで行単位のテキスト照合です。PDF/Wordの書式、表、複雑な移動、法律的効果は解析できません。重要事項は必ず原文全体や専門家で確認してください。</div>
+</main>
+<script>
+(function(){
+"use strict";
+var $=function(x){return document.getElementById(x);};
+var old=$("old"),newer=$("new"),current=[],states={};
+var LABELS={same:"変更なし",changed:"変更",added:"追加",removed:"削除"};
+var TYPES=[
+["金額",/(?:[¥￥]\s*\d[\d,]*(?:\.\d+)?|\d[\d,]*(?:\.\d+)?\s*(?:万円|千円|円|USD|ドル))/g],
+["日付",/(?:20\d{2}[\/.-]\d{1,2}[\/.-]\d{1,2}|20\d{2}年\d{1,2}月\d{1,2}日|\d{1,2}月\d{1,2}日)/g],
+["割合",/\d+(?:\.\d+)?\s*[%％]/g],
+["期間",/\d+(?:\.\d+)?\s*(?:営業日|日間|週間|週|ヶ月|か月|時間)/g],
+["条件語",/(?:禁止|不可|可能|同意|承認|免責|無償|有償|解除|責任|必須|任意|しない)/g]
+];
+var KEYWORDS=[["業務内容",/業務|制作|作業|納品物|deliverable/i],["納期",/納期|期限|提出日|deadline/i],["納品先・場所",/納品先|場所|所在地|location/i],["報酬",/報酬|金額|料金|円|fee/i],["支払期日",/支払日|支払期日|翌月|due date/i],["検査・検収",/検査|検収|inspection/i]];
+var demoA="案件：写真撮影\n業務内容：商品10点の撮影\n納品日：2026年12月10日\n報酬：30,000円\n支払期日：2027年1月20日\n修正：2回まで無償\n撮影場所：都内スタジオ";
+var demoB="案件：写真撮影\n業務内容：商品15点の撮影\n納品日：2026年12月5日\n報酬：30,000円\n支払期日：2027年2月20日\n修正：3回まで無償\n撮影場所：都内スタジオ\n二次利用：事前同意なく可能";
+function elem(tag,klass,value){var x=document.createElement(tag);if(klass)x.className=klass;if(value!==undefined)x.textContent=value;return x;}
+function lines(t){if(t.length>30000)throw Error("30,000字以内にしてください");var a=t.replace(/\r\n?/g,"\n").split("\n").map(function(s){return s.trim();}).filter(Boolean);if(a.length>180)throw Error("180行以内にしてください");return a;}
+function sim(a,b){if(a===b)return 1;var aa=Array.from(a),bb=Array.from(b),count={};if(aa.length<2||bb.length<2)return 0;for(var i=0;i<aa.length-1;i++){var x=aa[i]+"_"+aa[i+1];count[x]=(count[x]||0)+1;}var found=0;for(var j=0;j<bb.length-1;j++){var y=bb[j]+"_"+bb[j+1];if(count[y]>0){found++;count[y]--;}}return 2*found/(aa.length+bb.length-2);}
+function token(t,re){return Array.from(new Set((t.match(re)||[]).map(function(x){return x.normalize("NFKC").replace(/\s/g,"");}))).sort().join("§");}
+function flags(a,b){return TYPES.filter(function(rule){return token(a,rule[1])!==token(b,rule[1]);}).map(function(rule){return rule[0];});}
+function compute(before,after){var a=lines(before),b=lines(after),m=a.length,n=b.length,d=[],way=[];for(var i=0;i<=m;i++){d[i]=[];way[i]=[];for(var j=0;j<=n;j++)d[i][j]=0;}for(i=1;i<=m;i++){d[i][0]=i;way[i][0]=2;}for(j=1;j<=n;j++){d[0][j]=j;way[0][j]=3;}for(i=1;i<=m;i++)for(j=1;j<=n;j++){var s=a[i-1]===b[j-1]?0:(sim(a[i-1],b[j-1])>=.27?1.04:2.1),v=d[i-1][j-1]+s,del=d[i-1][j]+1,ins=d[i][j-1]+1;if(v<=del&&v<=ins){d[i][j]=v;way[i][j]=1;}else if(del<=ins){d[i][j]=del;way[i][j]=2;}else{d[i][j]=ins;way[i][j]=3;}}
+var out=[];i=m;j=n;while(i||j){var w=way[i][j],r;if(w===1){r={before:a[--i],after:b[--j],oldLine:i+1,newLine:j+1};r.kind=r.before===r.after?"same":"changed";}else if(w===2){r={before:a[--i],after:"",oldLine:i+1,newLine:null,kind:"removed"};}else{r={before:"",after:b[--j],oldLine:null,newLine:j+1,kind:"added"};}out.push(r);}out.reverse();return out.map(function(r,k){r.id="r"+k;r.flags=r.kind==="same"?[]:flags(r.before,r.after);return r;});}
+function metrics(){var changed=current.filter(function(r){return r.kind!=="same";});$("alerts").textContent=changed.filter(function(r){return r.flags.length;}).length;$("modified").textContent=changed.filter(function(r){return r.kind==="changed";}).length;$("insertions").textContent=changed.filter(function(r){return r.kind==="added";}).length+" / "+changed.filter(function(r){return r.kind==="removed";}).length;var v=Object.values(states);$("progress").textContent=v.filter(function(x){return x==="確認済み";}).length+" / "+v.filter(function(x){return x==="質問中";}).length;}
+function render(){metrics();var list=$("rows");list.replaceChildren();var filter=$("filter").value;var rows=current.filter(function(r){return r.kind!=="same"&&(filter!=="priority"||r.flags.length)&&(filter!=="unread"||(states[r.id]||"未確認")==="未確認");});if(!rows.length){list.append(elem("div","card","表示する変更はありません。"));}rows.forEach(function(r){var box=elem("article","line"+(r.flags.length?" emphasis":"")),head=elem("div","rowhead");head.append(elem("span","tag",LABELS[r.kind]),elem("span","note","旧"+(r.oldLine||"—")+" → 新"+(r.newLine||"—")));r.flags.forEach(function(f){head.append(elem("span","tag alert",f));});var pick=elem("select");pick.setAttribute("aria-label","確認状況");["未確認","確認済み","質問中"].forEach(function(s){var opt=elem("option","",s);opt.value=s;opt.selected=(states[r.id]||"未確認")===s;pick.append(opt);});pick.addEventListener("change",function(){states[r.id]=pick.value;render();});head.append(pick);box.append(head);var cells=elem("div","cells");cells.append(elem("div","cell",r.before||"（なし）"),elem("div","cell",r.after||"（なし）"));box.append(cells);list.append(box);});var kw=$("checks");kw.replaceChildren();KEYWORDS.forEach(function(k){var ok=k[1].test(newer.value);kw.append(elem("span","check"+(ok?"":" missing"),(ok?"✓ ":"? ")+k[0]));});}
+function analyse(){try{current=compute(old.value,newer.value);states={};$("results").classList.remove("hidden");$("message").textContent=(!old.value.trim()||!newer.value.trim())?"片方が空欄です。追加・削除のみの比較です。":"";render();}catch(e){$("message").textContent=e.message;}}
+function counts(){$("n1").textContent=old.value.length+"字";$("n2").textContent=newer.value.length+"字";}
+function download(name,content,type){var u=URL.createObjectURL(new Blob([content],{type:type+";charset=utf-8"}));var link=document.createElement("a");link.href=u;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(u);},2000);}
+function csvEscape(t){var x=String(t==null?"":t);if(/^\s*[=+\-@]/.test(x))x="'"+x;return '"'+x.replace(/"/g,'""')+'"';}
+$("go").onclick=analyse;$("demo").onclick=function(){old.value=demoA;newer.value=demoB;counts();analyse();};$("swap").onclick=function(){var x=old.value;old.value=newer.value;newer.value=x;counts();analyse();};$("reset").onclick=function(){old.value="";newer.value="";counts();current=[];states={};$("results").classList.add("hidden");$("message").textContent="";};
+old.addEventListener("input",counts);newer.addEventListener("input",counts);$("filter").onchange=render;
+[["f1",old],["f2",newer]].forEach(function(pair){$(pair[0]).onchange=async function(ev){try{var f=ev.target.files[0];if(!f)return;if(f.size>100000)throw Error("100KBを超えるファイルです");var t=await f.text();lines(t);pair[1].value=t;counts();$("message").textContent="";}catch(e){$("message").textContent=e.message;}ev.target.value="";};});
+$("csv").onclick=function(){var a=[["種類","旧行","新行","重要項目","確認状態","変更前","変更後"]];current.filter(function(r){return r.kind!=="same";}).forEach(function(r){a.push([r.kind,r.oldLine||"",r.newLine||"",r.flags.join("/"),states[r.id]||"未確認",r.before,r.after]);});download("yakusoku-review.csv","\uFEFF"+a.map(function(row){return row.map(csvEscape).join(",");}).join("\r\n"),"text/csv");};
+$("md").onclick=function(){var a=["# やくそく差分 確認メモ","","※法的な判断ではありません。",""];current.filter(function(r){return r.kind!=="same";}).forEach(function(r,i){a.push("## "+(i+1)+". "+LABELS[r.kind]+" / "+(states[r.id]||"未確認"),"- 確認候補: "+(r.flags.join("、")||"通常の変更"),"- 旧: "+(r.before||"（なし）"),"- 新: "+(r.after||"（なし）"),"");});download("yakusoku-review.md",a.join("\n"),"text/markdown");};
+$("json").onclick=function(){download("yakusoku-data.json",JSON.stringify({app:"yakusoku-delta",version:1,old:old.value,new:newer.value,states:states},null,2),"application/json");};
+$("openjson").onclick=function(){$("jsonfile").click();};
+$("jsonfile").onchange=async function(ev){try{var f=ev.target.files[0];if(!f)return;if(f.size>100000)throw Error("100KB以内のJSONを指定");var data=JSON.parse(await f.text());if(data.app!=="yakusoku-delta"||data.version!==1||typeof data.old!=="string"||typeof data.new!=="string")throw Error("対応していない形式");var result=compute(data.old,data.new);old.value=data.old;newer.value=data.new;current=result;states={};result.forEach(function(r){if(data.states&&["確認済み","質問中"].includes(data.states[r.id]))states[r.id]=data.states[r.id];});counts();$("results").classList.remove("hidden");render();$("message").textContent="JSONを復元しました。";}catch(e){$("message").textContent="復元失敗: "+e.message;}ev.target.value="";};
+counts();
+})();
+</script></body></html>
