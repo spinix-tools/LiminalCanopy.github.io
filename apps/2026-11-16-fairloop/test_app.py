@@ -62,19 +62,29 @@ with sync_playwright() as p:
     contents=Path(d.path()).read_text()
     assert contents.count('BEGIN:VEVENT')==8
     assert contents.count('DTSTART:')==8
-    print('ICS download PASS, 8 UTC events')
+    assert all(len(line.encode('utf-8')) <= 75 for line in contents.splitlines()), 'ICS line length'
+    print('ICS download PASS, 8 UTC events; <=75-byte lines')
 
     with page.expect_download() as ev:
         page.locator('#csv').click()
     csv=Path(ev.value.path()).read_text(encoding='utf-8-sig')
     assert csv.count('\n')==9
     print('CSV download PASS, 8 rows')
+    injected = page.evaluate("""() => {
+      const p=window.FairLoopCore.buildPlan([
+        {name:'=2+2',zone:'Asia/Tokyo',from:9,to:18,weekend:false},
+        {name:'Bob',zone:'Europe/London',from:9,to:18,weekend:false}
+      ], '2026-11-16', 4, 30, 'fair');
+      return window.FairLoopCore.csvContent(p);
+    }""")
+    assert "'" + "=2+2" in injected, 'Spreadsheet formula injection protection'
+    print('CSV formula guard PASS')
 
     page.locator('#reset').click()
     assert page.locator('#tbody tr').count()==4
     page.set_content(path.read_text(encoding="utf-8"),wait_until="load")
     assert page.locator('#tbody tr').count()==4
-    print('persistence/reset PASS')
+    print('reset/reinitialization PASS (real localStorage persistence untested)')
     page.screenshot(path=str(path.parent/'desktop.png'),full_page=True)
     mobile=browser.new_page(viewport={'width':390,'height':844},device_scale_factor=1)
     mobile.set_content(path.read_text(encoding="utf-8"),wait_until="load");mobile.wait_for_selector('#tbody tr')
