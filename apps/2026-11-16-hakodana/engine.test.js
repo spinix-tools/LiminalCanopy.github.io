@@ -1,0 +1,14 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const E=require('./engine.js');
+const item={...E.DEFAULT_ITEM};
+const mk=(o={})=>({id:'x',name:'検証箱',l:26,w:19,h:13,wall:0.4,weight:0.14,cost:50,...o});
+test('item fits with padding and correct inner dimensions',()=>{const x=E.fitItem(item,mk());assert.equal(x.fits,true);assert.deepEqual(x.inner,[25.2,18.2,12.2]);assert.ok(x.spare.every(v=>v>=0));});
+test('six orientation fit differs from upright',()=>{const i={...item,length:30,width:10,height:5,padding:0};const b=mk({l:12,w:7,h:32,wall:0});assert.equal(E.fitItem(i,b).fits,true);assert.equal(E.fitItem({...i,upright:true},b).fits,false);});
+test('volume alone does not guarantee fit',()=>{const i={...item,length:30,width:20,height:9,padding:0};const b=mk({l:100,w:10,h:10,wall:0});assert.equal(E.fitItem(i,b).fits,false);});
+test('tier follows stricter of size and actual weight',()=>{assert.equal(E.getTier(mk({l:20,w:20,h:20}),2).size,60);assert.equal(E.getTier(mk({l:20,w:20,h:20}),2.01).size,80);assert.equal(E.getTier(mk({l:30,w:30,h:21}),1).size,100);});
+test('Yamato size and weight maximum reject larger parcel',()=>{assert.equal(E.getTier(mk({l:171,w:10,h:10}),1),null);assert.equal(E.getTier(mk({l:40,w:40,h:20}),30.01),null);});
+test('pricing comparison only after all eligible shipping fees supplied',()=>{const boxes=[mk({id:'a',cost:90}),mk({id:'b',l:28,w:19,h:13,cost:0})];const p1=E.computePlan(item,boxes,{});assert.equal(p1.fullyPriced,false);assert.equal(p1.preferred.box.id,'a');const p2=E.computePlan(item,boxes,{60:800});assert.equal(p2.fullyPriced,true);assert.equal(p2.preferred.box.id,'b');assert.equal(p2.preferred.total,800);});
+test('insufficient box can not be a recommended candidate',()=>{const p=E.computePlan(item,[mk({h:6})],{60:0});assert.equal(p.eligible.length,0);assert.equal(p.rows[0].reason,'内寸に収まりません');});
+test('inputs reject negative, invalid wall and malicious name length',()=>{assert.ok(E.validateItem({...item,length:-1}));assert.ok(E.validateBox(mk({wall:20})));assert.ok(E.validateBox(mk({name:'x'.repeat(50)})));});
+test('boundary condition exactly at shipping size passes',()=>{const b=mk({l:30,w:20,h:10});assert.equal(E.getTier(b,2).size,60);});
