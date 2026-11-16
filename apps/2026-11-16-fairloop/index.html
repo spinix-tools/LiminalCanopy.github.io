@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101e2d">
+  <meta name="description" content="時差で生じる会議の負担を見える化し、毎週の不便を公平に分ける無料オフライン会議プランナー。">
+  <title>時差フェア — 誰かひとりの深夜にしない。</title>
+  <style>
+    :root { color-scheme: light; --ink:#182a39; --muted:#5d6c78; --ocean:#11334b; --teal:#166f73; --light:#f4f7f6; --paper:#fff; --line:#dce6e6; --glow:#d9f7eb; --gold:#f8d279; --warning:#9d5b17; --r:18px; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:linear-gradient(180deg,#eaf4f2 0,#fafbf9 440px); color:var(--ink); font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    button,input,select { font:inherit; } button { cursor:pointer; } button:disabled { cursor:not-allowed; opacity:.5; }
+    .shell { max-width:1160px; margin:auto; padding:0 24px 80px; }
+    header { padding:22px 0 52px; }
+    .top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:55px; }
+    .logo { font-weight:900; font-size:20px; letter-spacing:.025em; color:var(--ocean); }
+    .logo span { display:inline-grid; place-items:center; background:var(--ocean); color:#fff; border-radius:11px; width:35px; height:35px; font-size:20px; margin-right:9px; }
+    .top small { color:#466267; background:#e0eee9; padding:8px 12px; border-radius:100px; font-weight:700; }
+    .hero { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(240px,.8fr); gap:28px; align-items:center; }
+    .eyebrow { text-transform:uppercase; letter-spacing:.18em; font-size:12px; font-weight:800; color:var(--teal); }
+    h1 { font-size:clamp(34px,5.3vw,68px); letter-spacing:-.06em; line-height:1.22; margin:13px 0 18px; }
+    h1 em { color:var(--teal); font-style:normal; }
+    .lead { line-height:1.85; color:#526977; font-size:16px; max-width:650px; margin:0; }
+    .badge-art { background:var(--ocean); color:#fff; border-radius:30px; padding:35px; box-shadow:0 26px 50px rgba(15,46,65,.14); }
+    .badge-art strong { display:block; font-size:clamp(30px,3.5vw,43px); line-height:1.2; letter-spacing:-.04em; }
+    .badge-art p { color:#bad8d5; line-height:1.7; font-size:13px; margin:20px 0 0; }
+    .bar { display:flex; margin-top:20px; height:16px; border-radius:99px; overflow:hidden; gap:3px; }
+    .bar span:nth-child(1){flex:2;background:#80e2ba;} .bar span:nth-child(2){flex:1;background:#f9d678;} .bar span:nth-child(3){flex:1;background:#f29f7f;}
+    main { display:grid; grid-template-columns:minmax(280px,370px) minmax(0,1fr); gap:22px; align-items:start; }
+    .panel { background:var(--paper); border:1px solid var(--line); border-radius:24px; padding:26px; box-shadow:0 8px 30px rgba(22,59,65,.045); }
+    h2 { font-size:20px; margin:0 0 6px; letter-spacing:-.025em; }
+    .muted { color:var(--muted); font-size:13px; line-height:1.7; }
+    .tag { font-size:11px; font-weight:800; letter-spacing:.06em; color:var(--teal); text-transform:uppercase; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 14px; }
+    .field { display:block; font-size:12px; font-weight:800; color:#355564; margin:14px 0 6px; }
+    input,select { width:100%; min-width:0; background:#fbfcfb; border:1px solid #cddedc; border-radius:11px; padding:10px 11px; color:var(--ink); }
+    input:focus,select:focus,button:focus-visible { outline:3px solid #78c8c9; outline-offset:2px; }
+    .fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .person { padding:16px; background:#f5f8f7; border:1px solid #e5edeb; border-radius:15px; margin-bottom:12px; }
+    .person-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+    .person-header b { font-size:12px; color:#2a656b; }
+    .person .fields { gap:8px; }
+    .person .field { margin:8px 0 4px; }
+    .person .field:first-child { margin-top:0; }
+    .person label.switch { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin-top:11px; }
+    .person input[type=checkbox] { width:auto; accent-color:var(--teal); }
+    .btn { border:0; border-radius:12px; background:var(--teal); color:white; font-weight:800; padding:11px 15px; }
+    .btn:hover { filter:brightness(.94); }
+    .secondary { color:var(--ocean); background:#e3f3ef; }
+    .ghost { color:#516a71; border:1px solid var(--line); background:#fff; padding:7px 10px; border-radius:10px; }
+    .quiet { font-size:12px; padding:7px 10px; color:var(--teal); border:0; background:transparent; font-weight:800; }
+    .stack { display:flex; flex-wrap:wrap; gap:9px; }
+    .divider { height:1px; background:var(--line); margin:24px 0; }
+    .results { display:grid; gap:20px; }
+    .summary { display:grid; grid-template-columns:1fr 1fr 1fr; gap:11px; margin:20px 0; }
+    .metric { border-radius:14px; background:#f0f6f3; padding:14px 12px; }
+    .metric small { display:block; font-size:11px; color:#56726f; }
+    .metric strong { display:block; margin-top:5px; font-size:25px; letter-spacing:-.04em; }
+    .metric strong sub { font-weight:500; font-size:11px; letter-spacing:0; }
+    .note { background:#fff7e7; border:1px solid #efdfa9; border-radius:13px; padding:12px 14px; font-size:12px; line-height:1.7; color:#79521f; }
+    .tablewrap { overflow-x:auto; width:100%; }
+    table { width:100%; border-collapse:collapse; min-width:530px; }
+    th,td { text-align:left; border-bottom:1px solid #e8eeee; padding:13px 9px; font-size:12px; vertical-align:middle; }
+    th { color:#73858c; font-weight:800; font-size:11px; }
+    td strong { font-size:13px; }
+    td small { display:block; margin-top:3px; color:#778b8c; }
+    .pain { display:inline-block; font-size:10px; border-radius:6px; padding:3px 5px; font-weight:800; }
+    .pain.ok { color:#0c6b52; background:#e0f5ec; } .pain.mid { color:#895f10; background:#fff0ca; } .pain.bad { color:#a84629; background:#ffe7dc; }
+    .burden { display:grid; gap:11px; margin:15px 0 7px; }
+    .burden-row { display:grid; grid-template-columns:102px minmax(0,1fr) 37px; gap:8px; align-items:center; font-size:12px; }
+    .bar-track { background:#e8edec; height:11px; border-radius:99px; overflow:hidden; }
+    .bar-fill { background:linear-gradient(90deg,#47b6a2,#175b6a); height:100%; border-radius:inherit; min-width:2px; }
+    .comparison { background:#f8fbfb; border:1px solid #e1ebea; border-radius:15px; padding:16px; }
+    .comparison p { font-size:12px; line-height:1.7; color:#546870; margin:8px 0 0; }
+    .smallprint { font-size:12px; line-height:1.7; color:#697d83; }
+    #toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); padding:12px 18px; border-radius:12px; background:#14364c; color:white; box-shadow:0 12px 35px #122c3c33; display:none; font-size:13px; z-index:5; }
+    footer { text-align:center; font-size:12px; color:#718484; margin-top:40px; line-height:1.8; }
+    @media(max-width:850px){ main,.hero {grid-template-columns:1fr;} .badge-art {display:none;} .top {margin-bottom:25px;} header{padding-bottom:28px;} .panel{padding:19px;} }
+    @media(max-width:520px){.shell{padding:0 14px 48px;} .summary{grid-template-columns:1fr 1fr;} .summary .metric:last-child{grid-column:1/-1;} .fields{gap:8px;} h1{font-size:38px;} .top small{font-size:11px;} }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="top"><div class="logo"><span>◌</span> 時差フェア <span style="background:none;color:#54817c;width:auto;margin:0;font-size:12px">FAIRLOOP</span></div><small>完全無料 · ログイン不要 · ブラウザ内で計算</small></div>
+    <div class="hero">
+      <div><div class="eyebrow">FOR INTERNATIONAL TEAMS / 2026</div><h1>毎週の会議を、<br><em>誰かひとりの深夜にしない。</em></h1><p class="lead">時差会議の「誰が何時に出るか」を見える化。日本時間の定例日を起点に、負担の少ない時刻と、負担を分け合うローテーションを提案します。</p></div>
+      <div class="badge-art"><div class="tag" style="color:#8de1c7">THE FAIRNESS IDEA</div><strong>Same team.<br>Shared burden.</strong><div class="bar"><span></span><span></span><span></span></div><p>時刻の変換だけでなく、<br>数週間にわたる不便の偏りを比べます。</p></div>
+    </div>
+  </header>
+  <main>
+    <div class="panel" id="config">
+      <div class="section-head"><div><div class="tag">01 / TEAM</div><h2>参加する人</h2></div><button type="button" id="reset" class="quiet">初期化</button></div>
+      <p class="muted">各自の時差と勤務時間を入力。名前は端末内だけに保存されます。</p>
+      <div id="people"></div>
+      <button type="button" id="add" class="btn secondary" style="width:100%">＋ メンバーを追加</button>
+      <div class="divider"></div>
+      <div class="tag">02 / SCHEDULE</div><h2 style="margin-top:6px">会議の条件</h2>
+      <label class="field" for="startDate">初回の会議日（日本時間）</label><input id="startDate" type="date">
+      <div class="fields">
+        <div><label class="field" for="weeks">週数</label><select id="weeks"><option value="4">4週間</option><option value="6">6週間</option><option value="8">8週間</option></select></div>
+        <div><label class="field" for="duration">所要時間</label><select id="duration"><option value="30">30分</option><option value="60">60分</option><option value="90">90分</option></select></div>
+      </div>
+      <label class="field" for="mode">時刻の選び方</label><select id="mode"><option value="fair">公平重視：期間全体の偏りを抑える</option><option value="least">負担最小：毎回いちばん楽な時刻</option></select>
+      <label class="field" for="eventTitle">カレンダー用の会議名</label><input id="eventTitle" maxlength="80" value="グローバル定例ミーティング">
+      <button type="button" id="calc" class="btn" style="width:100%;margin-top:18px;padding:14px">候補を計算する →</button>
+      <p class="smallprint">時刻候補は日本時間の毎時00分・30分（0:00〜23:30）。週末判定は参加者の現地日付を使用します。</p>
+    </div>
+    <div class="results" aria-live="polite">
+      <section class="panel">
+        <div class="section-head"><div><div class="tag">03 / RESULT</div><h2>会議の提案</h2></div><span id="status" class="muted">自動計算</span></div>
+        <p class="muted" id="summaryText">メンバーと会議条件から毎週の候補を計算します。</p>
+        <div class="summary"><div class="metric"><small>会議回数</small><strong id="mWeeks">–</strong></div><div class="metric"><small>負担合計</small><strong id="mSum">–</strong></div><div class="metric"><small>負担の最大差</small><strong id="mSpread">–</strong></div></div>
+        <div id="warning" class="note" style="display:none"></div>
+        <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
+        <div class="stack" style="margin-top:19px"><button id="ics" type="button" class="btn">予定を .ics 保存</button><button id="csv" type="button" class="btn secondary">CSV書き出し</button><button id="copy" type="button" class="ghost">テキストをコピー</button></div>
+      </section>
+      <section class="panel"><div class="tag">04 / FAIRNESS</div><h2 style="margin-top:6px">負担の内訳</h2><p class="muted">1人ずつ、勤務時間外・深夜・週末の負担点を累積します。数値は推定値で、本人の同意・予定の空きは確認していません。</p><div id="burden" class="burden"></div><div class="comparison" id="compare"></div></section>
+      <section class="panel"><h2>計算のルール</h2><p class="smallprint">勤務時間内は0点。勤務時間外は時間帯に応じて2・5・9点、休日はさらに8点（30分ごと）。小さいほど好条件です。勤務時間の外でも会議を確定してよいという意味ではありません。公平重視は近似探索であり、最適性を保証しません。祝日、実際の空き時間、昼休み、変則シフトは考慮しません。日付と時差はブラウザのIANAタイムゾーン情報から取得します。</p></section>
+    </div>
+  </main>
+  <footer>FAIRLOOP / 時差フェア　•　No account, no API, no telemetry.　•　試作版：公開前に参加者の同意と地域別の祝日を確認してください。</footer>
+</div>
+<div id="toast" role="status"></div>
+<script>
+(()=>{'use strict';
+  const ZONES=[['Asia/Tokyo','東京・大阪'],['Asia/Seoul','ソウル'],['Asia/Shanghai','上海'],['Asia/Singapore','シンガポール'],['Asia/Kolkata','ムンバイ'],['Asia/Dubai','ドバイ'],['Europe/London','ロンドン'],['Europe/Paris','パリ'],['Europe/Berlin','ベルリン'],['Africa/Johannesburg','ヨハネスブルグ'],['America/New_York','ニューヨーク'],['America/Chicago','シカゴ'],['America/Denver','デンバー'],['America/Los_Angeles','ロサンゼルス'],['America/Sao_Paulo','サンパウロ'],['Australia/Sydney','シドニー'],['Pacific/Auckland','オークランド']];
+  const defaults=[{name:'東京',zone:'Asia/Tokyo',from:9,to:18,weekend:false},{name:'ロンドン',zone:'Europe/London',from:9,to:18,weekend:false},{name:'ニューヨーク',zone:'America/New_York',from:9,to:18,weekend:false}];
+  const $=id=>document.getElementById(id);
+  const fmtCache=new Map();
+  let people=[], plan=null, toastTimer;
+  const htmlEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function zoned(ms,zone){
+    let fmt=fmtCache.get(zone);
+    if(!fmt){fmt=new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});fmtCache.set(zone,fmt);}
+    const o={};for(const part of fmt.formatToParts(new Date(ms))){if(part.type!=='literal')o[part.type]=part.value;}
+    return {year:+o.year,month:+o.month,day:+o.day,hour:+o.hour,minute:+o.minute,weekday:o.weekday,date:`${o.year}-${o.month}-${o.day}`,clock:`${o.hour}:${o.minute}`};
+  }
+  function jstDay(date){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('日付を選んでください');
+    const start=Date.parse(`${date}T00:00:00+09:00`);
+    if(!Number.isFinite(start)||zoned(start,'Asia/Tokyo').date!==date)throw Error('正しい日付を選んでください');
+    return start;
+  }
+  function todayJST(){return zoned(Date.now(),'Asia/Tokyo').date;}
+  function score(p,ms,duration){
+    let v=0;for(let i=0;i<duration;i+=30){
+      const t=zoned(ms+i*60000+15*60000,p.zone);
+      const weekend=(t.weekday==='Sat'||t.weekday==='Sun')&&!p.weekend;
+      let n=0;if(!(t.hour>=p.from&&t.hour<p.to))n=(t.hour>=22||t.hour<6)?9:(t.hour>=20||t.hour<7)?5:2;
+      if(weekend)n+=8;v+=n;
+    }return v;
+  }
+  function optionsFor(startMs,ps,duration){const opts=[];
+    for(let i=0;i<48;i++){
+      const ms=startMs+i*30*60000,cost=ps.map(p=>score(p,ms,duration));
+      opts.push({ms,slot:i,cost,total:cost.reduce((a,b)=>a+b,0)});
+    }return opts;
+  }
+  function spread(vals){return Math.max(...vals)-Math.min(...vals);}
+  function rank(state,mode){return state.total+(mode==='fair'?2.4*spread(state.acc)+.15*Math.max(...state.acc):0);}
+  function buildPlan(ps,date,weeks,duration,mode){
+    if(ps.length<2||ps.length>6)throw Error('参加者は2〜6人にしてください');
+    if(![4,6,8].includes(weeks)||![30,60,90].includes(duration))throw Error('会議条件が不正です');
+    const start=jstDay(date);const weeksOptions=Array.from({length:weeks},(_,w)=>optionsFor(start+w*7*86400000,ps,duration));
+    let beam=[{acc:ps.map(()=>0),total:0,chosen:[]}];
+    for(const opts of weeksOptions){let candidates=[];
+      for(const state of beam){for(const opt of opts){const acc=state.acc.map((v,i)=>v+opt.cost[i]);const candidate={acc,total:state.total+opt.total,chosen:[...state.chosen,opt]};candidate.rank=rank(candidate,mode);candidates.push(candidate);}}
+      candidates.sort((a,b)=>a.rank-b.rank || a.total-b.total || a.chosen.at(-1).slot-b.chosen.at(-1).slot);
+      const seen=new Set();beam=[];
+      for(const state of candidates){const key=state.acc.join(',')+'|'+state.chosen.at(-1).slot;if(seen.has(key))continue;seen.add(key);beam.push(state);if(beam.length>=100)break;}
+    }
+    beam.sort((a,b)=>rank(a,mode)-rank(b,mode)||a.total-b.total);
+    const best=beam[0];
+    const fixed=[];for(let i=0;i<48;i++){const choices=weeksOptions.map(opts=>opts[i]);const acc=ps.map((_,p)=>choices.reduce((s,o)=>s+o.cost[p],0));fixed.push({acc,total:acc.reduce((a,b)=>a+b,0),chosen:choices,rank:rank({acc,total:acc.reduce((a,b)=>a+b,0)},mode)});}
+    fixed.sort((a,b)=>a.total-b.total||spread(a.acc)-spread(b.acc));
+    return {...best,ps,date,weeks,duration,mode,fixed:fixed[0]};
+  }
+  window.FairLoopCore={zoned,jstDay,score,optionsFor,buildPlan};
+  function sanitizePeople(value){
+    if(!Array.isArray(value)||value.length<2||value.length>6) return defaults.map(p=>({...p}));
+    return value.map((p,i)=>({name:String(p.name??`メンバー${i+1}`).slice(0,24),zone:ZONES.some(z=>z[0]===p.zone)?p.zone:'Asia/Tokyo',from:Number.isInteger(+p.from)?Math.min(22,Math.max(0,+p.from)):9,to:Number.isInteger(+p.to)?Math.min(24,Math.max(1,+p.to)):18,weekend:p.weekend===true}));
+  }
+  function load(){try{const raw=JSON.parse(localStorage.getItem('fairloop-v1')||'null');if(raw&&Array.isArray(raw.people)){people=sanitizePeople(raw.people);$('weeks').value=['4','6','8'].includes(String(raw.weeks))?String(raw.weeks):'4';$('duration').value=['30','60','90'].includes(String(raw.duration))?String(raw.duration):'60';$('mode').value=raw.mode==='least'?'least':'fair';$('eventTitle').value=String(raw.title||'グローバル定例ミーティング').slice(0,80);$('startDate').value=/^\d{4}-\d{2}-\d{2}$/.test(raw.date||'')?raw.date:todayJST();return;}}catch(e){}
+    people=sanitizePeople(defaults);$('startDate').value=todayJST();
+  }
+  function save(){try{localStorage.setItem('fairloop-v1',JSON.stringify({people,date:$('startDate').value,weeks:$('weeks').value,duration:$('duration').value,mode:$('mode').value,title:$('eventTitle').value}));}catch(e){} }
+  function renderPeople(){const root=$('people');root.replaceChildren();people.forEach((p,i)=>{
+    const el=document.createElement('div');el.className='person';
+    const hh=document.createElement('div');hh.className='person-header';const b=document.createElement('b');b.textContent=`MEMBER ${String(i+1).padStart(2,'0')}`;
+    const remove=document.createElement('button');remove.type='button';remove.className='quiet';remove.textContent='削除';remove.disabled=people.length<=2;remove.addEventListener('click',()=>{people.splice(i,1);renderPeople();refresh();});hh.append(b,remove);el.append(hh);
+    const field=(title,control)=>{const box=document.createElement('div');const label=document.createElement('label');label.className='field';label.textContent=title;box.append(label,control);return box;};
+    const name=document.createElement('input');name.value=p.name;name.maxLength=24;name.placeholder='名前';name.setAttribute('aria-label',`メンバー${i+1}の名前`);name.addEventListener('input',()=>{p.name=name.value;refresh();});el.append(field('呼び名',name));
+    const zone=document.createElement('select');zone.setAttribute('aria-label',`メンバー${i+1}のタイムゾーン`);ZONES.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;zone.append(option);});zone.value=p.zone;zone.addEventListener('change',()=>{p.zone=zone.value;refresh();});el.append(field('地域',zone));
+    const hours=document.createElement('div');hours.className='fields';
+    for(const [label,key] of [['勤務開始','from'],['勤務終了','to']]){const select=document.createElement('select');select.setAttribute('aria-label',`メンバー${i+1}の${label}`);for(let h=0;h<=24;h++){if(key==='from'&&h===24||key==='to'&&h===0)continue;const opt=document.createElement('option');opt.value=String(h);opt.textContent=`${String(h).padStart(2,'0')}:00`;select.append(opt);}select.value=String(p[key]);select.addEventListener('change',()=>{p[key]=+select.value;refresh();});hours.append(field(label,select));}el.append(hours);
+    const weekLabel=document.createElement('label');weekLabel.className='switch';const check=document.createElement('input');check.type='checkbox';check.checked=p.weekend;check.addEventListener('change',()=>{p.weekend=check.checked;refresh();});weekLabel.append(check,document.createTextNode('土日も勤務日として扱う'));el.append(weekLabel);
+    root.append(el);
+  });$('add').disabled=people.length>=6;}
+  function toast(msg){const el=$('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',2800);}
+  function labelLocal(ms,zone){const x=zoned(ms,zone);return `${x.month}/${x.day} ${String(x.hour).padStart(2,'0')}:${String(x.minute).padStart(2,'0')}`;}
+  function addCell(tr,tag,txt){const td=document.createElement(tag);td.textContent=txt;tr.append(td);return td;}
+  function render(){if(!plan)return;const {ps,chosen,acc,fixed,weeks,mode}=plan;
+    $('status').textContent=mode==='fair'?'公平性を考慮':'総負担を最小化';$('summaryText').textContent=`${weeks}週間の定例会議を提案。すべて日本時間の選択日を基準に計算しています。現地の前日になる場合は日付も表示します。`;
+    $('mWeeks').textContent=String(weeks);$('mSum').textContent=String(plan.total);$('mSpread').textContent=String(spread(acc));
+    const warning=$('warning');const high=chosen.some(o=>o.cost.some(v=>v>=9));warning.style.display=high?'block':'none';if(high)warning.textContent='⚠ 提案に勤務時間外・深夜・週末の負担を含む日があります。参加者の承諾前に確定せず、必要なら非同期共有へ切り替えてください。';
+    const head=$('thead');head.replaceChildren();addCell(head,'th','回 / 日本時間');ps.forEach(p=>addCell(head,'th',p.name||'メンバー'));const tbody=$('tbody');tbody.replaceChildren();
+    chosen.forEach((o,w)=>{const tr=document.createElement('tr');const j=zoned(o.ms,'Asia/Tokyo');const first=addCell(tr,'td',`${w+1}回目`);const strong=document.createElement('strong');strong.textContent=`${j.month}/${j.day} ${String(j.hour).padStart(2,'0')}:${String(j.minute).padStart(2,'0')}`;const sm=document.createElement('small');sm.textContent='JST（日本時間）';first.append(strong,sm);
+      ps.forEach((p,i)=>{const cell=addCell(tr,'td',labelLocal(o.ms,p.zone));const pill=document.createElement('span');pill.className='pain '+(o.cost[i]===0?'ok':o.cost[i]<=5?'mid':'bad');pill.textContent=`負担 ${o.cost[i]}`;cell.append(document.createElement('br'),pill);});tbody.append(tr);});
+    const bars=$('burden');bars.replaceChildren();const max=Math.max(...acc,1);ps.forEach((p,i)=>{const r=document.createElement('div');r.className='burden-row';const n=document.createElement('span');n.textContent=p.name||`メンバー${i+1}`;const track=document.createElement('div');track.className='bar-track';const fill=document.createElement('div');fill.className='bar-fill';fill.style.width=`${100*acc[i]/max}%`;track.append(fill);const number=document.createElement('b');number.textContent=String(acc[i]);r.append(n,track,number);bars.append(r);});
+    const compare=$('compare');compare.replaceChildren();const bold=document.createElement('strong');bold.textContent='毎週同時刻に固定した場合との比較';const text=document.createElement('p');text.textContent=`固定案は総負担 ${fixed.total} 点・最大差 ${spread(fixed.acc)} 点。この提案は総負担 ${plan.total} 点・最大差 ${spread(acc)} 点。公平性を重視すると負担合計が増える場合もあります。固定案は毎週同じJSTの開始時刻で計算しています。`;compare.append(bold,text);
+  }
+  function refresh(){save();try{if(!people.every(p=>p.to>p.from))throw Error('勤務終了は開始より後の時刻にしてください');plan=buildPlan(people.map(p=>({...p})).filter(p=>p.name.trim()),$('startDate').value,+$('weeks').value,+$('duration').value,$('mode').value);render();}catch(e){plan=null;$('status').textContent='条件を確認';$('summaryText').textContent=e.message;$('tbody').replaceChildren();$('burden').replaceChildren();$('mWeeks').textContent='–';$('mSum').textContent='–';$('mSpread').textContent='–';$('warning').style.display='none';$('compare').replaceChildren();}}
+  function utcString(ms){return new Date(ms).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');}
+  function icsEscape(str){return String(str).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+  function foldIcsLine(s){const bytes=new TextEncoder();let out='',line='',used=0;for(const c of s){const n=bytes.encode(c).length;if(used+n>75){out+=line+'\r\n';line=' ';used=1;}line+=c;used+=n;}return out+line;}
+  function icsContent(p){const stamp=utcString(Date.now());const title=icsEscape($('eventTitle').value||'グローバル定例ミーティング');const events=p.chosen.map((o,i)=>['BEGIN:VEVENT',`UID:fairloop-${o.ms}-${i}@local.invalid`,`DTSTAMP:${stamp}`,`DTSTART:${utcString(o.ms)}`,`DTEND:${utcString(o.ms+p.duration*60000)}`,`SUMMARY:${title}`,`DESCRIPTION:${icsEscape('時差フェアで提案された候補。必ず出席者の空き時間を確認してください。')}`,'END:VEVENT'].map(foldIcsLine).join('\r\n'));return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//FAIRLOOP//JP//EN','CALSCALE:GREGORIAN',...events,'END:VCALENDAR'].join('\r\n')+'\r\n';}
+  function csvContent(p){const quote=s=>{let v=String(s);if(/^[\s]*[=+@-]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};const header=['回','JST日時','UTC','合計負担',...p.ps.flatMap(x=>[`${x.name} 現地時刻`,`${x.name} 負担`])];const rows=p.chosen.map((o,i)=>[i+1,labelLocal(o.ms,'Asia/Tokyo'),new Date(o.ms).toISOString(),o.total,...p.ps.flatMap((x,j)=>[labelLocal(o.ms,x.zone),o.cost[j]])]);return '\ufeff'+[header,...rows].map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n';}
+  function download(content,mime,filename){const b=new Blob([content],{type:mime});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);}
+  function textContent(p){return ["時差フェア｜定例会議の候補",...p.chosen.map((o,i)=>`${i+1}回 ${labelLocal(o.ms,'Asia/Tokyo')} JST ／ `+p.ps.map((x,j)=>`${x.name} ${labelLocal(o.ms,x.zone)} (負担${o.cost[j]})`).join(' ／ ')),`累積負担：${p.ps.map((x,j)=>x.name+' '+p.acc[j]).join('、')}`,'※提案です。各自の空き時間を確認してください。'].join('\n');}
+  async function copyPlan(){if(!plan)return;const s=textContent(plan);try{await navigator.clipboard.writeText(s);}catch(e){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();if(!document.execCommand('copy')){ta.remove();toast('コピーできませんでした。CSVをご利用ください');return;}ta.remove();}toast('候補をコピーしました');}
+  $('add').addEventListener('click',()=>{if(people.length<6){people.push({name:`メンバー${people.length+1}`,zone:'Asia/Singapore',from:9,to:18,weekend:false});renderPeople();refresh();}});
+  $('reset').addEventListener('click',()=>{people=defaults.map(p=>({...p}));$('startDate').value=todayJST();$('weeks').value='4';$('duration').value='60';$('mode').value='fair';$('eventTitle').value='グローバル定例ミーティング';renderPeople();refresh();toast('初期設定に戻しました');});
+  ['startDate','weeks','duration','mode','eventTitle'].forEach(id=>$(id).addEventListener('change',refresh));$('calc').addEventListener('click',()=>{refresh();if(plan)toast('最新の条件で計算しました');});
+  $('ics').addEventListener('click',()=>{if(plan){download(icsContent(plan),'text/calendar;charset=utf-8','fairloop-meetings.ics');toast('.ics ファイルを作成しました');}});
+  $('csv').addEventListener('click',()=>{if(plan){download(csvContent(plan),'text/csv;charset=utf-8','fairloop-meetings.csv');toast('CSVを作成しました');}});
+  $('copy').addEventListener('click',copyPlan);
+  window.FairLoopCore.icsContent=icsContent;window.FairLoopCore.csvContent=csvContent;window.FairLoopCore.textContent=textContent;
+  load();renderPeople();refresh();
+})();
+</script>
+</body>
+</html>
