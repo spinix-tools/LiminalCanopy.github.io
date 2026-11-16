@@ -31,7 +31,7 @@ node --test engine.test.cjs
 python browser_test.py  # Python playwright と /usr/bin/chromium が必要
 ```
 
-**検証結果（2026-11-17）:** Node単体テスト **34/34成功**。Chromiumの追加・編集・削除・洗濯済み切替・容量変更・CSV/JSON出力・不正JSON拒否・HTML注入無効化・モバイル幅などの操作試験 **24/24成功**、ページスクリプト未捕捉エラー0。スクリーンショット `desktop.png` / `mobile.png` を収録。
+**検証結果（2026-11-17）:** Node単体テスト **34/34成功**。Chromiumの追加・編集・削除・洗濯済み切替・容量変更・CSV/JSON出力・不正JSON拒否・HTML注入無効化・モバイル幅などの操作試験 **24/24成功**、ページスクリプト未捕捉エラー0。スクリーンショット `desktop.png` / `mobile.png` はZIP配布版に同梱（GitHub上はソース・README・テストのみ）。
 
 **検証限界:** この実行環境では Chromium の `page.goto()` が管理者設定でブロックされたため、`set_content()` とスクリプト注入、メモリ上の `localStorage` 模擬で検証。**実端末での永続化、実衣類の洗濯結果、各洗濯機の容量定義、物理印刷は未検証**。パフォーマンス保証もない。
 
@@ -45,6 +45,6 @@ python browser_test.py  # Python playwright と /usr/bin/chromium が必要
 - `engine.js`：バリデーション・仕分け最適化・CSV/レポート生成
 - `app.js`：画面操作・ローカル保存・入出力
 - `engine.test.cjs` / `browser_test.py`：自動テスト
-- `desktop.png` / `mobile.png`：動作確認用画像
+- `desktop.png` / `mobile.png`：動作確認用画像（ZIPのみ）
 
 配布ライセンス: MIT（`LICENSE` を参照）。
