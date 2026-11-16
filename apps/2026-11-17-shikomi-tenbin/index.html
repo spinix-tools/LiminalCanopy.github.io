@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#112e25"><title>仕込みの天秤 — 売り切れと、売れ残りのあいだ。</title>
+<style>
+:root{--bg:#f5f6ef;--ink:#102d23;--green:#286d52;--pale:#e8f4ea;--line:#d5e3d8;--muted:#60776d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Yu Gothic",sans-serif}header{background:#102b23;color:#fff;padding:40px max(18px,calc((100vw - 1140px)/2))}header h1{font-size:clamp(32px,5vw,58px);line-height:1.25;letter-spacing:-.045em;margin:8px 0}header h1 em{font-style:normal;color:#d7e7b9}header p{margin:0;max-width:670px;color:#d3e3d5}.eyebrow{font-size:12px;letter-spacing:.18em;color:#a7c9ac;font-weight:800}.wrap{max-width:1180px;margin:auto;padding:16px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px}button{cursor:pointer;background:white;border:1px solid #bdd5c5;border-radius:9px;padding:9px 12px;color:var(--ink);font:700 13px system-ui}button:hover{background:#eef6ec}button.primary{background:var(--green);color:white;border-color:var(--green)}button:disabled{opacity:.45;cursor:default}.grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:16px;align-items:start}.panel{background:#fffefb;border:1px solid var(--line);border-radius:17px;padding:21px;box-shadow:0 10px 35px #274f2911}h2{font-size:21px;margin:0 0 6px}h3{font-size:17px;margin:22px 0 8px}p.note{font-size:12px;color:var(--muted);margin:0 0 15px}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:11px}.inputs.three{grid-template-columns:repeat(3,minmax(0,1fr))}.full{grid-column:1/-1}label{display:block;font-size:12px;font-weight:750}input{display:block;margin-top:4px;width:100%;min-width:0;border:1px solid #c9d9cd;border-radius:9px;padding:9px;color:var(--ink);background:#fff;font:600 15px system-ui}input:focus{outline:2px solid #b9d9bf}hr{border:0;border-top:1px solid var(--line);margin:22px 0}.product{border:1px solid var(--line);padding:13px;margin:12px 0;border-radius:13px;background:white}.productbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.small{padding:3px 8px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:#edf2e9;border-radius:12px;padding:4px;gap:5px}.tabs button{background:transparent;border:0;font-size:12px}.tabs button.on{background:#fff;box-shadow:0 1px 6px #bbc9b6}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}.metric{padding:14px;border:1px solid var(--line);border-radius:12px}.metric:first-child{background:var(--pale)}.metric .caption{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:26px;font-variant-numeric:tabular-nums;letter-spacing:-.03em}.itemrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.itemrow b{font-size:23px;white-space:nowrap}.itemrow small{display:block;color:var(--muted)}.scenario{display:grid;grid-template-columns:50px 1fr 95px;gap:9px;align-items:center;margin:13px 0}.scenario span:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}.track{height:10px;border-radius:10px;background:#e7efe8;overflow:hidden}.bar{height:100%;background:#65ad88;border-radius:10px}.bar.bad{background:#d98c77}.error{border:1px solid #ddb4a6;border-radius:10px;color:#923c37;background:#fff0ec;padding:12px}.boxnote{border:1px solid var(--line);background:#f2f6f0;border-radius:11px;padding:10px;margin-top:12px;color:var(--muted);font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.status{font-size:12px;color:var(--green);font-weight:800}footer{font-size:12px;color:var(--muted);margin:22px 3px}@media(max-width:900px){.grid{grid-template-columns:1fr}.wrap{max-width:650px}header{padding:30px 18px}}@media(max-width:460px){.wrap{padding:10px}.panel{padding:14px}.metric strong{font-size:21px}.scenario{grid-template-columns:43px 1fr 76px;gap:4px;font-size:12px}.inputs{gap:8px}input{padding:8px 5px;font-size:13px}.toolbar{justify-content:flex-start}}@media print{header,.toolbar,.left,.tabs,.actions,footer{display:none}.grid{display:block}.panel{border:0;box-shadow:none}}
+</style></head><body>
+<header><div class="eyebrow">SHIKOMI TENBIN · SMALL VENDOR LAB</div><h1>仕込みの天秤 ⚖<br><em>売り切れと、売れ残りのあいだ。</em></h1><p>「少なめ・通常・多め」の需要を置き、限られた仕込み時間を何に何個使うか。3つの方針と赤字リスクを見比べる出店前の計算帳です。</p></header>
+<div class="wrap"><div class="toolbar"><button id="reset">サンプルに戻す</button><button id="exportJson">JSON保存</button><button id="importBtn">JSON読込</button><input id="importFile" type="file" accept=".json,application/json" hidden><span id="status" class="status" role="status"></span></div>
+<div class="grid"><section class="panel left"><h2>① 出店条件</h2><p class="note">原価は仕込んだ全個数に発生します。</p>
+<div class="inputs"><label class="full">イベント名<input data-event="name" type="text" maxlength="60"></label><label>出店料（円）<input data-event="boothFee" type="number"></label><label>交通費（円）<input data-event="travelFee" type="number"></label><label>その他固定費（円）<input data-event="otherFee" type="number"></label><label>仕込み時間上限（分）<input data-event="capacity" type="number"></label></div>
+<hr><h2>② 売れ行きの仮定</h2><p class="note">予測値ではありません。合計100%にしてください。</p>
+<div class="inputs three"><label>少なめ %<input data-event="pLow" type="number"></label><label>通常 %<input data-event="pBase" type="number"></label><label>多め %<input data-event="pHigh" type="number"></label></div>
+<hr><h2>③ 商品の仕込み表</h2><p class="note">「回収価値」は売れ残りの値引き販売・再利用で実際に回収可能な見込み額。不明なら0円。</p><div id="products"></div><button class="primary" id="addItem">＋ 商品を追加</button>
+<div class="boxnote">各商品需要0〜200個、最大6商品・仕込み上限900分。設備制約、同時調理、食品衛生は考慮しません。</div></section>
+<section class="panel right"><h2>④ 仕込みの結論</h2><p class="note">同じ仕込み時間の枠を複数商品で分け合い、期待利益が最大になる整数個数を動的計画法で厳密計算。</p><div id="result"></div></section></div>
+<footer>🔒 登録・外部API・分析SDK・通信なし。入力はこのブラウザのlocalStorageに保存されます。計算は自己申告の需要・確率に依存します。税・決済手数料・未入力経費・人件費を自動計算せず、実売上や食品衛生を保証しません。</footer>
+</div>
+<script>
+(function(){
+'use strict';
+var SAMPLE={version:1,event:{name:'土曜の小さなマルシェ',boothFee:4500,travelFee:1200,otherFee:0,capacity:390,pLow:25,pBase:50,pHigh:25},items:[
+{id:'muffin',name:'さつまいもマフィン',price:420,cost:195,salvage:20,minutes:4,low:15,base:30,high:46},
+{id:'chiffon',name:'シフォンカップ',price:500,cost:220,salvage:25,minutes:5,low:12,base:24,high:36},
+{id:'scone',name:'焼きスコーン',price:350,cost:165,salvage:15,minutes:3,low:10,base:20,high:32}]};
+var state=JSON.parse(JSON.stringify(SAMPLE)),choice='standard',out=null;
+var $=function(q){return document.querySelector(q)};
+var fmt=function(n){return Math.round(n).toLocaleString('ja-JP')+'円'};
+var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(x){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]})};
+function number(v,n,min,max,int){if(v===null||v===undefined||String(v).trim()==='')throw Error(n+'を入力してください');var x=Number(v);if(!Number.isFinite(x)||x<min||x>max||(int&&!Number.isInteger(x)))throw Error(n+'は'+min+'〜'+max+'の範囲'+(int?'の整数':'')+'にしてください');return x}
+function check(raw){
+ if(!raw||raw.version!==1||!raw.event||!Array.isArray(raw.items)||raw.items.length<1||raw.items.length>6)throw Error('データ形式、または商品数が不正です');
+ var e=raw.event,ev={name:String(e.name||'').slice(0,60),boothFee:number(e.boothFee,'出店料',0,1e7),travelFee:number(e.travelFee,'交通費',0,1e7),otherFee:number(e.otherFee,'その他固定費',0,1e7),capacity:number(e.capacity,'仕込み上限',0,900,true),pLow:number(e.pLow,'少なめ確率',0,100),pBase:number(e.pBase,'通常確率',0,100),pHigh:number(e.pHigh,'多め確率',0,100)};
+ if(Math.abs(ev.pLow+ev.pBase+ev.pHigh-100)>0.00001)throw Error('需要の確率の合計を100%にしてください');
+ var ids={};var items=raw.items.map(function(r,i){
+  if(!r||typeof r!=='object')throw Error('商品データが不正です');
+  var id=String(r.id||'').slice(0,90);
+  if(!id||ids[id])throw Error('商品IDが重複または空です');ids[id]=true;
+  var n=String(r.name||'').trim().slice(0,60);if(!n)throw Error((i+1)+'番目の商品名がありません');
+  var v={id:id,name:n,price:number(r.price,n+'の価格',0,1e7),cost:number(r.cost,n+'の原価',0,1e7),salvage:number(r.salvage,n+'の回収価値',0,1e7),minutes:number(r.minutes,n+'の仕込み分',1,120,true),low:number(r.low,n+'の少なめ需要',0,200,true),base:number(r.base,n+'の通常需要',0,200,true),high:number(r.high,n+'の多め需要',0,200,true)};
+  if(v.salvage>v.cost)throw Error(n+'の回収価値は原価以下にしてください');
+  if(v.low>v.base||v.base>v.high)throw Error(n+'の需要は少なめ ≤ 通常 ≤ 多めの順にしてください');
+  return v
+ });return {version:1,event:ev,items:items}
+}
+function probs(e){return [e.pLow/100,e.pBase/100,e.pHigh/100]}
+function single(item,q,k){var sold=Math.min(item[k],q),left=q-sold;return {profit:sold*item.price+left*item.salvage-q*item.cost,sold:sold,left:left,miss:Math.max(0,item[k]-q)}}
+function expected(item,q,w){var keys=['low','base','high'],total=0;for(var i=0;i<3;i++)total+=single(item,q,keys[i]).profit*w[i];return total}
+function optimize(d,w,evalW){
+ var e=d.event,cap=e.capacity,dp=Array(cap+1).fill(-Infinity),backs=[];dp[0]=0;
+ for(var i=0;i<d.items.length;i++){
+  var it=d.items[i],next=Array(cap+1).fill(-Infinity),pick=Array(cap+1).fill(-1),maxq=Math.min(it.high,Math.floor(cap/it.minutes)),values=[];
+  for(var q=0;q<=maxq;q++)values.push(expected(it,q,w));
+  for(var t=0;t<=cap;t++)if(Number.isFinite(dp[t]))for(var j=0;j<=maxq&&t+j*it.minutes<=cap;j++){
+   var nt=t+j*it.minutes,nv=dp[t]+values[j];if(nv>next[nt]+1e-7){next[nt]=nv;pick[nt]=j}
+  }
+  dp=next;backs.push(pick)
+ }
+ var best=-Infinity,used=0;
+ for(var z=0;z<=cap;z++)if(dp[z]>best+1e-7){best=dp[z];used=z}
+ var counts=Array(d.items.length).fill(0),cursor=used;
+ for(var a=d.items.length-1;a>=0;a--){var qty=backs[a][cursor];if(qty<0)throw Error('計算結果を復元できません');counts[a]=qty;cursor-=qty*d.items[a].minutes}
+ var keys2=['low','base','high'],fixed=e.boothFee+e.travelFee+e.otherFee;
+ var scenarios=keys2.map(function(k){var total=-fixed,sold=0,left=0,miss=0;d.items.forEach(function(it,i){var x=single(it,counts[i],k);total+=x.profit;sold+=x.sold;left+=x.left;miss+=x.miss});return {profit:total,sold:sold,left:left,miss:miss}});
+ var profit=0,loss=0,leftMean=0,missMean=0;
+ scenarios.forEach(function(s,i){profit+=s.profit*evalW[i];loss+=(s.profit<0?evalW[i]:0);leftMean+=s.left*evalW[i];missMean+=s.miss*evalW[i]});
+ return {counts:counts,used:used,scenarios:scenarios,profit:profit,loss:loss,leftMean:leftMean,missMean:missMean,fixed:fixed}
+}
+function plans(raw){var d=check(raw),w=probs(d.event);return {data:d,options:[{key:'standard',label:'指定した確率',weights:w},{key:'careful',label:'少なめ想定',weights:[.6,.3,.1]},{key:'busy',label:'多め想定',weights:[.1,.25,.65]}].map(function(o){var p=optimize(d,o.weights,w);p.key=o.key;p.label=o.label;return p})}}
+function save(){try{localStorage.setItem('shikomi-tenbin:github-v1',JSON.stringify(state))}catch(e){status('保存できません。JSONへ書き出してください')}}
+function status(s){$('#status').textContent=s;setTimeout(function(){$('#status').textContent=''},3700)}
+function elInput(obj,id,key,type){return '<input data-id="'+esc(id)+'" data-key="'+key+'" type="'+type+'" value="'+esc(obj[key])+'">'}
+function field(label,input){return '<label>'+label+input+'</label>'}
+function renderProducts(){
+ $('#products').innerHTML=state.items.map(function(v,i){
+ return '<article class="product"><div class="productbar"><b>商品 '+(i+1)+'</b><button class="small" data-remove="'+esc(v.id)+'" '+(state.items.length===1?'disabled':'')+'>削除</button></div><div class="inputs">'+
+ field('商品名',elInput(v,v.id,'name','text'))+field('価格 / 個（円）',elInput(v,v.id,'price','number'))+field('原価 / 個（円）',elInput(v,v.id,'cost','number'))+field('売れ残り回収 / 個（円）',elInput(v,v.id,'salvage','number'))+field('仕込み分 / 個',elInput(v,v.id,'minutes','number'))+
+ '</div><p class="note" style="margin:12px 0 5px">各シナリオの需要個数</p><div class="inputs three">'+field('少なめ',elInput(v,v.id,'low','number'))+field('通常',elInput(v,v.id,'base','number'))+field('多め',elInput(v,v.id,'high','number'))+'</div></article>'
+ }).join('');
+ $('#addItem').disabled=state.items.length>=6
+}
+function render(){
+ try{out=plans(state)}catch(ex){out=null;$('#result').innerHTML='<div class="error" role="alert">'+esc(ex.message)+'</div>';return}
+ var d=out.data,p=out.options.find(function(x){return x.key===choice})||out.options[0],cap=d.event.capacity,max=Math.max.apply(null,p.scenarios.map(function(x){return Math.abs(x.profit)}).concat(1));
+ var html='<div class="tabs">'+out.options.map(function(x){return '<button data-plan="'+x.key+'" class="'+(choice===x.key?'on':'')+'" aria-pressed="'+(choice===x.key)+'">'+x.label+'</button>'}).join('')+'</div>'+
+ '<p class="note" style="margin-top:9px">'+(choice==='standard'?'入力した確率で仕込み量を最大化':'仕込み量を決める際は'+(choice==='careful'?'少なめ60%・通常30%・多め10%':'少なめ10%・通常25%・多め65%')+'。損益評価は入力確率で統一')+'</p>'+
+ '<div class="metrics"><div class="metric"><div class="caption">期待利益</div><strong>'+fmt(p.profit)+'</strong><div class="caption">出店固定費 '+fmt(p.fixed)+' 込み</div></div><div class="metric"><div class="caption">赤字想定確率</div><strong>'+(p.loss*100).toFixed(0)+'%</strong><div class="caption">入力した3シナリオの中で</div></div><div class="metric"><div class="caption">仕込み時間</div><strong>'+p.used+' / '+cap+'分</strong><div class="caption">上限以内・残り'+(cap-p.used)+'分</div></div><div class="metric"><div class="caption">売れ残り期待個数</div><strong>'+p.leftMean.toFixed(1)+'個</strong><div class="caption">品切れ期待 '+p.missMean.toFixed(1)+'個</div></div></div><h3>何を何個作る？</h3>';
+ d.items.forEach(function(it,i){html+='<div class="itemrow"><div><div><b>'+esc(it.name)+'</b></div><small>需要 '+it.low+' / '+it.base+' / '+it.high+'個・'+it.minutes+'分/個</small></div><b>'+p.counts[i]+'個</b></div>'});
+ html+='<h3>売れ行き別の損益</h3>';
+ p.scenarios.forEach(function(s,i){html+='<div class="scenario"><span>'+['少なめ','通常','多め'][i]+'</span><div class="track"><div class="bar '+(s.profit<0?'bad':'')+'" style="width:'+Math.max(2,Math.abs(s.profit)/max*100).toFixed(1)+'%"></div></div><span>'+fmt(s.profit)+'</span></div>'});
+ html+='<p class="note">各シナリオの利益＝売上＋売れ残り回収額−仕込み個数×原価−固定費。期待利益は入力確率による加重平均です。</p><h3>方針を共通確率で比較</h3><div class="metrics">';
+ out.options.forEach(function(x){html+='<div class="metric"><div class="caption">'+x.label+'</div><strong style="font-size:19px">'+fmt(x.profit)+'</strong><div class="caption">仕込み'+x.used+'分 / 残'+x.leftMean.toFixed(1)+'個</div></div>'});
+ html+='</div><div class="boxnote">これは予測ではなく入力条件での試算です。3方針の最終評価確率は常に同一。最適化で扱う容量制約は仕込み分数のみです。</div><div class="actions"><button id="csv" class="primary">CSV保存</button><button id="copy">計画をコピー</button><button id="print">印刷</button></div>';
+ $('#result').innerHTML=html
+}
+function sync(){document.querySelectorAll('[data-event]').forEach(function(n){n.value=state.event[n.dataset.event]})}
+function download(content,mime,name){var url=URL.createObjectURL(new Blob([content],{type:mime})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},900)}
+function cell(x){var s=String(x==null?'':x);if(/^[\s\x00-\x1f]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+function toCSV(){
+ var p=out.options.find(function(x){return x.key===choice}),d=out.data,rows=[['イベント',d.event.name],['方針',p.label],['期待利益',p.profit],['仕込み時間',p.used],['商品','仕込み数','価格','原価','回収価値','分/個','少なめ需要','通常需要','多め需要']];
+ d.items.forEach(function(it,i){rows.push([it.name,p.counts[i],it.price,it.cost,it.salvage,it.minutes,it.low,it.base,it.high])});
+ rows.push(['シナリオ','利益','販売数','売れ残り','機会損失（未販売数）']);p.scenarios.forEach(function(s,i){rows.push([['少なめ','通常','多め'][i],s.profit,s.sold,s.left,s.miss])});
+ return '\ufeff'+rows.map(function(r){return r.map(cell).join(',')}).join('\r\n')
+}
+document.querySelectorAll('[data-event]').forEach(function(n){n.addEventListener('input',function(){state.event[n.dataset.event]=n.value;save();render()})});
+$('#products').addEventListener('input',function(ev){var n=ev.target.closest('[data-id][data-key]');if(!n)return;var it=state.items.find(function(x){return x.id===n.dataset.id});if(it){it[n.dataset.key]=n.value;save();render()}});
+$('#products').addEventListener('click',function(ev){var n=ev.target.closest('[data-remove]');if(!n||state.items.length<=1)return;state.items=state.items.filter(function(x){return x.id!==n.dataset.remove});save();renderProducts();render()});
+$('#addItem').addEventListener('click',function(){if(state.items.length>=6)return;state.items.push({id:'p'+Date.now()+Math.floor(Math.random()*10000),name:'新しい商品',price:400,cost:150,salvage:0,minutes:5,low:8,base:18,high:30});save();renderProducts();render()});
+$('#result').addEventListener('click',function(ev){
+ var n=ev.target.closest('[data-plan]');if(n){choice=n.dataset.plan;render();return}if(!out)return;
+ if(ev.target.closest('#csv')){download(toCSV(),'text/csv;charset=utf-8','shikomi-plan.csv');status('CSVを作成しました')}
+ if(ev.target.closest('#print'))window.print();
+ if(ev.target.closest('#copy')){var p=out.options.find(function(x){return x.key===choice}),s=out.data.event.name+' / '+p.label+'\n期待利益 '+fmt(p.profit)+'\n'+out.data.items.map(function(it,i){return it.name+'：'+p.counts[i]+'個'}).join('\n')+'\n※入力仮定に基づく試算';if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(function(){status('コピーしました')}).catch(function(){status('コピーできませんでした')});else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');ta.remove();status(ok?'コピーしました':'コピー不可。CSVをお使いください')}}
+});
+$('#exportJson').addEventListener('click',function(){download(JSON.stringify(state,null,2),'application/json','shikomi-data.json')});
+$('#importBtn').addEventListener('click',function(){$('#importFile').click()});
+$('#importFile').addEventListener('change',async function(ev){var f=ev.target.files&&ev.target.files[0];if(!f)return;try{if(f.size>100000)throw Error('100KB以下のJSONを選んでください');var data=check(JSON.parse(await f.text()));state=data;choice='standard';sync();save();renderProducts();render();status('読み込みました')}catch(x){status('読み込み失敗：'+x.message)}ev.target.value=''});
+$('#reset').addEventListener('click',function(){if(!confirm('入力をサンプルに戻しますか？'))return;state=JSON.parse(JSON.stringify(SAMPLE));choice='standard';sync();save();renderProducts();render();status('サンプルに戻しました')});
+try{var stored=localStorage.getItem('shikomi-tenbin:github-v1');if(stored)state=check(JSON.parse(stored))}catch(x){state=JSON.parse(JSON.stringify(SAMPLE))}
+sync();renderProducts();render();window.ShikomiGithub={getState:function(){return JSON.parse(JSON.stringify(state))},getResults:function(){return out}};
+})();
+</script></body></html>
