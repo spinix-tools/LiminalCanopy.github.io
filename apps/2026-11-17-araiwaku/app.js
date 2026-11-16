@@ -1,0 +1,47 @@
+/* ARAIWAKU UI. No remote calls, no user analytics. */
+(function(){'use strict';
+const E=window.AraiEngine;if(!E){document.body.textContent='計算エンジンを読み込めませんでした。index.html、engine.js、app.jsを同じフォルダーに置いてください。';return;}
+const KEY='araiwaku:v1';const $=id=>document.getElementById(id);
+const sample=()=>({version:1,capacity:4500,garments:[
+{id:'demo_white_t',name:'白Tシャツ',color:'white',wash:'standard',temp:40,weight:240,bleed:false,dry:'yes',done:false},
+{id:'demo_socks',name:'白ソックス',color:'white',wash:'standard',temp:40,weight:140,bleed:false,dry:'yes',done:false},
+{id:'demo_black_slacks',name:'黒スラックス',color:'dark',wash:'gentle',temp:30,weight:430,bleed:false,dry:'no',done:false},
+{id:'demo_blue_tee',name:'紺Tシャツ',color:'dark',wash:'standard',temp:40,weight:320,bleed:false,dry:'low',done:false},
+{id:'demo_blouse',name:'ベージュのブラウス',color:'light',wash:'gentle',temp:30,weight:210,bleed:false,dry:'no',done:false},
+{id:'demo_scarf',name:'赤いスカーフ',color:'vivid',wash:'gentle',temp:30,weight:90,bleed:true,dry:'no',done:false},
+{id:'demo_knit',name:'ウールのニット',color:'dark',wash:'hand',temp:30,weight:350,bleed:false,dry:'no',done:false},
+{id:'demo_jacket',name:'コート（表示未確認）',color:'dark',wash:'unknown',temp:'unknown',weight:700,bleed:false,dry:'unknown',done:false}
+]});
+let storageOk=true;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){storageOk=false;message('保存できません。このタブを閉じると入力内容が失われる可能性があります。',true);}}
+function load(){try{const str=localStorage.getItem(KEY);if(str)return E.validateState(JSON.parse(str));}catch(e){message('保存データを読み込めませんでした。サンプルを表示します。',true);}return sample();}
+function message(str,permanent=false){const el=$('alert');if(permanent){el.textContent=str;el.classList.add('show');}else{if(storageOk){el.textContent='';el.classList.remove('show');}let toast=document.querySelector('.toast');if(toast)toast.remove();toast=document.createElement('div');toast.className='toast';toast.setAttribute('role','status');toast.textContent=str;document.body.appendChild(toast);setTimeout(()=>toast.remove(),3200);}}
+function el(tag,cl,text){const node=document.createElement(tag);if(cl)node.className=cl;if(text!==undefined)node.textContent=String(text);return node;}
+function addButton(parent,label,fn){const b=el('button','',label);b.type='button';b.addEventListener('click',fn);parent.appendChild(b);}
+let state=load();let cachedPlan=null;
+function render(){const plan=E.planLoads(state);cachedPlan=plan;$('itemCount').textContent=state.garments.length;$('capacity').value=(state.capacity/1000).toFixed(1);$('metricCycles').textContent=plan.summary.cycles;$('metricReady').textContent=plan.summary.itemsInCycles;$('metricHold').textContent=plan.summary.hold;renderItems();renderPlan(plan);$('methodNote').textContent=plan.approxCount?`12点超のグループ${plan.approxCount}件は近似配置です（最小回数を保証しません）。`:'同じ色・コースで仕分け、各グループ12点以下なら容量制約のもと最小回数を探索しています。';}
+function renderItems(){const list=$('items');list.replaceChildren();if(!state.garments.length){list.append(el('div','empty','衣類はまだありません。上のフォームから追加してください。'));return;}
+ for(const item of state.garments){const row=el('article','item'+(item.done?' done':''));const top=el('div','itemtop');const title=el('div','item-title',item.name);top.append(title,el('span','chip'+(item.done?'':' warn'),item.done?'洗濯済み':'待機中'));row.append(top);row.append(el('div','item-meta',`${E.COLORS[item.color]||'色未確認'} · ${E.WASH[item.wash]} · ${item.temp==='unknown'?'水温不明':item.temp+'℃以下'} · ${item.weight}g${item.bleed?' · 色移り注意':''}`));
+ const actions=el('div','item-actions');addButton(actions,item.done?'↶ 未洗に戻す':'✓ 洗濯済みにする',()=>{item.done=!item.done;save();render();});addButton(actions,'編集',()=>edit(item.id));addButton(actions,'削除',()=>{if(!confirm('この衣類を削除しますか？'))return;state.garments=state.garments.filter(g=>g.id!==item.id);save();resetForm();render();});row.append(actions);list.append(row);}
+}
+function renderPlan(plan){const container=$('cycles');container.replaceChildren();if(!plan.cycles.length)container.append(el('div','empty','機械洗いの組み合わせはありません。衣類の表示を確認して登録してください。'));
+ plan.cycles.forEach((c,i)=>{const card=el('article','card');const head=el('div','cardhead');const left=el('div');left.append(el('div','cycle-number',`WASH CYCLE ${String(i+1).padStart(2,'0')}`),el('div','cycle-title',`${E.COLORS[c.color]} · ${E.WASH[c.wash]}`));const chip=el('span','chip'+(c.isolated?' warn':''),`${c.temperature}℃以下`);head.append(left,chip);card.append(head);card.append(el('div','names',c.items.map(g=>g.name).join(' ／ ')));card.append(el('div','item-meta',`${(c.weight/1000).toFixed(2)} / ${(state.capacity/1000).toFixed(1)} kg · ${c.items.length}点${c.isolated?' · 色移り注意：単独':''}`));const meter=el('div','meter');const filling=el('span');filling.style.width=(100*c.weight/state.capacity).toFixed(1)+'%';meter.append(filling);card.append(meter);
+ card.append(el('p','footnote',c.dry==='yes'?'乾燥機表示：すべて「可」。ただし実物の注意書きを確認。':c.dry==='low'?'乾燥機表示：低温設定まで。全品のラベルを再確認。':'乾燥機：不可・未確認の品あり。各衣類ごとに判断。'));container.append(card);});
+ const queues=$('queues');queues.replaceChildren();const queueGroups=[['手洗い（機械洗いに混ぜない）',plan.hand,'warn'],['水洗い不可',plan.excluded,'error'],['確認待ち',plan.review,'warn'],['容量超過',plan.overweight,'error']];for(const [title,entries,tone] of queueGroups){if(!entries.length)continue;const section=el('section','queue');const heading=el('div','queue-title');heading.append(el('span','chip '+tone,title+' '+entries.length+'点'));section.append(heading);for(const entry of entries){const row=el('div','queue-line');row.append(el('strong','',entry.item.name),el('span','',entry.reason));section.append(row);}queues.append(section);}}
+function resetForm(){$('garmentForm').reset();$('editId').value='';$('formTitle').textContent='衣類を登録';$('saveButton').textContent='＋ 衣類を追加する';$('cancelEdit').hidden=true;$('weight').value='250';}
+function edit(id){const item=state.garments.find(g=>g.id===id);if(!item)return;$('editId').value=item.id;for(const field of ['name','color','wash','temp','weight','dry'])$(field).value=item[field];$('bleed').checked=item.bleed;$('formTitle').textContent='衣類を編集';$('saveButton').textContent='変更を保存';$('cancelEdit').hidden=false;$('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});$('name').focus();}
+$('garmentForm').addEventListener('submit',event=>{event.preventDefault();try{const id=$('editId').value;const current=state.garments.find(g=>g.id===id);const item=E.validateGarment({id:id||E.nextId(),name:$('name').value,color:$('color').value,wash:$('wash').value,temp:$('temp').value,weight:$('weight').value,dry:$('dry').value,bleed:$('bleed').checked,done:current?.done||false});if(id){if(!current)throw Error('編集対象が見つかりません');const idx=state.garments.findIndex(g=>g.id===id);state.garments[idx]=item;}else{if(state.garments.length>=E.MAX_ITEMS)throw Error('最大120点まで登録できます');state.garments.push(item);}save();resetForm();render();message(id?'衣類を更新しました':'衣類を追加しました');}catch(e){message(e.message,true);}});
+$('cancelEdit').addEventListener('click',resetForm);
+$('capacity').addEventListener('change',()=>{try{const n=Number($('capacity').value)*1000;if(!Number.isInteger(n))throw Error('容量は0.1kg単位で指定');const proposed=E.validateState({...state,capacity:n});state=proposed;save();render();}catch(e){message(e.message,true);$('capacity').value=(state.capacity/1000).toFixed(1);}});
+$('demoButton').addEventListener('click',()=>{if(!confirm('現在の登録内容をサンプル8点に置き換えますか？'))return;state=sample();save();resetForm();render();message('サンプルを読み込みました');});
+$('clearAll').addEventListener('click',()=>{if(!confirm('すべての衣類データを削除しますか？'))return;state.garments=[];save();resetForm();render();message('全削除しました');});
+$('clearDone').addEventListener('click',()=>{const count=state.garments.filter(g=>g.done).length;if(!count)return message('洗濯済みの衣類はありません');if(!confirm(`洗濯済み${count}点を削除しますか？`))return;state.garments=state.garments.filter(g=>!g.done);save();resetForm();render();message(`${count}点を削除しました`);});
+function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type}));const a=el('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+$('downloadJson').addEventListener('click',()=>download('araiwaku-backup.json',JSON.stringify(state,null,2),'application/json;charset=utf-8'));
+$('importJson').addEventListener('click',()=>$('fileImport').click());
+$('fileImport').addEventListener('change',async event=>{const file=event.target.files?.[0];event.target.value='';if(!file)return;if(file.size>1024*1024)return message('1MBを超えるバックアップは読み込めません',true);try{const parsed=E.validateState(JSON.parse(await file.text()));if(!confirm(`衣類${parsed.garments.length}点を読み込み、現在の内容をすべて置き換えますか？`))return;state=parsed;save();resetForm();render();message('バックアップを復元しました');}catch(e){message('復元できません: '+e.message,true);}});
+$('downloadCsv').addEventListener('click',()=>download('araiwaku-plan.csv',E.toCsv(state,cachedPlan),'text/csv;charset=utf-8'));
+$('copyPlan').addEventListener('click',async()=>{const str=E.report(state,cachedPlan);try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(str);else{const ta=el('textarea');ta.value=str;document.body.appendChild(ta);ta.select();if(!document.execCommand('copy'))throw Error('copy');ta.remove();}message('仕分けメモをコピーしました');}catch(e){message('コピーできませんでした。CSV書き出しをお試しください。',true);}});
+$('printPlan').addEventListener('click',()=>window.print());
+render();
+})();
