@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#faf5ef">
+  <meta name="description" content="断りづらい返事を、数タップで。理由や距離感を選んで自然な文章を作る、登録不要の返信サポート。">
+  <title>ことばのクッション — 断るのに、30分かけない。</title>
+  <style>
+    :root{color-scheme:light;--ink:#243036;--muted:#657077;--line:#e8ddd4;--cream:#faf5ef;--white:#fffefc;--coral:#db644a;--coralDark:#a64532;--blue:#dfeee9;--blueDark:#345c51;--shadow:0 24px 80px rgba(64,45,31,.08)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f1ad75;outline-offset:3px}
+    .wrap{max-width:1080px;margin:auto;padding:0 26px}.topbar{display:flex;align-items:center;justify-content:space-between;padding:25px 0;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:9px;font-weight:850;letter-spacing:-.04em}.mark{width:30px;height:30px;display:grid;place-items:center;background:var(--ink);color:white;border-radius:11px;font-size:19px;transform:rotate(-8deg)}.top-meta{font-size:11px;letter-spacing:.13em;color:var(--muted);font-weight:800}
+    .hero{padding:60px 0 33px;position:relative}.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.12em;color:var(--coralDark);font-weight:800}.eyebrow:before{content:"";height:7px;width:7px;background:var(--coral);border-radius:50%}h1{font-size:clamp(42px,7.5vw,84px);line-height:1.18;letter-spacing:-.08em;margin:18px 0 18px;font-weight:900}h1 span{color:var(--coral)}.lede{font-size:16px;line-height:1.8;color:#687179;margin:0;max-width:590px}.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:23px}.pill{font-size:11px;font-weight:700;padding:9px 12px;background:#f3e8dd;border-radius:99px;color:#756454}
+    .workshop{display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:20px;padding:20px 0 80px}.panel{background:var(--white);border-radius:24px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}.panelhead{padding:27px 29px 18px;display:flex;align-items:start;justify-content:space-between;gap:12px}.panelhead h2{font-size:20px;letter-spacing:-.04em;margin:0}.panelhead p{font-size:12px;color:var(--muted);margin:8px 0 0}.step{font-size:11px;color:#aa8c7a;font-weight:800;white-space:nowrap}.panelbody{padding:0 29px 30px}.field{margin-top:22px}.field label.title,.field legend{display:block;font-size:12px;letter-spacing:.01em;font-weight:850;margin-bottom:11px;color:#455057}.field legend{padding:0}.field small{font-weight:500;color:#899095}.options{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.pick{position:relative}.pick input{position:absolute;opacity:0;width:1px;height:1px}.pick span{display:block;padding:12px 6px;text-align:center;border-radius:10px;background:#f5f5f3;border:1.5px solid #ebeeea;font-size:12px;font-weight:750;color:#6d7777;transition:all .16s}.pick input:checked+span{color:var(--blueDark);background:var(--blue);border-color:#9ec8b5}.pick input:focus-visible+span{outline:3px solid #f1ad75;outline-offset:2px}.two{display:grid;grid-template-columns:1fr 1fr;gap:13px}.control{width:100%;height:47px;border:1.5px solid #e2e5df;background:#fafbf9;border-radius:11px;padding:0 13px;font-size:13px;color:var(--ink)}.control::placeholder{color:#a2a6a1}.tones{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.tone span{font-size:13px}.checkrow{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:650;margin-top:25px;cursor:pointer}.checkrow input{accent-color:var(--blueDark);width:18px;height:18px}.primary{border:none;background:var(--coral);color:white;font-size:14px;font-weight:850;border-radius:13px;padding:16px 22px;min-height:50px;box-shadow:0 6px 0 #b95038;transition:transform .12s,box-shadow .12s}.primary:hover{background:#ca563e}.primary:active{transform:translateY(4px);box-shadow:0 2px 0 #b95038}.generate{width:100%;margin-top:28px}
+    .preview{background:#f4faf7;border-color:#dbe9e3}.preview .panelhead{padding-bottom:14px}.preview .panelhead h2{display:flex;align-items:center;gap:8px}.live{font-size:11px;display:inline-flex;gap:6px;align-items:center;color:#376755;font-weight:800}.live i{width:6px;height:6px;border-radius:50%;background:#599e78}.paper{background:#fff;border:1px solid #dbe8e0;border-radius:15px;padding:26px 24px;margin-top:5px;min-height:256px;box-shadow:0 7px 19px #405c4908;position:relative}.paper:before{content:"“";position:absolute;top:2px;right:20px;color:#c8ddd2;font-family:Georgia,serif;font-size:76px}.previewtext{position:relative;white-space:pre-wrap;line-height:2;font-size:15px;letter-spacing:.02em;max-width:100%;overflow-wrap:anywhere;margin:11px 0 18px;min-height:151px;color:#2f4240}.wordcount{text-align:right;font-size:11px;color:#92a39a}.actions{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px;margin-top:13px}.action{min-height:45px;border-radius:12px;border:1px solid #c4d9cb;background:white;color:#466759;font-size:12px;font-weight:800;padding:10px 7px}.action:hover{border-color:#8fad9e;background:#f7fbf9}.action.copy{background:#2b5d50;color:#fff;border-color:#2b5d50}.action.copy:hover{background:#244e44}.note{margin:18px 4px 23px;font-size:11px;color:#718b7f;line-height:1.8}.saved{border-top:1px solid #dce9e0;padding-top:16px}.saved h3{font-size:12px;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between}.saved h3 em{font-size:10px;color:#9caca3;font-style:normal;font-weight:500}.savedlist{display:flex;flex-direction:column;gap:7px}.saveditem{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #e0eae3;padding:8px;border-radius:9px}.saveditem button.load{flex:1;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:none;border:none;color:#405e54;font-size:12px;min-width:0}.saveditem button.remove{border:0;background:#f5f3f0;color:#7d8784;border-radius:7px;min-width:29px;min-height:29px}.empty{font-size:12px;color:#98a8a0;margin:0;padding:10px 0}.footer{border-top:1px solid var(--line);padding:24px 0 40px;display:flex;justify-content:space-between;gap:12px;color:#8a8d8b;font-size:12px;line-height:1.6}.footer strong{color:#52645d}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);background:#213d36;color:white;font-size:13px;font-weight:700;padding:12px 20px;border-radius:12px;box-shadow:0 12px 35px #0002;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}.toast.visible{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:780px){.wrap{padding:0 16px}.topbar{padding:20px 0}.hero{padding:44px 0 24px}h1{font-size:clamp(38px,9vw,65px)}.workshop{grid-template-columns:1fr;gap:14px;padding:10px 0 35px}.panelhead{padding:23px 21px 14px}.panelbody{padding:0 21px 24px}.paper{min-height:210px}.previewtext{min-height:120px}.footer{padding-bottom:24px}}
+    @media(max-width:390px){.two{grid-template-columns:1fr;gap:0}.options{grid-template-columns:repeat(2,1fr)}.actions{grid-template-columns:1fr 1fr}.action.copy{grid-column:1/-1;order:-1}.top-meta{display:none}.pill{padding:7px 10px}h1{font-size:38px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar"><div class="brand"><span class="mark" aria-hidden="true">〰</span>ことばのクッション</div><div class="top-meta">SAY NO, KINDLY.</div></header>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="eyebrow">しんどい返信を、30秒で。</div>
+      <h1 id="hero-title">断るのに、<br><span>30分かけない。</span></h1>
+      <p class="lede">断りたい。でも冷たくしたくない。<br>相手との距離感を選んで、あなたの「ちょうどいい」一文をつくります。</p>
+      <div class="pills"><span class="pill">ログイン不要</span><span class="pill">登録・送信なし</span><span class="pill">端末内だけで動作</span></div>
+    </section>
+    <main class="workshop">
+      <section class="panel" aria-labelledby="make-title">
+        <div class="panelhead"><div><h2 id="make-title">どんな返事にする？</h2><p>3つ選ぶだけで、言葉が整います。</p></div><span class="step">01 / 02</span></div>
+        <div class="panelbody">
+          <fieldset class="field" style="border:0;padding:0;margin-left:0;margin-right:0"><legend>相手との関係</legend><div class="options" id="relation-options">
+            <label class="pick"><input type="radio" name="relation" value="friend" checked><span>友だち</span></label>
+            <label class="pick"><input type="radio" name="relation" value="work"><span>仕事</span></label>
+            <label class="pick"><input type="radio" name="relation" value="family"><span>家族</span></label>
+            <label class="pick"><input type="radio" name="relation" value="other"><span>知り合い</span></label>
+          </div></fieldset>
+          <div class="two">
+            <div class="field"><label for="situation" class="title">何を断る？</label><select id="situation" class="control"><option value="invite">お誘い</option><option value="request">頼まれごと</option><option value="reschedule">日程の変更</option><option value="repeat">継続的なお誘い</option></select></div>
+            <div class="field"><label for="reason" class="title">理由の伝え方</label><select id="reason" class="control"><option value="busy">予定があって</option><option value="energy">今は余裕がなくて</option><option value="budget">予算の都合で</option><option value="none">詳しくは伝えない</option><option value="custom">自分で書く</option></select></div>
+          </div>
+          <div class="field" id="custom-wrap" hidden><label for="custom-reason" class="title">理由 <small>無理に書かなくてもOK</small></label><input id="custom-reason" class="control" maxlength="70" placeholder="例：今週は家の用事を優先したくて"></div>
+          <fieldset class="field" style="border:0;padding:0;margin-left:0;margin-right:0"><legend>言葉の温度</legend><div class="tones">
+            <label class="pick tone"><input type="radio" name="tone" value="warm"><span>やわらかく</span></label>
+            <label class="pick tone"><input type="radio" name="tone" value="neutral" checked><span>ふつう</span></label>
+            <label class="pick tone"><input type="radio" name="tone" value="clear"><span>はっきり</span></label>
+          </div></fieldset>
+          <div class="field"><label for="who" class="title">相手の呼び名 <small>任意</small></label><input id="who" class="control" maxlength="30" placeholder="例：さきさん"></div>
+          <label class="checkrow"><input type="checkbox" id="future" checked>「また機会があれば」を添える</label>
+          <button id="generate" class="primary generate" type="button">この条件で返信をつくる <span aria-hidden="true">↗</span></button>
+        </div>
+      </section>
+      <section class="panel preview" aria-labelledby="preview-title">
+        <div class="panelhead"><div><h2 id="preview-title">返信のプレビュー</h2><p>使いたいところだけ、そのままコピー。</p></div><span class="live"><i aria-hidden="true"></i>READY</span></div>
+        <div class="panelbody">
+          <div class="paper"><p class="previewtext" id="result" aria-live="polite"></p><div id="wordcount" class="wordcount"></div></div>
+          <div class="actions"><button id="copy" type="button" class="action copy">文章をコピー</button><button id="another" type="button" class="action">別の言い方 ↻</button><button id="save" type="button" class="action">☆ 保存する</button></div>
+          <p class="note">※ 提案文は固定の表現ルールで作られます。AIに送信したり、入力内容を外部保存したりしません。最終的な気持ちに合うよう調整してください。</p>
+          <div class="saved"><h3>保存した返信 <em>この端末にだけ保存（最大8件）</em></h3><div id="savedlist" class="savedlist"><p class="empty">まだ保存された返信はありません。</p></div></div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer"><span><strong>ことばのクッション</strong> — 断る自由と、気遣う余白。</span><span>Privacy by default · 初版MVP</span></footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      'use strict';
+      const $ = (id) => document.getElementById(id);
+      const KEY = 'kotoba-cushion-v1';
+      let variant = 0;
+      let toastTimeout;
+      const store = {
+        get() { try { const x = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(x) ? x.filter(v => typeof v === 'string').slice(0, 8) : []; } catch (_) { return []; } },
+        set(value) { try { localStorage.setItem(KEY, JSON.stringify(value)); return true; } catch (_) { return false; } }
+      };
+      const pick = (name) => document.querySelector('input[name="' + name + '"]:checked')?.value || '';
+      const trim = (value, max) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+      function toast(message) {
+        const node = $('toast'); node.textContent = message; node.classList.add('visible');
+        clearTimeout(toastTimeout); toastTimeout = setTimeout(() => node.classList.remove('visible'), 2700);
+      }
+      function values() {
+        return { relation: pick('relation'), tone: pick('tone'), situation: $('situation').value, reason: $('reason').value,
+          who: trim($('who').value, 30), custom: trim($('custom-reason').value, 70), future: $('future').checked };
+      }
+      function write(v, index) {
+        const formal = v.relation === 'work' || v.relation === 'other';
+        const prefixes = v.who ? [v.who + '、', v.who + 'へ。\n', v.who + '、\n'][index] : '';
+        const intros = v.tone === 'warm'
+          ? (formal ? ['お声がけいただきありがとうございます。', '誘っていただけてうれしいです。', 'ご連絡ありがとうございます。'][index] : ['誘ってくれてありがとう！', '声をかけてくれて、うれしかったよ。', 'お誘いありがとう！'][index])
+          : v.tone === 'clear' ? (formal ? ['ご連絡ありがとうございます。', 'ご依頼についてお返事します。', 'お声がけありがとうございます。'][index] : ['声をかけてくれてありがとう。', '連絡ありがとう。', '誘ってくれてありがとう。'][index])
+          : (formal ? ['お声がけありがとうございます。', 'ご連絡ありがとうございます。', 'お誘いいただきありがとうございます。'][index] : ['誘ってくれてありがとう。', '声をかけてくれてありがとう！', '連絡ありがとう。'][index]);
+        const reasons = { busy: formal ? '予定の都合がつかず' : '予定が合わなくて', energy: formal ? '今は余裕がなく' : '今ちょっと余裕がなくて', budget: formal ? '予算の都合が合わず' : '予算がちょっと厳しくて', none: '', custom: v.custom };
+        const why = reasons[v.reason] || '';
+        const context = {
+          invite: formal ? ['今回は参加を見送らせてください。', '今回は伺うことが難しそうです。', '今回は辞退させていただきます。'][index] : ['今回は見送らせてね。', '今回は行けそうにないんだ。', '今回は遠慮しておくね。'][index],
+          request: formal ? ['今回はお引き受けできません。', '今回は対応が難しい状況です。', '今回はお力になれず申し訳ありません。'][index] : ['今回は引き受けられそうにないんだ。', '今回は手伝うのが難しいんだ。', '今回は力になれなくてごめんね。'][index],
+          reschedule: formal ? ['予定を変更させていただけますか。', '別日で調整できれば幸いです。', '日程を再調整できませんでしょうか。'][index] : ['別の日に変更してもらえるかな？', '予定をずらしてもらえたらうれしい。', '別日にできるか相談させてね。'][index],
+          repeat: formal ? ['今後もしばらく参加が難しいため、定期的なお誘いはお控えいただけると助かります。', '継続的なご参加は難しい状況です。', '当面はご遠慮させてください。'][index] : ['しばらくは参加を控えたいと思っているんだ。', 'しばらくお誘いには応えられそうにないんだ。', '当面は参加しないことにしたよ。'][index]
+        };
+        const noFuture = v.situation === 'repeat';
+        const future = v.future && !noFuture ? (formal ? ['また機会がございましたら、よろしくお願いいたします。', '別の機会にご一緒できれば幸いです。', '今後ともよろしくお願いいたします。'][index] : ['またタイミングが合うときに！', 'また都合が合えばぜひ。', '次の機会があったらうれしいな。'][index]) : '';
+        const part = why ? (formal ? `${why}、` : `${why}、`) : '';
+        let message = prefixes + intros + '\n\n' + part + context[v.situation];
+        if (v.situation === 'repeat' && v.future) message += formal ? '\n\nご理解いただけますと幸いです。' : '\n\n気持ちをわかってもらえたらうれしい。';
+        else if (future) message += '\n\n' + future;
+        if (v.tone === 'warm' && v.situation !== 'repeat' && !formal) message += '\nありがとうね。';
+        return message;
+      }
+      function render() {
+        const text = write(values(), variant);
+        $('result').textContent = text;
+        $('wordcount').textContent = `${text.replace(/\s/g, '').length}文字`;
+      }
+      async function copyText(text) {
+        try {
+          if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); toast('コピーしました'); return; }
+        } catch (_) { /* try fallback */ }
+        const area = document.createElement('textarea'); area.value = text; area.setAttribute('readonly', '');
+        area.style.position = 'fixed'; area.style.opacity = '0'; document.body.appendChild(area); area.select();
+        const ok = document.execCommand('copy'); area.remove();
+        toast(ok ? 'コピーしました' : 'コピーできませんでした。文章を選択してください');
+      }
+      function renderSaved() {
+        const items = store.get();
+        $('savedlist').replaceChildren();
+        if (!items.length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'まだ保存された返信はありません。'; $('savedlist').appendChild(p); return; }
+        items.forEach((value, index) => {
+          const item = document.createElement('div'); item.className = 'saveditem';
+          const open = document.createElement('button'); open.className = 'load'; open.type = 'button'; open.textContent = value.replace(/\s+/g, ' ').slice(0, 66);
+          open.setAttribute('aria-label', '保存した返信を表示');
+          open.addEventListener('click', () => { $('result').textContent = value; $('wordcount').textContent = `${value.replace(/\s/g, '').length}文字`; toast('保存した文章を開きました'); });
+          const remove = document.createElement('button'); remove.className = 'remove'; remove.type = 'button'; remove.textContent = '×'; remove.setAttribute('aria-label', `${index + 1}件目を削除`);
+          remove.addEventListener('click', () => { const next = store.get(); next.splice(index, 1); if (store.set(next)) { renderSaved(); toast('削除しました'); } else toast('端末に保存できません'); });
+          item.append(open, remove); $('savedlist').appendChild(item);
+        });
+      }
+      $('reason').addEventListener('change', () => { $('custom-wrap').hidden = $('reason').value !== 'custom'; });
+      $('generate').addEventListener('click', () => { variant = 0; render(); toast('返信をつくりました'); });
+      $('another').addEventListener('click', () => { variant = (variant + 1) % 3; render(); });
+      $('copy').addEventListener('click', () => copyText($('result').textContent));
+      $('save').addEventListener('click', () => { const value = $('result').textContent.trim(); if (!value) return;
+        const next = [value, ...store.get().filter(x => x !== value)].slice(0, 8);
+        if (store.set(next)) { renderSaved(); toast('この端末に保存しました'); } else toast('保存できません。ブラウザの設定をご確認ください');
+      });
+      render(); renderSaved();
+    })();
+  </script>
+</body>
+</html>
