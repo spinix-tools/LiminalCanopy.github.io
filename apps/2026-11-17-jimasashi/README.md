@@ -38,8 +38,8 @@
 
 過去の「時差フェア」「再現地図」「箱棚」「くいきる」「順番灯」「きりしろ」「仕込みの天秤」「源流ノート」「値札あわせ」と異なり、**動画字幕品質の静的解析・修正**に特化。音声認識、自動翻訳、動画レンダリング、WebVTTの `STYLE/REGION` メタデータ保持、フォーマットタグの維持保証、タイムコードの自動音声同期、真の視認性測定は対象外。WebVTT の識別子・キュー設定を保存しないため、装飾情報が重要なファイルの往復編集には不向き。
 
-## 保存先（予定）
+## GitHub保存先
 
-`spinix-tools/LiminalCanopy.github.io` の `hourly-app-lab` ブランチの `apps/2026-11-17-jimasashi/`（`main` ブランチは変更しない）。実際の保存状況は実行時の報告を参照。
+https://github.com/spinix-tools/LiminalCanopy.github.io/tree/hourly-app-lab/apps/2026-11-17-jimasashi — `hourly-app-lab` 専用ブランチ。`main` および既存サイトは変更していない。保存後、ファイル本文の一致照合を実施。
 
-License: MIT（このMVPの新規ソースに限る）。
+License: MIT（同梱 `LICENSE.md` 参照）。
