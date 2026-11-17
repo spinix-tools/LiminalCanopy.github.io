@@ -26,7 +26,7 @@ function calculate(){
 function empty(msg){$('recommendTitle').textContent='プランを作成できません';$('recommendDetail').textContent=msg;$('recommendFlag').textContent='要確認';['metricSize','metricFill','metricWeight'].forEach(id=>$(id).textContent='—');$('planList').innerHTML='';$('drawing').textContent=msg;$('stepBody').innerHTML='';$('stepCount').textContent='0点';$('legend').innerHTML='';$('csvExport').disabled=true;}
 function current(){return latest&&latest.results.find(r=>r.boxId===selected);}
 function renderResults(){let r=current();if(!r)return;let best=latest.best;
- $('recommendTitle').textContent=best?best.boxName:'全商品を収める箱がありません';$('recommendDetail').textContent=best?'下の候補を選ぶと配置を比較できます':'登録箱・商品寸法・余白を見直してください';$('recommendFlag').textContent=best?'配置成功':'未配置あり';
+ $('recommendTitle').textContent=r.boxName+(r.fit?'':'（未配置あり）');$('recommendDetail').textContent=best?(r.boxId===best.boxId?'外寸が小さい適合候補です':'おすすめの候補：'+best.boxName):'登録箱・商品寸法・余白を見直してください';$('recommendFlag').textContent=r.fit?'配置成功':'未配置あり';
  $('metricSize').textContent=r.size.cm+' cm';$('metricTier').textContent=r.size.label;
  $('metricFill').textContent=r.fill+' %';$('metricWeight').textContent=pretty(r.totalWeight)+' g';$('planCount').textContent=latest.results.length+'候補';
  $('planList').innerHTML=latest.results.map(r=>`<button type="button" class="plan ${r.boxId===selected?'active':''}" data-box="${esc(r.boxId)}" aria-pressed="${r.boxId===selected}"><div><strong>${esc(r.boxName)}</strong><small>外寸 ${r.size.outer.join(' × ')} mm · 3辺 ${r.size.cm} cm · ${r.fill}%占有</small></div><span class="plan-badge ${r.fit?'':'bad'}">${r.fit?(r.size.tier?r.size.tier+'相当':'200超'):`${r.missed.length}点未配置`}</span></button>`).join('');
