@@ -83,3 +83,14 @@ test("CSVの引用符を二重化",()=>{
 test("元データを解析中に変更しない",()=>{
  const p=base(),s=JSON.stringify(p);K.trace(p);K.availability(p,p.events[0],"one");assert.equal(JSON.stringify(p),s);
 });
+
+test("既存の別備品の衝突は新規予約を妨げない",()=>{
+ const p=base();p.events[1].needs={mic:1};p.events[1].start="2026-11-18T09:30";p.events[1].end="2026-11-18T10:30";
+ const x={id:"three",title:"独立",start:"2026-11-18T09:30",end:"2026-11-18T10:00",needs:{camera:1}};
+ assert.equal(K.availability(p,x).ok,true);
+});
+test("既存の衝突に新規予約が重なる場合は遮断",()=>{
+ const p=base();p.events[1].needs={mic:1};p.events[1].start="2026-11-18T09:30";p.events[1].end="2026-11-18T10:30";
+ const x={id:"three",title:"追加",start:"2026-11-18T09:30",end:"2026-11-18T10:00",needs:{mic:1}};
+ assert.equal(K.availability(p,x).ok,false);
+});
