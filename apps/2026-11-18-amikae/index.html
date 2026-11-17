@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="編み図と試し編みのゲージ差から、増減目の段割と幅の誤差を比較するオフラインWebアプリ">
+<title>あみかえ — ゲージ差を、編める段取りへ。</title>
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="sitehead"><div class="brand"><div class="logo">あ<span>み</span>かえ<b>●</b></div><small>KNIT PATTERN REWORK STUDIO</small></div><div class="headright"><span class="offline-dot"></span>ブラウザ内で完結 <span class="head-pill">ACCOUNT FREE</span></div></header>
+<div class="masthead"><div class="eyebrow">AMIKAE / GAUGE PLANNING TOOL <span>01 — 03</span></div><h1>ゲージ差を、<em>編める段取り</em>へ。</h1><p>編み図の目数・段数と、あなたの試し編みを比べて。<br>左右の増減目を何段目に入れるか、ふたつの候補を並べて検討できます。</p></div>
+<main class="main-grid">
+<section class="panel inputpanel" aria-labelledby="settings-title"><div class="panel-head"><span class="stepnum">01</span><div><h2 id="settings-title">編み図と試し編み</h2><p>数値を変えると、計画を自動で更新します。</p></div></div>
+<form id="config" novalidate>
+<div class="form-section"><div class="section-title">PROJECT <span>編み図の基本情報</span></div><label class="wide">作品名<input name="title" maxlength="60" placeholder="袖の増し目・ゲージ調整"></label>
+<div class="field-grid"><label>編み図ゲージ（目 / 10cm）<input type="number" name="patternSt" min="1" max="120" step="0.1" required></label><label>編み図ゲージ（段 / 10cm）<input type="number" name="patternRows" min="1" max="160" step="0.1" required></label><label>開始時の目数<input type="number" name="sourceStart" min="2" max="1500" step="1" required></label><label>終了時の目数<input type="number" name="sourceEnd" min="2" max="1500" step="1" required></label><label>編み図の総段数<input type="number" name="sourceRows" min="1" max="1200" step="1" required></label><label>幅の追加調整（cm）<input type="number" name="ease" min="-20" max="20" step="0.5" required></label></div></div>
+<div class="form-section"><div class="section-title">STITCH RULES <span>成立条件</span></div><div class="field-grid"><label>模様の倍数<input type="number" name="multiple" min="1" max="24" step="1" required></label><label>余りの目数<input type="number" name="offset" min="0" max="23" step="1" required></label><label class="wide">増減目ができる段の間隔<select name="step"><option value="1">毎段（1段ごと）</option><option value="2">2段ごと（表段など）</option><option value="4">4段ごと</option><option value="6">6段ごと</option></select></label></div><p class="hint">例：2目ゴム編みなど「4の倍数＋2目」は、倍数4・余り2。左右対称に1回で2目ずつ増減するモデルです。</p></div>
+<div class="form-section"><div class="section-title">SWATCHES <span>実測ゲージ / 10cm</span></div><div class="swatch-row"><span class="swtag tagA">A</span><label>目数<input type="number" name="swatchASt" min="1" max="120" step="0.1" required></label><label>段数<input type="number" name="swatchARows" min="1" max="160" step="0.1" required></label></div><div class="swatch-row"><span class="swtag tagB">B</span><label>目数<input type="number" name="swatchBSt" min="1" max="120" step="0.1" required></label><label>段数<input type="number" name="swatchBRows" min="1" max="160" step="0.1" required></label></div></div>
+<div class="toolbar"><button type="button" id="reset" class="btn ghost">初期例に戻す</button><button type="button" id="export" class="btn dark">計画をJSON保存 ↓</button></div><div class="toolbar secondary"><label class="importbtn">JSON読込<input type="file" id="import" accept=".json,application/json" hidden></label><button type="button" class="btn link" id="csv">段割CSV出力 ↓</button><button type="button" class="btn link" id="print">印刷する ↗</button></div>
+</form><div class="privacy">◎ 外部送信なし・登録不要・入力値はこのブラウザ内に保存</div></section>
+<section class="workpanel"><div class="panel resultpanel" aria-live="polite"><div class="panel-head"><span class="stepnum">02</span><div><h2>2つのゲージを比較</h2><p>編みやすさの判断材料を数値で可視化。</p></div></div>
+<div id="error" role="alert" class="error" hidden></div>
+<div id="results"><div class="comparison" id="comparison"></div><div class="note" id="explanation"></div></div></div>
+<div class="panel diagram-panel"><div class="panel-head"><span class="stepnum">03</span><div><h2>段ごとの実行プラン</h2><p>編み進める段数を記録しながら確認。</p></div></div>
+<div class="choice"><div class="segmented" role="group" aria-label="使う試し編み"><button id="useA" class="active" type="button">ゲージ A</button><button id="useB" type="button">ゲージ B</button></div><span id="planlabel" class="small-note"></span></div>
+<div class="tracker"><div class="tracker-top"><div><div class="overline">ROW COUNTER</div><strong><span id="currentrow">0</span><small> / <span id="totalrows">0</span> 段</small></strong></div><div class="tracker-actions"><button id="minus" type="button" aria-label="1段戻す">−</button><button id="plus" type="button" aria-label="1段進む">＋</button></div></div><div class="progress-track"><span id="progress"></span></div><p id="nextstep">最初の段から始めましょう。</p></div>
+<div class="chart-title">SHAPING MAP <span id="chartmeta"></span></div><div id="map" class="map" role="img" aria-label="段割の増減目位置"></div><div class="legend"><span><i class="leg-a"></i>増減目の段</span><span><i class="leg-b"></i>それ以外の段</span><span><i class="leg-c"></i>編了位置</span></div>
+<div class="event-head"><strong>増減目の指示</strong><span id="eventcount"></span></div><div id="events" class="events"></div>
+</div><footer>この計算は手編みの目安です。模様の配置・糸の伸縮・実際の編み方に応じて調整してください。<br>AMIKAE · LOCAL FIRST · 2026</footer></section></main>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
