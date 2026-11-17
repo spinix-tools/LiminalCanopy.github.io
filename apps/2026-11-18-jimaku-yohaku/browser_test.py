@@ -1,0 +1,107 @@
+"""Playwright E2E with real on-disk files injected into about:blank. localStorage mocked."""
+from __future__ import annotations
+import json
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+ROOT = Path(__file__).resolve().parent
+checks = []
+def check(label, condition):
+    assert condition, label
+    checks.append(label)
+def load_app(page, cache=None):
+    """Admin blocks local HTTP, so inject original on-disk files into about:blank."""
+    markup = (ROOT/'index.html').read_text()
+    markup = markup.replace('<link rel="stylesheet" href="style.css">','')
+    markup = markup.replace('<script src="engine.js"></script><script src="app.js"></script>','')
+    page.goto('about:blank')
+    page.set_content(markup)
+    previous = cache or {}
+    page.evaluate("data => { window.__mockStorage = data; Object.defineProperty(window, 'localStorage', { configurable:true, value:{ getItem:k=>data[k]??null, setItem:(k,v)=>data[k]=v, removeItem:k=>delete data[k] } }); }", previous)
+    page.add_style_tag(content=(ROOT/'style.css').read_text())
+    page.add_script_tag(content=(ROOT/'engine.js').read_text())
+    page.add_script_tag(content=(ROOT/'app.js').read_text())
+
+console_errors = []
+with sync_playwright() as pw:
+    browser = pw.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox', '--disable-dev-shm-usage'])
+    context = browser.new_context(viewport={'width':1440,'height':1100}, accept_downloads=True)
+    page = context.new_page()
+    page.on('pageerror', lambda err: console_errors.append(str(err)))
+    load_app(page);page.wait_for_selector('.cue')
+    check('head title', '字幕余白' in page.title())
+    check('sample loaded', page.locator('#metricTotal').inner_text() == '5')
+    check('initial overlap shown', int(page.locator('#metricErrors').inner_text()) >= 1)
+    check('real css loaded', page.locator('.hero').evaluate('(e)=>getComputedStyle(e).display') == 'flex')
+    check('five editable cards', page.locator('.cue').count() == 5)
+    page.screenshot(path=str(ROOT/'desktop.png'), full_page=True)
+    page.locator('#trimAll').click()
+    check('fix removes overlap', page.locator('#metricErrors').inner_text() == '0')
+    page.locator('#maxChars').fill('10')
+    page.locator('#reflowAll').click()
+    check('auto-wrap adds a newline', page.locator('.cue textarea').first.input_value().count('\n') >= 1)
+    page.locator('#position').fill('88')
+    check('unsafe position warned', '注意' in page.locator('#positionWarning').inner_text())
+    page.locator('#position').fill('43')
+    check('safe position indicated', 'セーフエリア内' in page.locator('#positionWarning').inner_text())
+    page.locator('#platform').select_option('landscape')
+    check('landscape toggle', 'landscape' in page.locator('#previewStage').get_attribute('class'))
+    page.locator('#platform').select_option('common')
+    check('portrait toggle', 'landscape' not in page.locator('#previewStage').get_attribute('class'))
+    page.locator('#addCue').click()
+    check('cue appended', page.locator('#metricTotal').inner_text() == '6')
+    page.locator('.cue').last.locator('textarea').fill('テスト用字幕')
+    page.locator('.cue').last.locator('textarea').blur()
+    check('cue text edited', page.locator('.cue').last.locator('textarea').input_value() == 'テスト用字幕')
+    # Refresh must restore persisted, edited cue.
+    previous = page.evaluate('window.__mockStorage')
+    load_app(page, previous);page.wait_for_selector('.cue')
+    check('mock storage rehydration', page.locator('#metricTotal').inner_text() == '6')
+    check('edited text restored from mock', page.locator('.cue').last.locator('textarea').input_value() == 'テスト用字幕')
+    with page.expect_download() as d:
+        page.locator('#exportSrt').click()
+    downloaded=d.value
+    check('SRT download', downloaded.suggested_filename.endswith('.srt'))
+    path = ROOT/'test-export.srt';downloaded.save_as(path)
+    check('SRT data actually includes edited cue', 'テスト用字幕' in path.read_text())
+    with page.expect_download() as d: page.locator('#exportVtt').click()
+    check('VTT download', d.value.suggested_filename.endswith('.vtt'))
+    with page.expect_download() as d: page.locator('#reportCsv').click()
+    check('CSV download', d.value.suggested_filename.endswith('.csv'))
+    with page.expect_download() as d: page.locator('#exportJson').click()
+    check('JSON download', d.value.suggested_filename.endswith('.json'))
+    page.locator('#filter').select_option('issues')
+    check('filter issues', page.locator('.cue').count() < 6)
+    page.locator('#filter').select_option('all')
+    page.locator('#pasteOpen').click()
+    check('paste dialog opens', page.locator('#pasteDialog').evaluate('(e)=>e.open'))
+    page.locator('#pasteArea').fill('WEBVTT\n\n00:00:00.100 --> 00:00:02.000\n読み込んだ字幕\n\n00:00:02.500 --> 00:00:04.000\n二番目')
+    page.locator('#pasteImport').click()
+    page.wait_for_timeout(100)
+    check('paste import 2 cues', page.locator('#metricTotal').inner_text() == '2')
+    check('pasted content visible', '読み込んだ字幕' in page.locator('.cue textarea').first.input_value())
+    page.locator('.cue').first.locator('input[data-field="start"]').fill('00:00:00,250')
+    page.locator('.cue').first.locator('input[data-field="start"]').blur()
+    check('time edited', page.locator('.cue').first.locator('input[data-field="start"]').input_value() == '00:00:00,250')
+    page.locator('#shiftAmount').fill('400')
+    page.locator('#shiftBtn').click()
+    check('shift reflected in time', page.locator('.cue').first.locator('input[data-field="start"]').input_value() == '00:00:00,650')
+    # File import of a saved SRT. The file uses ordinary browser File API.
+    page.locator('#subtitleFile').set_input_files(str(path))
+    page.wait_for_function('document.getElementById("metricTotal").textContent === "6"')
+    check('file import', page.locator('#metricTotal').inner_text() == '6')
+    page.locator('.cue').last.locator('[data-action="remove"]').click()
+    check('delete cue', page.locator('#metricTotal').inner_text() == '5')
+    # Reject XSS in user text by DOM escaping.
+    page.locator('.cue textarea').first.fill('<img src=x onerror="window.__xss=1">')
+    page.locator('.cue textarea').first.blur()
+    check('XSS no image created in cards', page.locator('.cue img').count() == 0)
+    check('XSS did not execute', page.evaluate('window.__xss === undefined'))
+    check('no JS exceptions', not console_errors)
+    mob = browser.new_context(viewport={'width':390,'height':844},device_scale_factor=1, is_mobile=True,has_touch=True)
+    mobile=mob.new_page();load_app(mobile);mobile.wait_for_selector('.cue')
+    mobile.screenshot(path=str(ROOT/'mobile.png'),full_page=True)
+    check('mobile usable', mobile.locator('#metricTotal').inner_text() == '5')
+    check('mobile no horizontal overflow', mobile.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 2'))
+    browser.close()
+print(f'Playwright Chromium: {len(checks)}/{len(checks)} checks passed')
+for item in checks: print('PASS',item)
