@@ -22,8 +22,8 @@
     $('people').innerHTML=config.people.map(p=>`<div class="fieldrow" data-id="${escapeHtml(p.id)}">
       <input aria-label="拠点名" data-key="label" value="${escapeHtml(p.label)}" maxlength="40">
       <select aria-label="タイムゾーン" data-key="zone">${opts}</select>
-      <input aria-label="勤務開始" data-key="start" type="time" step="900" value="${p.start}">
-      <input aria-label="勤務終了" data-key="end" type="time" step="900" value="${p.end}">
+      <input aria-label="勤務開始・24時間表記" data-key="start" type="text" inputmode="numeric" maxlength="5" placeholder="09:00" value="${escapeHtml(p.start)}">
+      <input aria-label="勤務終了・24時間表記" data-key="end" type="text" inputmode="numeric" maxlength="5" placeholder="18:00" value="${escapeHtml(p.end)}">
       <button class="remove" data-remove="${escapeHtml(p.id)}" aria-label="${escapeHtml(p.label)}を削除" ${config.people.length<=2?'disabled':''}>×</button>
     </div>`).join('');
     $('people').querySelectorAll('[data-id]').forEach(row=>{
