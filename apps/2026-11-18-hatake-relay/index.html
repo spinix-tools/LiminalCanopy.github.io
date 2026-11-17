@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#163b32">
+<meta name="description" content="家庭菜園の過去3年の作付け履歴から、次の作物の区画を自動で割り当てる無料オフラインツール。">
+<title>畑リレー｜連作リスクを減らす区画割当</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#17392f;background:#f4f6ed;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f9aa4e;outline-offset:2px}a{color:inherit}header{background:#15392f;color:#f7f5e9;padding:18px max(20px,calc((100vw - 1200px)/2));position:relative;overflow:hidden}header:after{content:"";position:absolute;right:-80px;top:-110px;width:420px;height:420px;border:2px solid #678d5e30;border-radius:50%;box-shadow:0 0 0 40px #678d5e16,0 0 0 80px #678d5e0c;pointer-events:none}.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;position:relative;z-index:2}.logo{font-size:20px;font-weight:850;letter-spacing:.02em}.logo span{color:#d9d492}.edition{font-size:12px;color:#d6e1d0;border:1px solid #7f9a87;border-radius:30px;padding:6px 11px}h1{font-size:clamp(31px,4.5vw,57px);line-height:1.24;letter-spacing:-.065em;margin:36px 0 12px;font-weight:900;position:relative;z-index:2}h1 em{color:#c6d88a;font-style:normal}header p{line-height:1.9;color:#d4e1d2;font-size:14px;max-width:650px;margin:0 0 33px;position:relative;z-index:2}.wrap{max-width:1228px;padding:26px 14px 80px;margin:auto}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}.toolbar label{display:flex;align-items:center;gap:8px;font-weight:750;color:#3c5e52}.toolbar input{width:90px}.spacer{flex:1}.btn{display:inline-flex;justify-content:center;align-items:center;gap:7px;border-radius:11px;padding:10px 15px;border:1px solid #ccd8c5;background:#fff;color:#244c3c;font-size:13px;font-weight:760;min-height:41px}.btn:hover:not(:disabled){background:#ecf3df}.btn-main{background:#e8ad4f;border-color:#e8ad4f;color:#2e3624;box-shadow:0 4px 12px #17392f18}.btn-main:hover:not(:disabled){background:#ffcb76}.btn-ink{background:#1b5040;color:#fff;border-color:#1b5040}.btn-ink:hover:not(:disabled){background:#30765e}.btn-danger{color:#a04332;background:#fff6f1;border-color:#f2dfd2}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.91fr);gap:18px;align-items:start}.stack{display:grid;gap:18px}.panel{background:#fff;border:1px solid #e2e9dc;border-radius:18px;box-shadow:0 6px 25px #1433270a;padding:22px}.panel h2{font-size:18px;margin:0;color:#183e31;letter-spacing:-.035em}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}.muted{color:#748b7d;font-size:12px;line-height:1.6}.hint{font-size:12px;color:#7c8c7e;margin-top:8px}.mini{border-radius:9px;padding:6px 10px;font-size:12px}.bedrow{border:1px solid #e3e9dc;border-radius:13px;padding:13px;margin:11px 0;background:#fbfdf7}.bedtop{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:center}.bedname,.area,.field{width:100%;background:#fff;border:1px solid #d2decb;border-radius:8px;padding:9px 10px;min-width:0;color:#203f33;font-size:13px}.area{font-variant-numeric:tabular-nums}.tinylabel{font-size:11px;color:#78917f;display:block;margin:10px 0 5px}.history{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.history label{font-size:11px;color:#718778}.history select{display:block;width:100%;margin-top:5px;padding:7px 4px;background:#fff;border:1px solid #d2decb;border-radius:8px;font-size:11px}.rowadd{display:flex;gap:7px;align-items:center;margin-top:10px}.rowadd select{min-width:0;flex:1}.empty{border:1px dashed #b7c9b5;background:#f8faf4;border-radius:14px;padding:26px;text-align:center;color:#68846f;font-size:13px}.wishrow{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #edf0e9}.wishrow:last-child{border-bottom:0}.wishnum{background:#eaf1e0;color:#607853;border-radius:10px;width:30px;height:30px;display:grid;place-items:center;font-size:12px;font-weight:800}.wishcrop{display:flex;align-items:center;gap:7px;min-width:0}.wishcrop b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.famtag{font-size:10px;border-radius:50px;padding:3px 7px;white-space:nowrap;background:#edf4eb;color:#3d7a50}.live{display:flex;gap:14px;align-items:center;background:#f0f5e7;border-radius:14px;padding:14px;margin-bottom:14px;justify-content:space-between}.live b{font-size:21px}.live .muted{color:#55795a}.heroNumbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.metric{padding:15px 10px 12px;border-radius:13px;background:#f4f7ef;border:1px solid #e8edde}.metric small{font-size:11px;color:#748677}.metric strong{display:block;margin:7px 0 2px;font-size:26px;letter-spacing:-.06em;font-variant-numeric:tabular-nums}.metric span{font-size:11px;color:#718877}.proposal{border:1px solid #b8ddbf;background:#eef8eb;border-radius:14px;padding:15px;margin-bottom:14px}.proposal h3{margin:0 0 6px;font-size:14px}.proposal p{font-size:12px;color:#43634e;line-height:1.6;margin:0 0 12px}.proposal-actions{display:flex;gap:8px}.scorebadge{background:#fff5e4;color:#9a6237;border-radius:100px;padding:5px 9px;font-weight:800;font-size:11px}.scorebadge.good{background:#e7f5e7;color:#2a774b}.timeline{overflow-x:auto}.plan-table{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:12px}.plan-table th{text-align:left;color:#7b9080;font-weight:700;padding:2px 6px}.plan-table td{padding:11px 7px;background:#f6f8f2;vertical-align:middle}.plan-table td:first-child{border-radius:10px 0 0 10px}.plan-table td:last-child{border-radius:0 10px 10px 0}.plan-table select{min-width:100px;width:100%;border:1px solid #dae4d4;border-radius:8px;background:#fff;padding:7px 5px;font-size:12px}.plan-table .check{display:flex;gap:5px;align-items:center;font-size:11px;white-space:nowrap}.status{font-size:11px;display:inline-block;padding:5px 8px;border-radius:50px;background:#e4f1df;color:#388056;font-weight:800;white-space:nowrap}.status.warn{background:#fff2dd;color:#a46a24}.status.bad{background:#ffe9dc;color:#ba6245}.visgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.plot{border:1px solid #e3e9dc;border-radius:12px;padding:13px;background:linear-gradient(145deg,#f6f8ef,#fff);min-height:130px;position:relative}.plot-title{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plot-sub{font-size:11px;color:#789180;margin:5px 0 13px}.plot-crop{font-size:15px;font-weight:800}.plot-crop span{font-size:11px;color:#7b927d;display:block;font-weight:500;margin-top:6px}.plot-flag{margin-top:12px}.legend{margin:10px 0 0;font-size:11px;color:#7f907e;line-height:1.6}.foot{font-size:12px;color:#718375;line-height:1.8;margin:18px auto;max-width:900px;text-align:center}.file-import{display:none}.toast{position:fixed;z-index:10;bottom:20px;left:50%;transform:translateX(-50%);background:#204a3b;color:white;padding:12px 20px;border-radius:12px;box-shadow:0 9px 40px #112b2a33;font-size:13px;max-width:90vw;display:none}.toast.show{display:block}.foot .dot{padding:0 9px;color:#bbc7b9}@media(max-width:890px){.layout{grid-template-columns:1fr}.wrap{padding-top:15px}.panel{padding:17px}.heroNumbers{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){h1{margin-top:27px}.edition{display:none}.toolbar{gap:6px}.toolbar .btn{padding:8px 10px;font-size:12px}.spacer{display:none}.panel-head{align-items:center}.history{gap:4px}.history select{font-size:10px}.visgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-table select{min-width:70px}.plan-table td{padding:8px 4px}.plan-table th{padding:2px 4px}.metric strong{font-size:23px}.wishcrop{display:block}.famtag{display:inline-block;margin-top:3px}}@media print{header{padding:13px;background:#fff;color:#17392f}.edition,.toolbar,.btn,.rowadd,.history,.wishrow button,.plan-table select,.plan-table input,.toast,.panel:first-child{display:none!important}.layout{display:block}.panel{box-shadow:none;break-inside:avoid}.wrap{padding:8px}.panel{margin-bottom:12px}h1{font-size:25px;margin:10px 0}.foot{font-size:10px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav"><div class="logo">🌱 畑<span>リレー</span><small style="font-size:11px;margin-left:10px;opacity:.7">HATAKE RELAY</small></div><span class="edition">会員登録不要 ・ ブラウザ完結</span></div>
+  <h1>次に植える場所、<br><em>勘ではなく履歴から。</em></h1>
+  <p>同じ科を同じ土で続けないための、ちいさな作付け設計室。<br>過去3年と育てたい野菜を入力すれば、最もリスク点が低い区画割当を計算します。</p>
+</header>
+<main class="wrap">
+<div class="toolbar">
+  <label for="year">🌿 作付け年 <input class="field" type="number" id="year" min="2020" max="2100" step="1"></label>
+  <div class="spacer"></div>
+  <button class="btn" id="demo">例を読み込む</button>
+  <button class="btn" id="save">JSON保存</button>
+  <button class="btn" id="load">JSON読込</button>
+  <button class="btn" id="csv">CSV出力</button>
+  <button class="btn" id="print">印刷</button>
+  <input type="file" accept=".json,application/json" id="file" class="file-import">
+</div>
+<div class="layout">
+  <div class="stack">
+    <section class="panel" aria-labelledby="bedsTitle">
+      <div class="panel-head"><div><h2 id="bedsTitle">01. 区画と過去の作付け</h2><div class="muted">同じ土を使う畝・プランターを1区画として登録</div></div><button id="addBed" class="btn mini">＋ 区画</button></div>
+      <div id="beds"></div>
+      <p class="hint">科が不明な年度は「記録なし」のままにしてください。空欄は安全の証明ではありません。</p>
+    </section>
+    <section class="panel" aria-labelledby="wantsTitle">
+      <div class="panel-head"><div><h2 id="wantsTitle">02. 次に育てたい野菜</h2><div class="muted">同じ品目を複数追加できます・1区画に1作物を割当</div></div></div>
+      <div id="wants"></div>
+      <div class="rowadd"><label for="newCrop" class="muted">追加</label><select class="field" id="newCrop"></select><button id="addWant" class="btn btn-ink">＋ 追加</button></div>
+      <p class="hint">作物ごとの必要面積は比較用の仮定値です。品種・栽培法・栽培密度に合わせて現地で確認してください。</p>
+    </section>
+    <section class="panel" aria-labelledby="plotsTitle"><div class="panel-head"><div><h2 id="plotsTitle">区画マップ</h2><div class="muted">現在の配置（提案は「反映」で確定）</div></div></div><div id="plots" class="visgrid"></div><div class="legend">🟢 履歴上の重複なし　🟠 注意　🔴 前年と同じ科／面積の不足が大きい　※病害予測ではありません</div></section>
+  </div>
+  <div class="stack">
+    <section class="panel" aria-labelledby="planTitle">
+      <div class="panel-head"><div><h2 id="planTitle">03. 区画を割り当てる</h2><div class="muted">固定した配置は動かさず、残りを厳密に最小化</div></div></div>
+      <div id="metrics" class="heroNumbers"></div>
+      <button class="btn btn-main" id="solve" style="width:100%;padding:14px;font-size:15px">✦ 最小リスク配置を提案する</button>
+      <div id="proposalArea" style="margin-top:13px"></div>
+      <div class="timeline"><table class="plan-table"><thead><tr><th scope="col">作物</th><th scope="col">割当先</th><th scope="col">固定</th><th scope="col">判定</th></tr></thead><tbody id="planRows"></tbody></table></div>
+      <p class="hint">🔒 固定した配置は計算で動かしません。未配置や同じ区画の重複は自動的に検査します。</p>
+    </section>
+    <section class="panel" aria-labelledby="scienceTitle">
+      <h2 id="scienceTitle">判断の根拠</h2>
+      <div class="muted" style="margin-top:8px;line-height:1.9">同じ科の作付け履歴が <b>1年前 = 100点</b>、<b>2年前 = 42点</b>、<b>3年前 = 16点</b>。作物の参考面積に足りない場合も加点します。全区画の点数合計が最小となる割当を全探索に相当する動的計画法で算出します（最大10区画）。</div>
+      <div style="margin-top:13px;display:flex;align-items:center;gap:8px"><span class="scorebadge">点数が小さいほど優先</span><span class="muted">科学的な発病確率ではありません</span></div>
+    </section>
+    <section class="panel" aria-labelledby="privacyTitle"><h2 id="privacyTitle">データとプライバシー</h2><p class="muted" style="line-height:1.9">入力はこのブラウザ内でのみ処理します。自動保存はこの端末のlocalStorageに行い、JSONで持ち運べます。位置情報・氏名・メールアドレス・外部APIを使いません。共有端末ではブラウザの保存データを消してください。</p><button id="clear" class="btn btn-danger">すべて初期化</button></section>
+  </div>
+</div>
+<div class="foot">畑リレー v1.0 <span class="dot">·</span> 無料・オフライン対応 <span class="dot">·</span> 学習・計画用の参考ツール。実際の連作障害や輪作期間は作物・土壌・病原体で異なります。</div>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
