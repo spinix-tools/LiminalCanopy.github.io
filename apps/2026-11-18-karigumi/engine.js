@@ -74,7 +74,14 @@ const KariCore=(function buildCore(){
    const probe={...project,events:[...project.events.filter(e=>e.id!==excludeId),candidate]};
    const errors=check(probe);
    if(errors.length)return {ok:false,errors,shortages:[]};
-   const shortages=trace(project,candidate,excludeId).filter(x=>x.shortage>0);
+   const shortages=trace(project,candidate,excludeId).flatMap(x=>{
+     if(!(candidate.needs[x.itemId]>0))return [];
+     const item=project.items.find(i=>i.id===x.itemId);
+     const from=ms(candidate.start)-item.buffer*60000,to=ms(candidate.end)+item.buffer*60000;
+     const segments=x.segments.filter(v=>v.start<to&&v.end>from);
+     const shortage=Math.max(0,...segments.map(v=>v.shortage));
+     return shortage>0?[{...x,segments,shortage}]:[];
+   });
    return {ok:shortages.length===0,errors:[],shortages};
  }
  function suggestions(project,candidate,excludeId=null,count=4,days=7){
