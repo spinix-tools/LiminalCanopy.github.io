@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ひかり線 — LED配線プランナー</title><style>
+:root{font-family:system-ui,"Hiragino Kaku Gothic ProN",sans-serif;color:#18223e;background:#f2f5fc}
+*{box-sizing:border-box}body{margin:0}main{max-width:1150px;padding:22px;margin:auto}
+header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+header strong{font-size:23px}header small{color:#6477a1}h1{font-size:clamp(28px,4vw,45px);letter-spacing:-.06em;margin:32px 0 8px}
+h1 em{font-style:normal;color:#435bd0}p{color:#64718a;line-height:1.8;font-size:13px}
+.wrap{display:grid;grid-template-columns:minmax(310px,1fr) minmax(310px,1fr);gap:18px}
+section{background:white;border:1px solid #e0e5f0;border-radius:16px;padding:23px;box-shadow:0 8px 20px #2836680b}
+h2{font-size:20px;margin:0 0 16px}h3{font-size:15px;margin:24px 0 10px}
+label{display:block;font-size:12px;font-weight:750;color:#4e5d7c}
+input,select{display:block;width:100%;border:1px solid #d4dbee;background:#fbfcff;border-radius:8px;padding:10px;margin:6px 0 12px;min-width:0}
+button{border:1px solid #b9c4e1;background:#edf0fb;color:#3b50ad;border-radius:9px;padding:11px 13px;font:inherit;font-weight:750;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8ba4ff}
+.primary{background:#3f51cb;color:white;border:0;width:100%;margin-top:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{padding:14px;border:1px solid #e0e6f3;border-radius:12px;margin:12px 0;background:#fcfdff}
+.card-head{display:flex;justify-content:space-between;align-items:center}.card-head button{padding:5px 9px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpis div{background:#f4f6fc;padding:12px;border-radius:10px;min-width:0}
+.kpis span{font-size:10px;color:#6e7b96;display:block}.kpis strong{font-size:24px;display:block;margin-top:10px}
+.result{border-top:1px solid #e6eaf3;padding:15px 0}.result b{display:block;margin-bottom:8px}
+.result span{font-size:12px;display:block;line-height:1.9}.warn{color:#ac6035}.ok{color:#317c67}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #e5e9f2;padding:10px;text-align:left}
+.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}.upload{display:inline-flex;align-items:center;border:1px solid #b9c4e1;background:#edf0fb;border-radius:9px;padding:10px;cursor:pointer;color:#3b50ad}.upload input{display:none}
+footer{color:#8c96a9;font-size:11px;padding:27px 0}.alert{background:#fff3e5;border:1px solid #f3ddc3;padding:12px;border-radius:9px;margin:16px 0}
+@media(max-width:780px){main{padding:14px}.wrap{grid-template-columns:minmax(0,1fr)}section{padding:17px}}
+@media print{header button,.actions,.primary,#add,.card-head button,.upload{display:none!important}body{background:white}main{padding:0}.wrap{display:block}section{box-shadow:none;margin:10px 0;break-inside:avoid}}
+</style></head>
+<body><main><header><div><strong>✳ ひかり線</strong> <small>HIKARISEN</small></div><small>● 登録不要・外部送信なし</small></header>
+<h1>光る工作を、<br><em>つなぐ前に設計する。</em></h1>
+<p>24V以下の直流LED工作向け。複数色の配線系統と抵抗・電池持続時間をまとめて見積もります。</p>
+<div class="wrap"><section><h2>01 / 電源設定</h2><label>作品名<input id="title" maxlength="60"></label>
+<div class="two"><label>電源 V<input id="supply" type="number" min="1" max="24" step=".1"></label><label>電池容量 mAh<input id="capacity" type="number" min="1" max="30000"></label>
+<label>利用可能容量 %<input id="usable" type="number" min="10" max="100"></label><label>抵抗系列<select id="series"><option>E12</option><option>E24</option></select></label>
+<label>公差 ±%<input id="tol" type="number" min="1" max="20"></label><label>抵抗の定格 W<select id="power"><option value=".125">0.125</option><option value=".25">0.25</option><option value=".5">0.5</option><option value="1">1</option><option value="2">2</option><option value="5">5</option></select></label>
+<label>LED最大電流 mA<input id="max" type="number" min="1" max="100"></label></div>
+<h3>02 / LED系統</h3><p>系統ごとに独立した抵抗を挟みます。並列数だけ同じ系統を繰り返します。</p><div id="rows"></div><button id="add">＋ 系統を追加</button>
+<button class="primary" id="run">計算を更新する ↗</button><p id="status" role="status"></p></section>
+<section><h2>03 / 計算結果</h2><div class="kpis"><div><span>合計電流</span><strong id="total">—</strong><span>mA</span></div><div><span>推定点灯時間</span><strong id="hours">—</strong><span>時間</span></div><div><span>LED合計</span><strong id="count">—</strong><span>個</span></div></div><div id="message" class="alert"></div>
+<h3>系統別の抵抗値</h3><div id="results"></div><h3>部品表</h3><table><thead><tr><th>抵抗</th><th>本数</th></tr></thead><tbody id="parts"></tbody></table>
+<p>注意：計算用Vfは初期目安です。データシートを優先してください。最悪電流はVfが10%低下・抵抗が公差下限という簡易仮定。計算で実回路の安全は保証できません。</p>
+</section></div><section style="margin-top:18px"><h2>04 / 保存・共有</h2><div class="actions"><button id="reset">例を戻す</button><button id="json">設定JSON</button><button id="csv">結果CSV</button><button id="print">印刷</button><label class="upload">設定を読込<input id="import" type="file" accept=".json,application/json"></label></div></section>
+<footer>HIKARISEN · MIT License · 単一HTMLの軽量版 / 実験用計算であり製品の安全保証ではありません。</footer></main>
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id),E12=[1,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2],E24=[1,1.1,1.2,1.3,1.5,1.6,1.8,2,2.2,2.4,2.7,3,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1],colors={red:['赤',2],green:['緑',2.2],blue:['青',3.1],white:['白',3.2],amber:['橙',2.1]},initial={title:'光る工作の配線案',supply:9,capacity:500,usable:75,series:'E12',tol:10,power:.25,max:20,rows:[{color:'red',vf:2,count:2,parallel:2,current:15},{color:'blue',vf:3.1,count:2,parallel:1,current:10}]};
+let data,output=[];
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(v,lo,hi,def)=>v===''||!Number.isFinite(Number(v))?def:Math.min(hi,Math.max(lo,Number(v)));
+function norm(raw){if(!raw||!Array.isArray(raw.rows)||!raw.rows.length||raw.rows.length>12)throw Error('系統は1〜12件です');return {title:String(raw.title||'LED工作').slice(0,60),supply:num(raw.supply,1,24,9),capacity:num(raw.capacity,1,30000,500),usable:num(raw.usable,10,100,75),series:raw.series==='E24'?'E24':'E12',tol:num(raw.tol,1,20,10),power:[.125,.25,.5,1,2,5].includes(Number(raw.power))?Number(raw.power):.25,max:num(raw.max,1,100,20),rows:raw.rows.map(r=>({color:colors[r.color]?r.color:'red',vf:num(r.vf,.5,5,2),count:Math.round(num(r.count,1,12,1)),parallel:Math.round(num(r.parallel,1,20,1)),current:num(r.current,1,100,15)}))};}
+function resValue(ideal){if(ideal<=0)return null;const arr=data.series==='E24'?E24:E12;for(let exp=-1;exp<9;exp++)for(const base of arr){const v=base*10**exp;if(v>=ideal-1e-8)return +v.toPrecision(6)}return null;}
+function read(){const o={...data};for(const k of ['title','supply','capacity','usable','series','tol','power','max'])o[k]=$(k).value;o.rows=[...$('rows').children].map(el=>{const r={};el.querySelectorAll('[data-field]').forEach(x=>r[x.dataset.field]=x.value);return r});data=norm(o);}
+function settings(){for(const k of ['title','supply','capacity','usable','series','tol','power','max'])$(k).value=data[k];$('rows').innerHTML=data.rows.map((r,i)=>'<div class="card" data-index="'+i+'"><div class="card-head"><b>LED系統 '+(i+1)+'</b><button data-remove="'+i+'" '+(data.rows.length===1?'disabled':'')+'>削除</button></div><div class="three"><label>色<select data-field="color">'+Object.entries(colors).map(([key,c])=>'<option value="'+key+'" '+(r.color===key?'selected':'')+'>'+c[0]+'</option>').join('')+'</select></label><label>順電圧 V<input data-field="vf" type="number" min=".5" max="5" step=".1" value="'+r.vf+'"></label><label>直列数<input data-field="count" type="number" min="1" max="12" value="'+r.count+'"></label><label>並列数<input data-field="parallel" type="number" min="1" max="20" value="'+r.parallel+'"></label><label>希望 mA<input data-field="current" type="number" min="1" max="100" value="'+r.current+'"></label></div></div>').join('');$('add').disabled=data.rows.length>=12;}
+function compute(){output=[];const parts=new Map();let total=0,led=0,warnings=0;
+for(const r of data.rows){led+=r.count*r.parallel;const delta=data.supply-r.vf*r.count;if(delta<=0){output.push({...r,error:'電源電圧がLEDの直列電圧以下です'});warnings++;continue;}
+const ideal=delta/(r.current/1000),ohms=resValue(ideal);if(!ohms){output.push({...r,error:'抵抗の範囲外'});warnings++;continue;}
+const actual=1000*delta/ohms,worst=1000*Math.max(0,data.supply-r.vf*r.count*.9)/(ohms*(1-data.tol/100)),loss=(actual/1000)**2*ohms,worstLoss=(worst/1000)**2*ohms*(1-data.tol/100),notes=[];
+if(worst>data.max)notes.push('想定最大電流を超過');if(worstLoss*2>data.power)notes.push('抵抗の定格Wに余裕不足');warnings+=notes.length;
+total+=actual*r.parallel;const part=ohms+'Ω / '+data.power+'W';parts.set(part,(parts.get(part)||0)+r.parallel);output.push({...r,ideal,ohms,actual,worst,loss,notes});}
+$('total').textContent=total.toFixed(1);$('hours').textContent=total?(data.capacity*data.usable/100/total).toFixed(1):'—';$('count').textContent=led;
+$('message').textContent=warnings?warnings+'件の注意・設計不可があります。各系統の結果を確認してください。':'全系統の計算が完了しました。実部品の定格を確認してください。';
+$('message').style.background=warnings?'#fff3e5':'#e7f6ef';
+$('results').innerHTML=output.map((r,i)=>'<div class="result"><b>系統 '+(i+1)+' · '+esc(colors[r.color][0])+' / 直列'+r.count+' × 並列'+r.parallel+'</b>'+(r.error?'<span class="warn">⚠ '+esc(r.error)+'</span>':'<span>抵抗 '+r.ohms+'Ω（理想 '+r.ideal.toFixed(1)+'Ω）／実電流 '+r.actual.toFixed(1)+'mA</span><span>抵抗の発熱 '+r.loss.toFixed(3)+'W ／ ワースト想定 '+r.worst.toFixed(1)+'mA</span>'+r.notes.map(x=>'<span class="warn">⚠ '+esc(x)+'</span>').join(''))+'</div>').join('');
+$('parts').innerHTML=[...parts].map(([item,qty])=>'<tr><td>'+esc(item)+'</td><td>'+qty+'本</td></tr>').join('')||'<tr><td colspan="2">対象なし</td></tr>';
+}
+function save(){try{localStorage.setItem('hikarisen-lite:v1',JSON.stringify(data));$('status').textContent='端末内に保存しました';}catch{$('status').textContent='保存なしで利用中';}}
+function run(){read();settings();compute();save();}
+function download(name,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+$('rows').addEventListener('change',ev=>{if(ev.target.dataset.field==='color'){const el=ev.target.closest('.card');el.querySelector('[data-field="vf"]').value=colors[ev.target.value][1];}run();});
+$('rows').addEventListener('click',ev=>{const b=ev.target.closest('[data-remove]');if(!b||data.rows.length<2)return;read();data.rows.splice(+b.dataset.remove,1);settings();compute();save();});
+$('add').onclick=()=>{read();if(data.rows.length===12)return;data.rows.push({color:'white',vf:3.2,count:1,parallel:1,current:10});settings();compute();save();};
+$('run').onclick=run;$('reset').onclick=()=>{data=norm(initial);settings();compute();save();};
+for(const k of ['title','supply','capacity','usable','series','tol','power','max'])$(k).addEventListener('change',run);
+$('json').onclick=()=>{read();download('hikarisen-settings.json',JSON.stringify(data,null,2),'application/json;charset=utf-8');};
+$('csv').onclick=()=>{run();const rows=[['系統','色','直列','並列','抵抗Ω','電流mA','抵抗損失W','注意'],...output.map((r,i)=>[i+1,colors[r.color][0],r.count,r.parallel,r.ohms||'',r.actual?r.actual.toFixed(2):'',r.loss?r.loss.toFixed(3):'',r.error||r.notes.join('/')])];download('hikarisen-result.csv','\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');};
+$('import').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>200000)throw Error('ファイルが大きすぎます');data=norm(JSON.parse(await f.text()));settings();compute();save();$('status').textContent='復元しました';}catch(e){$('status').textContent='読込失敗: '+e.message;}e.target.value='';};
+$('print').onclick=()=>window.print();
+try{const raw=localStorage.getItem('hikarisen-lite:v1');data=raw?norm(JSON.parse(raw)):norm(initial);}catch{data=norm(initial)}
+settings();compute();
+})();
+</script></body></html>
