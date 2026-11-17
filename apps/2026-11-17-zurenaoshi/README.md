@@ -50,4 +50,4 @@ python browser_test.py
 
 ## GitHub保存場所
 
-`spinix-tools/LiminalCanopy.github.io` の **`hourly-app-lab` ブランチ専用**の `apps/2026-11-17-zurenaoshi/` を予定。`main` やサイト用ルートの書き換え禁止。
+`spinix-tools/LiminalCanopy.github.io` の **`hourly-app-lab` ブランチ専用**の `apps/2026-11-17-zurenaoshi/` に7ファイルを保存。`main` やサイト用ルートは変更していません。
