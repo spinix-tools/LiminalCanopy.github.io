@@ -1,0 +1,54 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const E = require('./engine.js');
+const example = [{start:500,end:2200,text:'こんにちは'},{start:2500,end:5500,text:'おはよう'}];
+test('timestamp SRT formatter',()=>assert.equal(E.stamp(3601234),'01:00:01,234'));
+test('timestamp VTT formatter',()=>assert.equal(E.stamp(61023,'.'),'00:01:01.023'));
+test('timestamp parser with hours',()=>assert.equal(E.parseStamp('01:01:02,300'),3662300));
+test('timestamp parser without hours',()=>assert.equal(E.parseStamp('01:02.3'),62300));
+test('timestamp parser forbids invalid minutes',()=>assert.throws(()=>E.parseStamp('01:61:00,200')));
+test('timestamp parser forbids invalid seconds',()=>assert.throws(()=>E.parseStamp('00:00:69,111')));
+test('timestamp formatter rejects negative',()=>assert.throws(()=>E.stamp(-20)));
+test('SRT parser supports CRLF/BOM/index',()=>{
+ const r=E.parseSubtitles('\uFEFF1\r\n00:00:00,500 --> 00:00:02,200\r\nこんにちは\r\n\r\n2\r\n00:00:02,500 --> 00:00:05,500\r\nおはよう');
+ assert.equal(r.cues.length,2); assert.equal(r.cues[0].text,'こんにちは'); assert.equal(r.format,'srt');
+});
+test('VTT parser ignores NOTE and cue labels',()=>{
+ const r=E.parseSubtitles('WEBVTT\n\nNOTE testing\nignore this\n\nintro\n00:00:01.100 --> 00:00:02.500 line:80%\nふたつ\n\n00:00:03.000 --> 00:00:04.000\n次');
+ assert.equal(r.cues.length,2);assert.equal(r.cues[0].start,1100);assert.equal(r.format,'vtt');
+});
+test('parser rejects empty source',()=>assert.throws(()=>E.parseSubtitles('')));
+test('parser rejects arbitrary text',()=>assert.throws(()=>E.parseSubtitles('lorem ipsum')));
+test('SRT roundtrip preserves text and timing',()=>{
+ const r=E.parseSubtitles(E.serializeSrt(example));assert.deepEqual(r.cues.map(c=>[c.start,c.end,c.text]),example.map(c=>[c.start,c.end,c.text]));
+});
+test('VTT roundtrip preserves text and timing',()=>{
+ const r=E.parseSubtitles(E.serializeVtt(example));assert.deepEqual(r.cues.map(c=>[c.start,c.end,c.text]),example.map(c=>[c.start,c.end,c.text]));
+});
+test('unicode grapheme count: emoji sequence',()=>assert.equal(E.visibleChars('家族👨‍👩‍👧‍👦と😊'),5));
+test('unicode grapheme count ignores whitespace',()=>assert.equal(E.visibleChars('こ ん\nにちは'),5));
+test('metrics count duration cps',()=>{ const m=E.cueMetrics({start:1000,end:2000,text:'日本語' });assert.equal(m.cps,3); assert.equal(m.maxLine,3); });
+test('metrics show Infinity on zero duration',()=>assert.equal(E.cueMetrics({start:0,end:0,text:'あ'}).cps,Infinity));
+test('QA flags overlap',()=>assert.ok(E.assess([{start:0,end:1200,text:'あ'},{start:1000,end:2000,text:'い'}]).rows[1].issues.some(i=>i.key==='overlap')));
+test('QA flags line count and long line',()=>{const a=E.assess([{start:0,end:4000,text:'あいうえおかきくけこ\nさしすせそ\nたちつてと'}],{maxChars:6,maxLines:2});assert.ok(a.rows[0].issues.some(i=>i.key==='line'));assert.ok(a.rows[0].issues.some(i=>i.key==='lines'));});
+test('QA flags fast reading',()=>assert.ok(E.assess([{start:0,end:1000,text:'あ'.repeat(24)}]).rows[0].issues.some(i=>i.key==='speed')));
+test('QA flags backwards duration',()=>assert.ok(E.assess([{start:2200,end:2000,text:'あ'}]).rows[0].issues.some(i=>i.key==='time')));
+test('QA flags reverse order',()=>assert.ok(E.assess([{start:1200,end:2000,text:'あ'},{start:500,end:1300,text:'い'}]).rows[1].issues.some(i=>i.key==='order')));
+test('QA flags empty cue',()=>assert.ok(E.assess([{start:0,end:1000,text:'  '}]).rows[0].issues.some(i=>i.key==='empty')));
+test('QA flags too short and too long durations',()=>{const a=E.assess([{start:0,end:500,text:'い'},{start:700,end:14000,text:'あ'}]);assert.ok(a.rows[0].issues.some(i=>i.key==='short'));assert.ok(a.rows[1].issues.some(i=>i.key==='long'));});
+test('QA flags tight non-overlapping gaps',()=>assert.ok(E.assess([{start:0,end:1200,text:'あ'},{start:1250,end:2000,text:'い'}]).rows[1].issues.some(i=>i.key==='gap')));
+test('reflow keeps short string',()=>assert.equal(E.reflow('短い文。',10,2),'短い文。'));
+test('reflow enforces max lines and chars if feasible',()=>{let r=E.reflow('今日は良い天気です。明日もよい日になるでしょう。',13,2);assert.ok(r.split('\n').length<=2);assert.ok(r.split('\n').every(x=>E.chars(x).length<=13));});
+test('reflow preserves graphemes',()=>{const x='明日は晴れ。朝から元気に出かけましょう。';assert.equal(E.reflow(x,12,2).replace(/\n/g,''),x);});
+test('reflow refuses impossible fit without truncating',()=>assert.equal(E.reflow('あ'.repeat(44),10,2),'あ'.repeat(44)));
+test('reflow avoids leading punctuation when possible',()=>{const x='あいうえお、かきくけこさし';const r=E.reflow(x,8,2);assert.ok(!r.split('\n').some(l=>/^[、。！？]/.test(l)));});
+test('reflowAll does not mutate original',()=>{const a=[{start:0,end:2000,text:'あいうえおかきくけこ'}];const b=E.reflowAll(a,{maxChars:5,maxLines:2});assert.notEqual(b[0].text,a[0].text);});
+test('shift forward preserves relative time',()=>{const r=E.shiftAll(example,500);assert.equal(r.cues[0].start,1000);assert.equal(r.cues[1].end,6000);});
+test('shift negative clamps to zero consistently',()=>{const r=E.shiftAll(example,-1000);assert.equal(r.applied,-500);assert.equal(r.cues[0].start,0);assert.equal(r.cues[1].start,2000);});
+test('shift invalid offset rejected',()=>assert.throws(()=>E.shiftAll(example,NaN)));
+test('trim overlaps leaves no overlap when feasible',()=>{const r=E.trimOverlaps([{start:0,end:2200,text:'a'},{start:2100,end:4000,text:'b'}],100);assert.equal(r.fixed,1);assert.equal(r.cues[0].end,2000);});
+test('trim refuses inverted duration',()=>{const r=E.trimOverlaps([{start:1000,end:3000,text:'a'},{start:1050,end:4000,text:'b'}],100);assert.equal(r.fixed,0);assert.equal(r.cues[0].end,3000);});
+test('position risk varies by platform',()=>{assert.equal(E.positionRisk('common',89),true);assert.equal(E.positionRisk('common',43),false);});
+test('CSV handles quotes and UTF8 BOM',()=>{const c=E.toCsvReport(E.assess([{start:0,end:2000,text:'"あ"'}]));assert.ok(c.startsWith('\uFEFF'));assert.ok(c.includes('""あ""'));});
+test('rejects invalid negative time on normalize',()=>assert.throws(()=>E.normalizeCues([{start:-1,end:500,text:'x'}])));
+test('rejects more than 5000 cues',()=>assert.throws(()=>E.normalizeCues(Array.from({length:5001},()=>({start:0,end:1000,text:'x'})))));
