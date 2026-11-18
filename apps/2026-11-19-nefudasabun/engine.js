@@ -57,7 +57,7 @@ function compare(oldTable,newTable,mapping){
   const counts={added:0,removed:0,changed:0,same:0,issues:issues.length};for(const e of entries)counts[e.kind]++;
   return {entries,issues,counts,excluded:{old:a.list.filter(r=>r.invalid).length,new:b.list.filter(r=>r.invalid).length}};
 }
-function csvValue(value){let s=String(value??'');if(/^[\s]*[=+@\\-\t\r]/.test(s))s="'"+s;if(/[",\r\n]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s;}
+function csvValue(value){let s=String(value??'');if(/^[\s]*[=+@\-\t\r]/.test(s))s="'"+s;if(/[",\r\n]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s;}
 function toCSV(rows){return '\uFEFF'+rows.map(row=>row.map(csvValue).join(',')).join('\r\n')+'\r\n';}
 function auditRows(data,checked=new Set()){
  const rows=[['判定','確認','商品コード','変更項目','旧商品名','新商品名','旧価格','新価格','価格差','旧原価','新原価','注意','旧CSV行','新CSV行']];
