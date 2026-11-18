@@ -10,7 +10,8 @@
 
 | 市場 | 競合・特徴 | 差分の仮説 |
 |---|---|---|
-| 国内・日本語利用 | [timeanddate Meeting Planner](https://www.timeanddate.com/worldclock/meeting-help.html)（時差・DST・候補時刻） | 日本語の負担点説明、複数週3案比較に特化 |
+| 国内 | [TimeRex](https://timerex.net/feature)（英語・タイムゾーン対応、カレンダー連携の日程調整） | 予約・空き枠連携ではなく、定例会議の時差負担の監査に特化 |
+| 海外／日本からも利用可能 | [timeanddate Meeting Planner](https://www.timeanddate.com/worldclock/meeting-help.html)（時差・DST・候補時刻） | 日本語の負担点説明、複数週3案比較に特化 |
 | 海外 | [UnisonTime](https://unisontime.com/)（勤務時間・食事・祝日・ICS） | 3種の固定／輪番方式の累積比較に集中 |
 | 海外 | [FairTime](https://fairtime.net/)（公平性履歴・DST・ICS） | あえて公平案以外の固定2案も同一基準で定量比較 |
 | 海外 | [DigiTools Fair Meeting Rotation](https://usedigitools.com/meetings/fair-meeting-rotation)（輪番・固定比較） | 日本語、過去負担の手入力、時刻別48候補とDST注記の一画面化 |
