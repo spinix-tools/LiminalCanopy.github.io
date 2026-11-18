@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#131d25"><meta name="description" content="商品マスタCSVの新旧差分を確認し、危険な更新をレビューして承認分だけ書き出すローカルツール。">
+  <title>差分門 SABUNMON — 商品CSVを更新前にチェック</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="差分門の先頭へ"><span class="brand-mark">差<span>・</span></span><span class="brand-stack"><strong>差分門</strong><small>SABUNMON / catalog gate</small></span></a>
+      <div class="top-actions"><span class="status-dot">端末内だけで処理</span><a href="#how" class="top-link">使い方 <span aria-hidden="true">↗</span></a></div>
+    </header>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse"></span> CATALOG UPDATE SAFETY TOOL <span class="eyebrow-line"></span> 01 / REVIEW</p>
+          <h1>商品CSVの更新に、<br><em>ひと呼吸</em>を。</h1>
+          <p class="hero-lead">大量更新の前に、価格変更・在庫切れ・商品消失を発見。<br>変更を一件ずつ承認し、<strong>承認済みの差分だけ</strong>で更新案を作成します。</p>
+          <div class="hero-tags"><span>✓ ログイン不要</span><span>✓ ファイル送信なし</span><span>✓ スタンドアロン</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-card art-back"><span>BEFORE</span><b>1,280 <i>→</i> 128</b><div class="art-line"></div><div class="art-line short"></div></div><div class="art-card art-front"><span>REVIEW SIGNAL</span><div class="art-alert">!</div><b>価格 -90.0%</b><small>承認前に要確認</small></div><span class="art-cross one">＋</span><span class="art-cross two">＋</span></div>
+      </section>
+      <div class="section-head"><span>01</span><div><p class="eyebrow dark">INPUT / COMPARE</p><h2>2つのCSVを読み込む</h2></div><button type="button" id="demoBtn" class="btn btn-ink">サンプルを読み込む <span aria-hidden="true">↗</span></button></div>
+      <section class="input-grid" aria-label="CSVの入力">
+        <div class="input-card old">
+          <div class="input-head"><div><span class="step-num">A — BEFORE</span><h3>更新前の商品マスタ</h3></div><span class="file-badge">現行版</span></div>
+          <div class="file-row"><label class="file-button">＋ CSVファイルを選択<input type="file" id="oldFile" accept=".csv,text/csv"></label><span id="oldFilename" class="file-name">または下の欄に貼り付け</span></div>
+          <textarea id="oldCsv" spellcheck="false" aria-label="更新前CSV" placeholder="商品コード,商品名,販売価格,在庫数&#10;A001,柚子のジャム,980,12"></textarea>
+          <div class="input-footer"><span>CSV / UTF-8・Shift_JIS</span><span id="oldRows">未読込</span></div>
+        </div>
+        <div class="input-card newer">
+          <div class="input-head"><div><span class="step-num">B — AFTER</span><h3>更新後の商品マスタ</h3></div><span class="file-badge new">更新案</span></div>
+          <div class="file-row"><label class="file-button">＋ CSVファイルを選択<input type="file" id="newFile" accept=".csv,text/csv"></label><span id="newFilename" class="file-name">または下の欄に貼り付け</span></div>
+          <textarea id="newCsv" spellcheck="false" aria-label="更新後CSV" placeholder="商品コード,商品名,販売価格,在庫数&#10;A001,柚子のジャム,1080,5"></textarea>
+          <div class="input-footer"><label for="encoding">読み込み文字コード</label><select id="encoding"><option value="utf-8">UTF-8</option><option value="shift_jis">Shift_JIS</option></select><span id="newRows">未読込</span></div>
+        </div>
+      </section>
+      <section class="settings-panel" aria-label="照合設定">
+        <div class="settings-title"><div><span class="eyebrow dark">MATCH RULES</span><h3>照合と警告の条件</h3></div><p>キーは数字に変換しません。<code>001</code>と<code>1</code>は別の商品です。</p></div>
+        <div class="settings-grid">
+          <label>商品の照合キー <span class="required">必須</span><select id="keySelect"><option value="">CSVを読み込んでください</option></select></label>
+          <label>販売価格の列<select id="priceSelect"><option value="">指定しない</option></select></label>
+          <label>在庫数の列<select id="stockSelect"><option value="">指定しない</option></select></label>
+          <label>商品名の列<select id="nameSelect"><option value="">指定しない</option></select></label>
+          <label>価格警告の変動幅 <span id="thresholdLabel">25%</span><input id="threshold" type="range" min="5" max="80" value="25" step="5"></label>
+          <label class="check-setting"><input id="trimKeys" type="checkbox"> キーの前後空白を無視する <small>同じ値になる重複はエラーにします</small></label>
+        </div>
+        <div class="settings-foot"><p>価格・在庫列が未指定の場合は該当リスクを検査できません。列名は両CSVで一致させてください。</p><button class="btn btn-primary" id="compareBtn" type="button">差分を診断する <span aria-hidden="true">→</span></button></div>
+      </section>
+      <div id="message" class="message" role="alert" aria-live="polite" hidden></div>
+      <section id="results" class="results" aria-label="差分診断結果">
+        <div class="section-head results-head"><span>02</span><div><p class="eyebrow dark">REVIEW / APPROVE</p><h2>更新の中身を点検する</h2></div><div id="resultMark" class="result-mark">サンプルを試す ↗</div></div>
+        <div class="metric-grid">
+          <div class="metric"><span class="metric-icon circle-yellow">↗</span><span class="metric-label">変更</span><strong id="mModified">—</strong><small>項目を書き換え</small></div>
+          <div class="metric"><span class="metric-icon circle-green">＋</span><span class="metric-label">追加</span><strong id="mAdded">—</strong><small>新しい商品</small></div>
+          <div class="metric"><span class="metric-icon circle-blue">−</span><span class="metric-label">削除</span><strong id="mRemoved">—</strong><small>一覧から消える</small></div>
+          <div class="metric caution"><span class="metric-icon circle-orange">!</span><span class="metric-label">要注意 / ブロック</span><strong id="mDanger">—</strong><small>重大変更の候補</small></div>
+        </div>
+        <div class="review-layout">
+          <section class="review-main">
+            <div class="review-toolbar"><div><h3>更新候補の一覧</h3><p id="reviewHint">CSVを比較すると変更が並びます。</p></div><label class="search-wrapper"><span>⌕</span><input id="searchBox" type="search" placeholder="商品コード・商品名で検索" aria-label="商品を検索"></label></div>
+            <div class="filter-row" role="group" aria-label="表示する項目"><button class="filter active" data-filter="all">変更すべて</button><button class="filter" data-filter="danger">要注意</button><button class="filter" data-filter="modified">変更</button><button class="filter" data-filter="added">追加</button><button class="filter" data-filter="removed">削除</button><button class="filter" data-filter="approved">承認済み</button></div>
+            <div id="reviewList" class="review-list"><div class="empty-panel"><span class="empty-symbol">≋</span><h4>まだ差分はありません</h4><p>「サンプルを読み込む」を押すと、価格の大幅下落や在庫ゼロなどの例を確認できます。</p></div></div>
+            <p id="listCap" class="list-cap"></p>
+          </section>
+          <aside class="sidebar">
+            <div class="sidebar-top"><span class="eyebrow">03 / RELEASE GATE</span><h3>承認して書き出す</h3><p>承認しなかった変更は、更新前の値を保持。危険な更新を一括適用しません。</p></div>
+            <div class="sidebar-body"><div class="approved-meter"><div><span>承認済み</span><strong id="approvalCount">0 / 0</strong></div><div class="progress-track"><span id="approvalBar" style="width:0%"></span></div></div>
+              <button class="btn btn-secondary wide" id="approveSafeBtn" disabled>注意・エラーのない変更を承認</button>
+              <button class="btn btn-primary wide" id="exportStagedBtn" disabled>承認済み更新案 CSV ↓</button>
+              <button class="btn btn-outline wide" id="exportAuditBtn" disabled>変更履歴レポート CSV ↓</button>
+              <button class="btn btn-outline wide" id="exportOriginalBtn" disabled>更新前CSVをバックアップ ↓</button>
+              <div class="privacy-note"><strong>🔒 画面を閉じると入力は消えます</strong><p>CSVの中身・承認状況は端末の保存領域にも送信先にも記録しません。ダウンロードしたファイルはご自身で保管してください。</p></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section id="how" class="how"><div><p class="eyebrow dark">HOW IT WORKS</p><h2>公開前の3ステップ。</h2></div><div class="how-grid"><article><b>01</b><h3>新旧を投入</h3><p>CSVを選ぶか貼り付け。行の順番が入れ替わっても、商品コードで突き合わせます。</p></article><article><b>02</b><h3>警告を見て承認</h3><p>価格の急変、在庫ゼロ、削除、数値不正を明示。気になるものだけ個別に判断。</p></article><article><b>03</b><h3>反映案を書き出す</h3><p>承認した変更だけ採用したCSVを生成。元CSVと監査レポートも保存できます。</p></article></div></section>
+    </main>
+    <footer><strong>差分門 <small>SABUNMON</small></strong><span>Built for careful catalog updates · Local first · MIT License</span><span>実際に更新する前に内容を確認してください。</span></footer>
+  </div>
+  <script src="engine.js"></script><script src="app.js"></script>
+</body></html>
