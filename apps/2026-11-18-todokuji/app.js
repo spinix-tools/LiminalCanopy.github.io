@@ -1,0 +1,28 @@
+/* TODOKUJI offline UI. No fetch, tracking, or external services. */
+(()=>{'use strict';
+const E=window.Todokuji,KEY='todokuji-project-v1',ids=['label','title','body','foot','paper','orientation','arrow','distance','titleSize','bodySize','footSize'];
+const el=id=>document.getElementById(id);let data=E.clone(E.BASE),mode='color',toastTimer;
+function readSaved(){try{const s=localStorage.getItem(KEY);if(s){data=E.normalize(JSON.parse(s));return;}}catch(_){/* private mode or unavailable storage */}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){/* optional local save */}}
+function hydrate(){for(const id of ids)el(id).value=data[id];for(const id of ['background','accent'])el(id).value=data.colors[id];el('textColor').value=data.colors.text;el('accentText').value=data.colors.accentText;el('titleSizeVal').textContent=data.titleSize+'mm';el('bodySizeVal').textContent=data.bodySize+'mm';el('footSizeVal').textContent=data.footSize+'mm';}
+function status(node,good,positive,negative){node.textContent=good?positive:negative;node.classList.toggle('bad',!good);}
+function render(){const l=E.layout(data);el('paperPreview').innerHTML=E.svg(data).replace(/^<\?xml[^>]*>\s*/, '');el('paperPreview').classList.toggle('monochrome',mode==='mono');el('paperBadge').textContent=data.paper+(data.orientation==='landscape'?' 横':' 縦');el('scaleIndicator').textContent=l.width+'×'+l.height+'mm';
+el('titleReach').textContent=l.titleReach.toFixed(1)+'m';el('bodyReach').textContent=l.bodyReach.toFixed(1)+'m';el('contrastRatio').textContent=l.normalContrast.toFixed(2)+':1';status(el('titleReachState'),l.titleReach>=data.distance,'距離の目安を満たす','大きめの字を推奨');status(el('bodyReachState'),l.bodyReach>=data.distance,'距離の目安を満たす','近づいて読む設計に');status(el('contrastState'),l.normalContrast>=4.5,'Web基準の参考値 OK','文字と背景の差が小さい');
+const issues=el('issueList');issues.replaceChildren();for(const n of l.notes){const item=document.createElement('div');item.className='issue '+n.level;const mark=document.createElement('b');mark.textContent=n.level==='error'?'!':n.level==='warn'?'△':'i';const t=document.createElement('span');t.textContent=n.text;item.append(mark,t);issues.append(item);}if(!l.notes.length){const item=document.createElement('div');item.className='issue ok';item.textContent='✓ 現在の簡易チェックでは注意点がありません。原寸の試し刷りは必須です。';issues.append(item);}const important=l.notes.filter(n=>n.level!=='info').length;el('auditCount').textContent=important?important+' 件の注意':'注意 0 件';el('auditCount').classList.toggle('has-alert',important>0);
+}
+function update(){data=E.normalize(data);persist();render();}
+function notify(msg){const t=el('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400);}
+function saveFile(text,name,type){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+function fileStem(){return 'todokuji-'+new Date().toISOString().slice(0,10);}
+readSaved();hydrate();render();
+for(const id of ids){el(id).addEventListener('input',()=>{data[id]=el(id).value;update();if(['titleSize','bodySize','footSize'].includes(id))el(id+'Val').textContent=data[id]+'mm';});}
+const cp={background:'background',textColor:'text',accent:'accent',accentText:'accentText'};for(const [id,key] of Object.entries(cp)){el(id).addEventListener('input',()=>{data.colors[key]=el(id).value;update();});}
+for(const b of document.querySelectorAll('[data-preset]'))b.addEventListener('click',()=>{data=E.normalize(E.clone(E.PRESETS[b.dataset.preset]));hydrate();update();document.querySelectorAll('[data-preset]').forEach(x=>x.classList.toggle('active',x===b));notify('用途のサンプルを適用しました');});
+for(const b of document.querySelectorAll('[data-mode]'))b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));render();});
+el('autoContrast').addEventListener('click',()=>{data.colors.text=E.bestTextColor(data.colors.background);data.colors.accentText=E.bestTextColor(data.colors.accent);hydrate();update();notify('文字色を白または黒で自動調整しました');});
+el('resetBtn').addEventListener('click',()=>{if(!confirm('入力中の内容を初期化しますか？'))return;data=E.clone(E.BASE);hydrate();update();notify('初期化しました');});
+el('downloadSvg').addEventListener('click',()=>{const l=E.layout(data);if(l.notes.some(n=>n.level==='error'))notify('レイアウトに注意点があります。保存後にご確認ください');saveFile(E.svg(data),fileStem()+'.svg','image/svg+xml;charset=utf-8');});
+el('downloadReport').addEventListener('click',()=>{saveFile(E.auditText(data),fileStem()+'-audit.txt','text/plain;charset=utf-8');notify('診断メモを出力しました');});
+el('downloadJson').addEventListener('click',()=>{saveFile(JSON.stringify({format:'TODOKUJI/1',project:E.normalize(data)},null,2),fileStem()+'.json','application/json;charset=utf-8');notify('再編集用JSONを出力しました');});
+el('importJson').addEventListener('change',async(e)=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>200000)throw new Error('JSONは200KB以下にしてください');const src=JSON.parse(await f.text());if(!src||src.format!=='TODOKUJI/1'||!src.project||typeof src.project!=='object'||Array.isArray(src.project))throw new Error('とどく字で出力したJSONではありません');data=E.normalize(src.project);hydrate();update();notify('プロジェクトを読み込みました');}catch(err){notify('読込失敗: '+err.message);}finally{el('importJson').value='';}});
+})();

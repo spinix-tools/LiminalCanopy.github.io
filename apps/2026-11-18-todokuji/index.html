@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="とどく字は、掲示物を視距離と配色から点検し、原寸SVGで持ち帰れる無料のオフラインWebアプリです。">
+<title>とどく字 | 距離からつくる、読める案内</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="brand"><div class="brandmark" aria-hidden="true">字</div><div><strong>とどく字</strong><span>TODOKUJI / Poster accessibility lab</span></div></div><div class="topright"><span class="pill"><span class="dot"></span> LOCAL FIRST</span><button type="button" class="ghost" id="resetBtn">初期化</button></div></header>
+<main class="shell">
+<section class="intro"><div><div class="eyebrow">PRINT LEGIBILITY STUDIO <span>01 / 01</span></div><h1>その案内、<em>何メートル先</em>まで届く？</h1><p>掲示物の文字サイズ・色の差・紙面の収まりをまとめて点検。<br class="desktop">そのまま印刷できるSVGを、端末内だけで作れます。</p></div><div class="intro-index">READABILITY<br><strong>CHECK / MAKE / PRINT</strong></div></section>
+<div class="workspace">
+<aside class="panel editor">
+<div class="panel-head"><span class="step">01</span><div><h2>掲示内容をつくる</h2><p>入力するだけで右側のプレビューが更新されます</p></div></div>
+<div class="panel-body">
+<div class="miniheading">まずは用途から</div><div class="presetrow" role="group" aria-label="用途のテンプレート"><button class="preset active" data-preset="reception">↗ 受付案内</button><button class="preset" data-preset="event">◎ 会場誘導</button><button class="preset" data-preset="queue">≡ 順番待ち</button></div>
+<div class="rule"></div>
+<label class="field">小見出し<span class="hint">最大42文字</span><input id="label" maxlength="42" placeholder="例：受付案内"></label>
+<label class="field">いちばん伝えたい言葉<span class="hint">見出し</span><textarea id="title" rows="2" maxlength="150"></textarea></label>
+<label class="field">補足文<span class="hint">最大300文字</span><textarea id="body" rows="2" maxlength="300"></textarea></label>
+<label class="field">ページ下の一言<span class="hint">任意</span><input id="foot" maxlength="250"></label>
+<div class="twofields"><label class="field">用紙<select id="paper"><option value="A4">A4（210 × 297mm）</option><option value="A3">A3（297 × 420mm）</option></select></label><label class="field">向き<select id="orientation"><option value="portrait">縦</option><option value="landscape">横</option></select></label></div>
+<label class="field">案内矢印<select id="arrow"><option value="right">右へ →</option><option value="left">左へ ←</option><option value="up">上へ ↑</option><option value="down">下へ ↓</option><option value="none">表示なし</option></select></label>
+<div class="rule"></div>
+<div class="miniheading">字の大きさ <small>紙の上のフォントサイズ・mm</small></div>
+<div class="twosliders"><label class="sliderfield"><span>見出し <strong id="titleSizeVal">30mm</strong></span><input type="range" id="titleSize" min="8" max="95" step="1"></label><label class="sliderfield"><span>補足文 <strong id="bodySizeVal">15mm</strong></span><input type="range" id="bodySize" min="4" max="60" step="1"></label></div>
+<label class="sliderfield smaller"><span>下の一言 <strong id="footSizeVal">6.5mm</strong></span><input type="range" id="footSize" min="3" max="30" step=".5"></label>
+<div class="rule"></div>
+<div class="miniheading">配色</div><div class="colors"><label>背景<input type="color" id="background" aria-label="背景色"></label><label>文字<input type="color" id="textColor" aria-label="文字色"></label><label>アクセント<input type="color" id="accent" aria-label="アクセント色"></label><label>ラベル文字<input type="color" id="accentText" aria-label="ラベル文字色"></label></div>
+<button class="minorbtn" id="autoContrast" type="button">◐ 文字色のコントラストを自動改善</button>
+</div></aside>
+<div class="results">
+<section class="panel canvaspanel"><div class="canvas-head"><div><div class="miniheading">02 · LIVE PREVIEW</div><h2>掲示物プレビュー <span class="muted" id="paperBadge">A4 縦</span></h2></div><div class="mode" role="group" aria-label="プレビューモード"><button class="modebtn active" data-mode="color">カラー</button><button class="modebtn" data-mode="mono">白黒印刷</button></div></div>
+<div class="preview-stage"><div class="paper-wrap" id="paperPreview" aria-label="掲示物プレビュー"></div></div>
+<div class="canvas-foot"><span>紙面は縮小プレビューです。SVG出力は指定用紙の原寸指定。</span><span id="scaleIndicator">A4 / 210×297mm</span></div></section>
+<section class="panel checks"><div class="checktop"><div><div class="miniheading">03 · READABILITY AUDIT</div><h2>届きやすさを点検する</h2></div><span class="audit-count" id="auditCount">—</span></div>
+<div class="distance"><div><label for="distance">想定する見る距離</label><p>掲示物からどのくらい離れた位置で読みますか？</p></div><div class="distanceinput"><input id="distance" type="number" min="0.3" max="25" step="0.1" value="2.5"><span>m</span></div></div>
+<div class="metrics"><div class="metric"><div class="metric-label">見出しが目立つ目安</div><strong id="titleReach">—</strong><span class="metric-state" id="titleReachState">判定中</span></div><div class="metric"><div class="metric-label">補足文を読む目安</div><strong id="bodyReach">—</strong><span class="metric-state" id="bodyReachState">判定中</span></div><div class="metric"><div class="metric-label">文字と背景の色差</div><strong id="contrastRatio">—</strong><span class="metric-state" id="contrastState">判定中</span></div></div>
+<div id="issueList" class="issues" aria-live="polite"></div>
+<details class="method"><summary>数値と判定の根拠・注意点</summary><p>距離は「目立つ文字高25mm / 3m、読む文字高12.5mm / 3m」の経験則と、文字高をフォントサイズの70%とする簡易仮定から計算します。実際の日本語フォントの字高や見え方は異なります。コントラストはWCAGの計算式を参考に4.5:1と比較しますが、WCAGはWeb向け規格であり紙面の適合認定ではありません。照明・素材・印刷・視覚特性に依存するため、必ず原寸で試し刷りしてください。</p></details>
+</section>
+<section class="exportbar"><div><strong>入稿前の下書きができましたか？</strong><p>SVGはデザインデータ、JSONは再編集、TXTは点検メモです。</p></div><div class="actions"><button class="primary" id="downloadSvg" type="button">↧ 原寸SVGを保存</button><button class="secondary" id="downloadReport" type="button">診断TXT</button><button class="secondary" id="downloadJson" type="button">JSON保存</button><label for="importJson" class="secondary filelabel">JSON読込</label><input type="file" id="importJson" accept=".json,application/json" hidden></div></section>
+</div></div>
+</main>
+<footer>© 2026 TODOKUJI · no accounts · no network requests · no tracking <span>実測・専門家監修の代わりにはなりません。</span></footer>
+<div class="toast" role="status" id="toast" aria-live="polite"></div>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
