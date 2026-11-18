@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101924">
+  <meta name="description" content="時差てんびん：国際チームの週次会議を、固定時刻と負担輪番の3案で比較。登録不要・ブラウザだけで完結。">
+  <title>時差てんびん — 誰か一人の深夜にしない。</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="engine.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar wrap">
+    <a class="logo" href="#top" aria-label="時差てんびん トップ"><span class="mark">◷</span><span>時差てんびん<small>JISA TENBIN</small></span></a>
+    <div class="topright"><span class="local-pill"><span class="on-dot"></span> 端末内で計算</span><a href="#about">使い方</a></div>
+  </header>
+  <main id="top" class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> TIMEZONE FAIRNESS STUDIO · 01</div>
+      <h1>誰か一人の深夜に、<br><em>しない。</em></h1>
+      <p>東京・ロンドン・ニューヨーク。全員の「都合のよい時刻」がないとき、<strong>毎週同じ時刻</strong>と<strong>負担を分け合う輪番</strong>を数字で比較。夏時間の切替も先回りして確認できます。</p>
+      <div class="hero-meta"><span>🌐 17の主要タイムゾーン例 + IANA指定</span><span>◫ 2〜8拠点 / 2〜12週</span><span>⌁ 外部送信なし</span></div>
+    </section>
+
+    <div class="layout">
+      <section class="controls panel" aria-labelledby="config-heading">
+        <div class="section-heading"><span class="serial">01 / SETUP</span><h2 id="config-heading">チームの条件</h2><p>個人名は不要です。拠点名・営業時間だけで試せます。</p></div>
+        <div class="input-grid">
+          <label>初回の基準日 <input id="meeting-date" type="date" required></label>
+          <label>週次の回数 <select id="weeks"><option value="4">4週</option><option value="6">6週</option><option value="8">8週</option><option value="12">12週</option></select></label>
+          <label>会議の長さ <select id="duration"><option value="30">30分</option><option value="60">60分</option><option value="90">90分</option></select></label>
+          <label>基準タイムゾーン <select id="anchor"></select></label>
+        </div>
+        <div class="people-head"><h3>参加拠点</h3><span id="people-count" class="count"></span></div>
+        <div id="people" class="people" aria-live="polite"></div>
+        <button class="button button-outline full" id="add-person" type="button">＋ 拠点を追加する</button>
+        <div class="settings-footer">
+          <button id="reset" class="text-button" type="button">例に戻す</button>
+          <span>勤務時間外・週末・深夜を自動加点</span>
+        </div>
+      </section>
+
+      <section class="results" aria-labelledby="result-heading">
+        <div class="section-heading results-heading"><span class="serial">02 / COMPARE</span><h2 id="result-heading">3つの開催方法を比較</h2><p>最も困る人の負担と、チーム全体の負担は一致しません。</p></div>
+        <div id="errors" class="error" role="alert" hidden></div>
+        <div id="strategy-cards" class="strategies" aria-label="開催方法を選択"></div>
+        <div class="result-detail panel">
+          <div class="detail-head"><div><span class="serial">SELECTED STRATEGY</span><h3 id="selected-title"></h3><p id="selected-description"></p></div><span id="best-tag" class="tag" hidden>最大負担が最小</span></div>
+          <div id="metrics" class="metrics"></div>
+          <div class="burden-head"><h4>累積負担の内訳</h4><span>単位：負担点（勤務時間外1時間＝1点）</span></div>
+          <div id="burden-bars" class="burden-bars"></div>
+          <div class="export-bar">
+            <button id="export-ics" class="button button-primary" type="button">◫ カレンダー（ICS）</button>
+            <button id="export-csv" class="button button-subtle" type="button">↓ CSV</button>
+            <button id="copy-summary" class="button button-subtle" type="button">⧉ 予定をコピー</button>
+          </div>
+        </div>
+        <div class="panel week-panel">
+          <div class="week-head"><div><span class="serial">03 / LOCAL CLOCKS</span><h3>毎週、現地では何時？</h3></div><span class="help-pill">🟠 勤務時間外 / 🟣 夏時間切替</span></div>
+          <div class="table-scroller"><table id="week-table"><thead></thead><tbody></tbody></table></div>
+          <p class="small-note">勤務時間外は、会議時間内の15分刻みで判定。祝日や各人の既存予定は未考慮です。</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel explorer" aria-labelledby="explore-title">
+      <div class="section-heading"><span class="serial">04 / EXPLORE</span><h2 id="explore-title">初回の48候補を探索</h2><p>基準タイムゾーンの1日を30分刻みで比較。選んだ時刻を「固定開催」の基準にできます。</p></div>
+      <div class="legend"><span><i class="swatch good"></i> 負担が少ない</span><span><i class="swatch mid"></i> 中くらい</span><span><i class="swatch bad"></i> 負担が大きい</span></div>
+      <div id="slots" class="slots" role="group" aria-label="初回の候補時刻"></div>
+      <div class="slot-explanation"><div id="slot-preview" class="slot-preview"></div><div class="slot-buttons"><button id="pin-slot" class="button button-primary" type="button">この時刻を固定基準にする</button><button id="clear-pin" class="text-button" type="button">自動選定に戻す</button></div></div>
+    </section>
+
+    <section class="bottom-grid">
+      <div class="panel guide" id="about"><span class="serial">05 / HOW IT WORKS</span><h2>負担点の読み方</h2><p>会議を15分ごとに見て、<strong>勤務時間外は1時間あたり1点</strong>、夜間（22時〜翌7時）は1.8点、週末は2.1点として換算します。週末を優先して判定します。</p><p>「輪番」は各週の累積最大負担・拠点間の差・総負担から近似的に選びます。<strong>公平さの唯一の正解ではなく、合意形成用の試算</strong>です。過去負担点を入力すると今回の輪番にも反映されます。</p></div>
+      <div class="panel privacy"><span class="serial">06 / YOUR DATA</span><h2>あなたの端末だけに保存</h2><p>入力・計算・保存はブラウザ内で完結。APIやアカウントは不要です。機密の人名を入れずに運用できます。</p><div class="storage-buttons"><button id="export-json" class="button button-subtle" type="button">↓ 設定をJSON保存</button><button id="import-json" class="button button-subtle" type="button">↑ JSONを復元</button><input type="file" id="import-file" accept=".json,application/json" hidden></div><p class="small-note">ICSを読み込んだだけでは相手への招待は送信されません。日時と参加可否を確認してから共有してください。</p></div>
+    </section>
+    <footer><div><strong>時差てんびん</strong> / JISA TENBIN <span>— 今日は誰が無理をしている？</span></div><span>100% local · MIT License · 2026</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <datalist id="zones"></datalist>
+</body>
+</html>
