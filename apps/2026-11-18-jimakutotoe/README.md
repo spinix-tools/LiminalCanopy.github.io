@@ -7,7 +7,8 @@
 YouTube・SNS動画・教材動画を作る個人クリエイター、広報担当者、少人数の制作チーム。自動生成した字幕の最終確認では、読み切れない字幕、行の詰まり、重複時刻の検出が必要です。
 
 - **日本の関連市場**：サイバーエージェント／デジタルインファクトの2026年3月9日発表によれば、2025年の国内動画広告市場は8,855億円、2025年縦型動画広告市場は2,049億円。これは字幕校正ツールの売上・需要を直接示す数字ではありません。<https://www.cyberagent.co.jp/news/detail/id=33050>
-- **海外ニーズの手がかり**：SubtitleDesk、SRT Creator 等はSRT/VTT編集、CPS、重複検出を提供しており、字幕校正が独立したツールカテゴリーとして成立しています。市場規模や有料転換率は未調査です。<https://subtitledesk.com/subtitle-editor> / <https://www.srtcreator.com/>
+- **海外の関連需要**：Wyzowl「State of Video Marketing 2026」では調査対象企業の91%が動画マーケティングを利用。字幕校正ツールの直接需要ではなく、動画制作の普及を示す参考値です。<https://wyzowl.com/video-marketing-statistics/>
+- **海外競合**：SubtitleDesk、SRT Creator 等はSRT/VTT編集、CPS、重複検出を提供しており、字幕校正が独立したツールカテゴリーとして成立しています。市場規模や有料転換率は未調査です。<https://subtitledesk.com/subtitle-editor> / <https://www.srtcreator.com/>
 - **国内競合**：VrewはAI文字起こしとSRTエクスポートを提供。<https://vrew.ai/ja/feature/srt-export/> / <https://vrew.ai/ja/feature/ai-video-subtitle/>
 - **海外競合**：SRT Creatorは読み取り速度や重複の検査、自動修正、動画プレビューなど高度な機能を持ちます。これらを新機能とは主張しません。<https://www.srtcreator.com/>
 
