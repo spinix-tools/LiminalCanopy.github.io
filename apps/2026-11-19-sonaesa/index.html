@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="将来の備蓄不足を見える化。賞味期限と予算を踏まえた家庭用防災備蓄シミュレーター。">
+  <title>そなえ差分｜防災備蓄を未来から点検する</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar"><a class="brand" href="#top"><span class="brandmark">◒</span> そなえ差分 <span class="brandlatin">SONAESA</span></a><span class="local"><span class="live-dot"></span> 端末内で完結・ログイン不要</span></header>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-content"><div class="eyebrow">HOME STOCKPILE / FUTURE READINESS</div>
+          <h1>「今ある」だけでなく、<br><em>「その日に残る」</em>備蓄へ。</h1>
+          <p>期限を迎えた在庫を除いて、災害が起きる日ごとの備えを比較。限られた予算で何を先に買うかまで、一画面で見通せます。</p>
+          <div class="hero-tags"><span>01 期限による差分</span><span>02 不足の見える化</span><span>03 予算内の買い足し</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="art-circle outer"><div class="art-circle inner"><div class="art-core">備える<br><strong>今日と未来</strong></div></div></div><div class="art-caption">READY IS A MOVING TARGET</div></div>
+      </section>
+      <div class="notice" role="note"><strong>計算上の目安です。</strong> 下記の使用量は初期設定で変更できます。地域の防災情報、生活条件、必要な衛生用品・医薬品などを別途確認してください。期限が空欄の在庫は期限なしとして計算します。</div>
+      <section class="panel" aria-labelledby="conditions-title">
+        <div class="section-header"><div><div class="kicker">01 / CONDITIONS</div><h2 id="conditions-title">どんな状況に備えますか</h2></div><p>在宅避難の想定を自由に変更</p></div>
+        <div class="controls-grid">
+          <label>人数 <input id="persons" type="number" min="1" max="20" step="1" required></label>
+          <label>目標日数 <input id="days" type="number" min="1" max="30" step="1" required></label>
+          <label>比較する未来の日 <input id="asof" type="date" required></label>
+          <label>追加購入の予算（円） <input id="budget" type="number" min="0" max="10000000" step="100" required></label>
+        </div>
+        <details class="advanced"><summary>1人1日あたりの想定使用量と購入単価を調整 <span>›</span></summary>
+          <div class="adv-grid"><div class="adv-heading">カテゴリ</div><div class="adv-heading">1人1日の量</div><div class="adv-heading">購入1パックの量</div><div class="adv-heading">1パック価格（円）</div>
+            <label for="rate-water">飲料水（L）</label><input id="rate-water" type="number" min="0.01" max="50" step="0.5"><input id="packq-water" type="number" min="0.01" step="0.5"><input id="packp-water" type="number" min="1" step="10">
+            <label for="rate-food">食事（食）</label><input id="rate-food" type="number" min="0.01" max="50" step="0.5"><input id="packq-food" type="number" min="0.01" step="1"><input id="packp-food" type="number" min="1" step="10">
+            <label for="rate-toilet">携帯トイレ（回）</label><input id="rate-toilet" type="number" min="0.01" max="50" step="1"><input id="packq-toilet" type="number" min="0.01" step="1"><input id="packp-toilet" type="number" min="1" step="10">
+          </div>
+          <small>予算提案は各カテゴリの最少充足日数を優先して購入パックを追加する簡易ヒューリスティックです。厳密な最適解ではありません。</small>
+        </details>
+      </section>
+      <section class="panel results" aria-labelledby="result-title">
+        <div class="section-header"><div><div class="kicker">02 / READINESS</div><h2 id="result-title">備えの差分</h2></div><p id="scenario-label" aria-live="polite"></p></div>
+        <div class="score-grid"><div class="score primary"><div class="score-label">今日の最短充足日数</div><div class="score-value"><span id="now-days">—</span><span class="suffix">日分</span></div><div id="now-explain" class="score-hint">—</div></div><div class="score secondary"><div class="score-label">比較日の最短充足日数</div><div class="score-value"><span id="future-days">—</span><span class="suffix">日分</span></div><div id="future-explain" class="score-hint">—</div></div><div class="score delta"><div class="score-label">期限で失う可能性のある日数</div><div class="score-value"><span id="lost-days">—</span><span class="suffix">日分</span></div><div class="score-hint">3カテゴリのうち一番少ないもので計算</div></div></div>
+        <div id="coverage-cards" class="coverage-grid" aria-live="polite"></div>
+      </section>
+      <section class="panel" aria-labelledby="shopping-title"><div class="section-header"><div><div class="kicker">03 / NEXT PURCHASE</div><h2 id="shopping-title">この予算で、何を補充する？</h2></div><p>比較日時点の在庫を基準に試算</p></div><div id="plan-summary" class="plan-summary" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>品目</th><th>購入パック</th><th>補充量</th><th>概算費用</th><th>購入後の日数</th></tr></thead><tbody id="plan-body"></tbody></table></div><p class="muted-small">費用は入力した想定単価による概算です。買い足した商品は比較日まで使用可能と仮定し、実在庫には自動で加えません。</p></section>
+      <section class="panel" aria-labelledby="inventory-title"><div class="section-header"><div><div class="kicker">04 / INVENTORY</div><h2 id="inventory-title">備蓄を登録・入れ替え</h2></div><span class="count" id="item-count">0ロット</span></div>
+        <form id="item-form" class="item-form"><label>分類 <select id="item-category"><option value="water">飲料水（L）</option><option value="food">食事（食）</option><option value="toilet">携帯トイレ（回）</option></select></label><label>品名 <input id="item-name" maxlength="80" required placeholder="例：水 2Lボトル"></label><label>数量 <input id="item-quantity" type="number" min="0.001" step="0.001" max="1000000" required value="2"></label><label>期限（任意） <input id="item-expiry" type="date"></label><label>保管場所（任意） <input id="item-location" maxlength="80" placeholder="例：玄関収納"></label><button class="btn accent" type="submit">＋ ロットを追加</button></form>
+        <div class="subheader"><h3>期限の近いもの</h3><small>今日から30日以内 / 過期限を含む</small></div><div id="rotation-list" class="rotation-list"></div>
+        <div class="subheader"><h3>全備蓄リスト</h3><small>「1単位使った」を押すと在庫が1減ります</small></div><div class="table-wrap"><table><thead><tr><th>分類・品名</th><th>数量</th><th>期限</th><th>保管場所</th><th>操作</th></tr></thead><tbody id="inventory-body"></tbody></table></div>
+      </section>
+      <section class="panel tools"><div class="section-header"><div><div class="kicker">05 / YOUR DATA</div><h2>持ち出す・戻す</h2></div><p>すべて端末内で処理</p></div>
+        <div class="tool-buttons"><button id="export-json" class="btn" type="button">JSONバックアップ</button><button id="import-json" class="btn" type="button">JSONを復元</button><input id="import-file" type="file" accept="application/json,.json" hidden><button id="export-csv" class="btn" type="button">在庫CSV</button><button id="print" class="btn" type="button">印刷</button><button id="sample-reset" class="btn danger" type="button">サンプルに戻す</button></div><p id="status" role="status" aria-live="polite">変更はこのブラウザに自動保存されます。</p>
+      </section>
+    </main>
+    <footer><strong>◒ そなえ差分</strong><span>備えの量と期限を、生活に合わせて見直すための試作ツール。</span><span>外部通信なし / ライブラリなし / MIT License</span></footer>
+  </div>
+</body>
+</html>
