@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15362f">
+<title>きりしろ — 木材の買い方まで考えるカット計画</title>
+<meta name="description" content="DIY向けの木材カット計画。端材の優先利用、ノコ刃幅、店舗カット代、持ち帰り寸法を一画面で試算。無料、登録不要、完全オフライン。">
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="masthead"><div class="wrap nav"><div class="brand"><span class="brand-icon">▤</span><span>きりしろ <small>KIRISHIRO / 材料計画ラボ</small></span></div><div class="nav-right"><span class="local-label">● OFFLINE / LOCAL</span><button id="resetBtn" class="quiet-btn">サンプルに戻す</button></div></div></header>
+<main class="wrap">
+<section class="hero"><div><p class="eyebrow">CUT SMARTER, CARRY LIGHTER.</p><h1>木を切る前に、<br><em>ムダと予算</em>を見える化。</h1><p>必要な部材・持っている端材・買える定尺材を入れるだけ。<br>刃幅・カット代・車に積める長さを考えて、買い物と切り方をまとめます。</p><div class="hero-pills"><span>✓ 端材から優先</span><span>✓ 切りしろ計算</span><span>✓ そのまま印刷</span></div></div><div class="hero-number"><span class="number-label">本日のプラン / SAMPLE</span><span class="number-figure" id="heroTotal">—</span><span class="number-note" id="heroNote">部材を入力して、計算を始めよう</span></div></section>
+<div class="workspace">
+<div class="input-column">
+ <section class="card" aria-labelledby="settingsTitle"><div class="section-top"><div><span class="step">01 / CONDITIONS</span><h2 id="settingsTitle">加工と運搬の条件</h2></div></div><div class="settings-grid">
+ <label>のこ刃の幅 <small>mm</small><input type="number" min="0" max="20" step="1" data-setting="kerf"></label>
+ <label>端部の余裕 <small>mm / 片側</small><input type="number" min="0" max="50" data-setting="trim"></label>
+ <label>店舗のカット料金 <small>円 / 1カット</small><input type="number" min="0" max="1000" data-setting="fee"></label>
+ <label>残しておく端材 <small>mm以上</small><input type="number" min="0" max="6000" data-setting="offcutMin"></label>
+ <label class="full">持ち帰り上限 <small>mm / 0なら制限なし。購入材だけに適用</small><input type="number" min="0" max="6000" data-setting="carry"></label>
+ </div></section>
+ <section class="card" aria-labelledby="partsTitle"><div class="section-top"><div><span class="step">02 / CUT LIST</span><h2 id="partsTitle">必要な部材</h2><p>同じ断面・材質の部材をまとめて計算します。</p></div><button id="addPart" class="subtle-btn">＋ 部材</button></div><div class="table-scroller"><table><thead><tr><th>名前</th><th>長さ mm</th><th>個数</th><th><span class="sr-only">削除</span></th></tr></thead><tbody id="partsRows"></tbody></table></div></section>
+ <section class="card" aria-labelledby="stocksTitle"><div class="section-top"><div><span class="step">03 / STOCK RACK</span><h2 id="stocksTitle">手元の端材と購入候補</h2><p>購入候補は単価と最大購入可能数を入力。端材は0円扱いです。</p></div><button id="addStock" class="subtle-btn">＋ 材料</button></div><div class="table-scroller"><table class="stock-table"><thead><tr><th>種類・名前</th><th>長さ mm</th><th>本数上限</th><th>単価 円</th><th><span class="sr-only">削除</span></th></tr></thead><tbody id="stocksRows"></tbody></table></div></section>
+ <div class="actions"><button id="calculateBtn" class="primary-btn">カット計画を更新 <span>↗</span></button><button id="exportJsonBtn" class="outline-btn">JSON保存</button><button id="importBtn" class="outline-btn">JSON読込</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+ <div id="storageStatus" class="storage-note" role="status">この端末に自動保存・外部送信なし</div>
+</div>
+<div class="result-column">
+ <section class="card results" aria-labelledby="resultTitle"><div class="section-top"><div><span class="step">YOUR CUTTING PLAN</span><h2 id="resultTitle">カット計画</h2><p id="resultSubtitle">端材から使い、必要な購入本数を試算します。</p></div><span id="resultStatus" class="status-pill">計算中</span></div><div id="errorBox" role="alert" hidden></div>
+ <div id="summary" class="summary-grid"></div><div id="comparison" class="comparison"></div>
+ <div class="result-toolbar"><span class="eyebrow dark">LAYOUT / EACH BOARD</span><div class="toolbar-buttons"><button id="csvBtn" class="quiet-btn">CSV</button><button id="svgBtn" class="quiet-btn">SVG図面</button><button id="printBtn" class="quiet-btn">印刷</button></div></div>
+ <div id="boards" class="boards" aria-live="polite"></div>
+ <div class="purchase" id="purchase"></div>
+ <div id="warning" class="warnings"></div>
+ <div class="stock-actions"><button id="applyBtn" class="primary-btn secondary">加工完了 → 端材台帳を更新</button><button id="undoBtn" class="outline-btn" hidden>直前の在庫更新を取り消す</button></div>
+ </section>
+ <div class="note-card"><span class="note-icon">ⓘ</span><div><strong>試算の前提</strong><p>長さ方向の1次元計画です。材料の断面・材質は同じものとして扱い、節・割れ・木目・斜め切り・店ごとの加工制約は判定しません。計画は近似法で最適解を保証しません。実作業前に寸法を実測してください。</p></div></div>
+</div></div>
+</main><footer class="footer"><div class="wrap"><span>きりしろ / KIRISHIRO · 2026</span><span>会員登録・通信・課金なし。データは端末内のみ。</span></div></footer>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
