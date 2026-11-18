@@ -1,0 +1,36 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const E=require('./engine.js');
+const base=(config={},items=[])=>E.normalize({config:{...E.DEFAULT_CONFIG,...config},items});
+test('initial keys and defaults',()=>{assert.deepEqual(E.KEYS,['water','food','toilet']);assert.equal(base().config.persons,2)});
+test('valid calendar dates',()=>{assert.equal(E.validDate('2028-02-29'),true);assert.equal(E.validDate('2026-02-29'),false);assert.equal(E.validDate('2026-13-12'),false);assert.equal(E.validDate('2026-01-00'),false);assert.equal(E.validDate('abc'),false)});
+test('date shifts across leap and year',()=>{assert.equal(E.shiftDate('2028-02-28',1),'2028-02-29');assert.equal(E.shiftDate('2026-12-31',1),'2027-01-01');assert.equal(E.shiftDate('2026-01-01',-1),'2025-12-31')});
+test('normalization prevents missing inventory',()=>assert.throws(()=>E.normalize({}),/件数/));
+test('normalization prevents unlisted categories',()=>assert.throws(()=>base({},[{name:'x',category:'med',quantity:1}]),/分類/));
+test('normalization prevents zero or NaN quantities',()=>{for(const quantity of [0,-1,Infinity,'NaN'])assert.throws(()=>base({},[{name:'x',category:'water',quantity}]),/内容/)});
+test('normalization prevents invalid expiry',()=>assert.throws(()=>base({},[{name:'x',category:'water',quantity:2,expiry:'2026-02-30'}]),/内容/));
+test('normalization caps quantities and fields',()=>{const v=base({},[{id:'bad id',name:'A'.repeat(200),category:'water',quantity:2.12345,location:'Z'.repeat(200)}]).items[0];assert.equal(v.id,'row_0');assert.equal(v.name.length,80);assert.equal(v.quantity,2.123);assert.equal(v.location.length,80)});
+test('normalization caps list length',()=>assert.throws(()=>base({},Array.from({length:501},(_,i)=>({id:'k'+i,name:'x',category:'water',quantity:1}))),/件数/));
+test('defaults configurable but bounded',()=>{const c=base({persons:50,days:0,budget:-5,rates:{water:0},packs:{water:{quantity:0,price:0}}}).config;assert.equal(c.persons,2);assert.equal(c.days,7);assert.equal(c.budget,5000);assert.equal(c.rates.water,3);assert.equal(c.packs.water.price,150)});
+test('exact expiry inclusion and later exclusion',()=>{const s=base({},[{name:'water',category:'water',quantity:10,expiry:'2026-11-19'}]);assert.equal(E.assess(s,'2026-11-19').detail.water.have,10);assert.equal(E.assess(s,'2026-11-20').detail.water.have,0)});
+test('blank expiry remains included',()=>{const s=base({},[{name:'x',category:'toilet',quantity:15}]);assert.equal(E.assess(s,'2090-01-01').detail.toilet.have,15)});
+test('multi-lot aggregation',()=>{const s=base({},[{name:'a',category:'water',quantity:1},{name:'b',category:'water',quantity:4.5}]);assert.equal(E.available(s.items,'2026-11-19').water,5.5)});
+test('assess needs scale by people days rates',()=>{const s=base({persons:4,days:7});assert.equal(E.assess(s,'2026-11-19').detail.water.need,84);assert.equal(E.assess(s,'2026-11-19').detail.food.need,84);assert.equal(E.assess(s,'2026-11-19').detail.toilet.need,140)});
+test('assess minimum and deficit',()=>{const s=base({persons:1,days:3},[{name:'a',category:'water',quantity:9},{name:'b',category:'food',quantity:9},{name:'c',category:'toilet',quantity:10}]);const r=E.assess(s,'2026-11-19');assert.equal(r.minDays,2);assert.equal(r.covered,false);assert.equal(r.detail.toilet.short,5)});
+test('assess all covered',()=>{const s=base({persons:1,days:2},[{name:'a',category:'water',quantity:6},{name:'b',category:'food',quantity:6},{name:'c',category:'toilet',quantity:10}]);assert.equal(E.assess(s,'2026-11-19').covered,true)});
+test('budget plan respects zero budget',()=>{const s=base({budget:0});const p=E.budgetPlan(s,'2026-11-19');assert.equal(p.spent,0);assert.equal(p.remaining,0);assert.equal(p.complete,false)});
+test('budget plan respects exact pack cost',()=>{const s=base({persons:1,days:1,budget:150,packs:{water:{quantity:3,price:150},food:{quantity:3,price:300},toilet:{quantity:5,price:650}}});const p=E.budgetPlan(s,'2026-11-19');assert.equal(p.packsCount.water,1);assert.equal(p.spent,150);assert.equal(p.remaining,0)});
+test('budget plan completes with sufficient budget',()=>{const s=base({persons:1,days:1,budget:10000});const p=E.budgetPlan(s,'2026-11-19');assert.equal(p.complete,true);assert.ok(p.spent<=10000);for(const k of E.KEYS)assert.ok(p.after[k].short===0)});
+test('budget plan compares date expired stock',()=>{const s=base({persons:1,days:1,budget:10000},[{name:'a',category:'water',quantity:3,expiry:'2026-11-19'}]);assert.equal(E.budgetPlan(s,'2026-11-19').packsCount.water,0);assert.ok(E.budgetPlan(s,'2026-11-20').packsCount.water>0)});
+test('budget plan no overspending for randomized states',()=>{let seed=42;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/2**32};for(let i=0;i<200;i++){
+ const persons=1+Math.floor(rand()*9),days=1+Math.floor(rand()*20),budget=Math.floor(rand()*40000);
+ const rates={water:1+rand()*4,food:1+rand()*4,toilet:2+rand()*6};
+ const packs={};for(const k of E.KEYS)packs[k]={quantity:1+Math.floor(rand()*20),price:1+Math.floor(rand()*1000)};
+ const s=base({persons,days,budget,rates,packs});const p=E.budgetPlan(s,'2026-11-19');
+ assert.ok(p.spent<=budget);assert.equal(p.spent+p.remaining,budget);
+ for(const k of E.KEYS){assert.ok(p.after[k].have>=0);assert.equal(p.after[k].have,p.packsCount[k]*packs[k].quantity)}
+ }});
+test('rotation sorts expires and includes expired',()=>{const s=base({},[{name:'later',category:'food',quantity:1,expiry:'2026-12-19'},{name:'early',category:'food',quantity:1,expiry:'2026-11-18'},{name:'fine',category:'food',quantity:1,expiry:'2027-01-01'}]);const r=E.rotate(s.items,'2026-11-19',30);assert.deepEqual(r.map(x=>x.name),['early','later']);assert.equal(r[0].status,'期限切れ');assert.equal(r[1].status,'期限間近')});
+test('CSV quotes and formula injection',()=>{const s=base({},[{name:'=DANGEROUS',category:'food',quantity:3,location:'"a,b"'}]);const csv=E.toCSV(s.items);assert.ok(csv.startsWith('\uFEFF'));assert.ok(csv.includes("'=DANGEROUS"));assert.ok(csv.includes('""a,b""'))});
+test('defensive invalid as-of date',()=>assert.throws(()=>E.available([],'2026-02-30'),/評価日/));
+test('no inventory mutations in planning',()=>{const s=base({budget:10000},[{name:'water',category:'water',quantity:10}]);const snap=JSON.stringify(s);E.budgetPlan(s,'2026-11-19');assert.equal(JSON.stringify(s),snap)});
