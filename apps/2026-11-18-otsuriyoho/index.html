@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="おつり予報｜マルシェ・学園祭の釣銭準備を、商品価格と支払傾向からシミュレーション。ブラウザだけで使える無料ツール。">
+  <title>おつり予報｜小さな売り場の釣銭プランナー</title>
+  <link rel="stylesheet" href="./style.css"><script src="./engine.js" defer></script><script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="site-header"><div class="brand"><div class="mark" aria-hidden="true">¥</div><div><strong>おつり予報</strong><span>OTSURI YOHO · CASH FLOAT STUDIO</span></div></div><span class="offline-tag">● ローカル完結 / 無料</span></header>
+  <main class="shell">
+    <section class="hero"><div><div class="eyebrow">FOR POP-UP STORES & LOCAL MARKETS</div><h1>おつり、<em>足りますか？</em></h1><p>出店前に「何円玉を何枚？」を数字で試す。商品・来客・支払い傾向を設定して、釣銭不足のシナリオと追加準備のヒントを確認しましょう。</p></div><div class="hero-symbol" aria-hidden="true"><div class="hero-note">予測ではなく、<b>試算。</b></div><div class="coin coin1">¥100</div><div class="coin coin2">¥500</div><div class="coin coin3">¥50</div></div></section>
+    <div class="actionbar"><div class="preset-group"><label for="preset">はじめる</label><select id="preset" aria-label="サンプルシナリオ"><option value="market">週末マルシェ</option><option value="flea">フリーマーケット</option><option value="school">学園祭の模擬店</option></select><button type="button" id="load-preset" class="btn-secondary">例を読み込む</button></div><div class="action-buttons"><button type="button" id="import-btn" class="btn-quiet">JSONを読込</button><input type="file" id="json-file" accept="application/json,.json" hidden><button type="button" id="export-json" class="btn-quiet">JSON保存</button><button type="button" id="export-csv" class="btn-quiet">CSVレポート</button><button type="button" id="print-btn" class="btn-quiet">印刷</button></div></div>
+    <div class="workspace"><div class="config-column">
+      <section class="panel" aria-labelledby="products-heading"><div class="panel-head"><div><span class="section-n">01 / PRODUCTS</span><h2 id="products-heading">売りものと価格</h2><p>売れ行き比率は相対的な重み。合計100でなくても使えます。</p></div><button type="button" class="btn-secondary compact" id="add-product">＋ 商品追加</button></div><div class="table-wrap"><table class="edit-table" aria-label="商品設定"><thead><tr><th>商品名</th><th>価格 / 円</th><th>重み</th><th><span class="sr-only">削除</span></th></tr></thead><tbody id="product-rows"></tbody></table></div></section>
+      <section class="panel" aria-labelledby="scenario-heading"><div class="panel-head"><div><span class="section-n">02 / SCENARIO</span><h2 id="scenario-heading">当日の見込み</h2><p>現金払いだけを対象にします。キャッシュレス取引は除外してください。</p></div></div><div class="fields-grid"><label class="field">シナリオ名<input id="scenario-name" type="text" maxlength="60"></label><label class="field">現金払いの来客数<input id="count" type="number" min="1" max="500" step="1"></label><label class="field">2商品購入の確率 / %<input id="pairChance" type="number" min="0" max="100" step="1"></label><label class="field">反復シミュレーション数<input id="runs" type="number" min="1" max="100" step="1"></label><label class="field">追加準備の上限 / 円<input id="budget" type="number" min="0" max="100000" step="1"></label><label class="field">乱数シード<input id="seed" type="number" min="1" max="2147483647" step="1"></label></div><h3 class="subhead">お客さんの支払傾向 <span>合計100でなくても可</span></h3><div id="style-rows" class="style-grid"></div><p class="micro">例：「千円単位」は購入額以上の次の1,000円ちょうどで支払う想定です。実際の紙幣・硬貨の選び方はモデル化した単純な仮定です。</p></section>
+      <section class="panel" aria-labelledby="cash-heading"><div class="panel-head"><div><span class="section-n">03 / OPENING FLOAT</span><h2 id="cash-heading">開店時のつり銭</h2><p>硬貨・紙幣の枚数を入力してください。</p></div><div class="pill" id="float-total">—</div></div><div id="float-rows" class="denom-grid"></div></section>
+      <button type="button" id="run-btn" class="btn-primary full">シナリオを再計算 <span aria-hidden="true">↗</span></button><p class="micro centered">設定はこの端末内だけに保存。送信・課金なし。</p>
+    </div><div class="result-column">
+      <section class="panel results" aria-labelledby="result-heading"><div class="panel-head"><div><span class="section-n">04 / FORECAST</span><h2 id="result-heading">釣銭不足の見通し</h2><p id="run-meta">例を読み込んで試算します</p></div><span class="status-chip" id="result-state">参考値</span></div>
+       <div class="big-kpi"><div class="kpi-name">平均不足取引</div><div class="kpi-value"><strong id="avg-failed">—</strong><span>件 / 試行</span></div><div class="track"><div id="failure-bar" class="track-fill"></div></div><div id="failure-desc" class="kpi-foot">—</div></div>
+       <div class="kpi-grid"><div class="kpi"><div>1件以上不足する試行</div><strong id="risk">—</strong></div><div class="kpi"><div>90%点の不足件数</div><strong id="p90">—</strong></div><div class="kpi"><div>平均成立売上</div><strong id="sales">—</strong></div></div>
+       <h3 class="subhead">不足件数の分布 <span id="hist-note">—</span></h3><div id="histogram" class="histogram" role="img" aria-label="シミュレーションごとの不足件数"></div><p class="micro">シードを変えると異なる客順を試せます。各試行は同じ初期釣銭から始まります。</p>
+      </section>
+      <section class="panel recommendation" aria-labelledby="recommend-heading"><div class="panel-head"><div><span class="section-n">05 / PREPARE</span><h2 id="recommend-heading">追加するなら</h2><p>指定予算内で釣銭不足を減らす金種パックを近似探索。</p></div></div><div id="rec-summary" class="rec-summary">—</div><div id="rec-rows"></div><p class="micro">改善値は固定シードの簡易探索用サンプルで算出。最適解や当日の安全性は保証しません。</p></section>
+      <section class="panel" aria-labelledby="ledger-heading"><div class="panel-head"><div><span class="section-n">06 / FIRST RUN</span><h2 id="ledger-heading">最初の20取引</h2><p>一例の流れを確認できます。未成立の取引はレジ残高に反映しません。</p></div></div><div class="table-wrap"><table class="ledger-table"><thead><tr><th>#</th><th>買い物</th><th>支払</th><th>おつり</th><th>結果</th></tr></thead><tbody id="ledger-rows"></tbody></table></div></section>
+      <section class="panel live-check" aria-labelledby="calc-heading"><div class="panel-head"><div><span class="section-n">BONUS / QUICK CHECK</span><h2 id="calc-heading">その場のおつり計算</h2><p>設定した開店時金種で返せるか確認できます（残高は変更しません）。</p></div></div><div class="calc-fields"><label class="field">会計額 / 円<input type="number" min="0" max="100000" value="850" id="calc-price"></label><label class="field">お預かり / 円<input type="number" min="0" max="100000" value="1000" id="calc-tender"></label><button type="button" class="btn-secondary" id="calc-btn">計算</button></div><div id="calc-result" class="calc-result" aria-live="polite">—</div></section>
+    </div></div>
+    <p id="message" class="message" role="status" aria-live="polite"></p>
+    <footer><div><b>おつり予報</b> <span>© 2026 · MVP</span></div><p>これは準備用の確率的な試算です。支払傾向・商品構成が外れる場合や銀行での両替手数料、実際の金種制約は考慮していません。会計記録・税務処理には使用しないでください。</p></footer>
+  </main>
+</body>
+</html>
