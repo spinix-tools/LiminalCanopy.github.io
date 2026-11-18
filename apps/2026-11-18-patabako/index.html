@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122f42">
+  <meta name="description" content="商品サイズから、A4用紙で組み立てられる紙製トレイの展開図を作成。複数枚タイル印刷と紙代試算をブラウザだけで。">
+  <title>ぱた箱｜小さなお店の紙箱工房</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="ぱた箱の先頭へ"><span class="brand-mark">▣</span><span>ぱた箱 <small>PATABAKO</small></span></a>
+    <span class="pill">登録なし · オフライン · A4原寸</span>
+  </header>
+  <main id="top">
+    <section class="intro">
+      <div class="eyebrow"><span class="sparkle">✳</span> YOUR SMALL PACKAGING STUDIO</div>
+      <h1>ぴったりの箱を、<br><em>1枚の紙</em>から。</h1>
+      <p>商品サイズを入れるだけ。手づくりトレイの型紙、貼り合わせページ数、紙代まで一緒に見える小さな工房です。</p>
+      <div class="key"><span><i class="key-cut"></i>切る線</span><span><i class="key-fold"></i>折る線</span><span><i class="key-glue"></i>のりしろ</span></div>
+    </section>
+    <div class="workspace">
+      <section class="panel controls" aria-labelledby="settingsTitle">
+        <div class="section-head"><div class="step">01</div><div><span class="kicker">SIZE & MATERIAL</span><h2 id="settingsTitle">中身に合わせる</h2></div></div>
+        <div class="mini-label">サンプルから試す</div>
+        <div class="presets" role="group" aria-label="サイズのサンプル">
+          <button type="button" data-preset="accessory" class="preset active">アクセサリー</button>
+          <button type="button" data-preset="soap" class="preset">せっけん</button>
+          <button type="button" data-preset="gift" class="preset">ギフト</button>
+        </div>
+        <form id="configForm" novalidate>
+          <div class="field-title"><strong>商品サイズ</strong><span>mm・外形寸法</span></div>
+          <div class="field-grid">
+            <label>幅 <span>W</span><input id="productW" name="productW" type="number" inputmode="decimal" min="10" max="300" step="1" value="60" required></label>
+            <label>奥行 <span>D</span><input id="productD" name="productD" type="number" inputmode="decimal" min="10" max="300" step="1" value="48" required></label>
+            <label>高さ <span>H</span><input id="productH" name="productH" type="number" inputmode="decimal" min="5" max="200" step="1" value="28" required></label>
+          </div>
+          <label class="line-field"><span>内寸のゆとり <small>各辺 / mm</small></span><input id="gap" name="gap" type="number" min="0" max="10" step="0.5" value="2"></label>
+          <hr>
+          <div class="field-title"><strong>つくる数量と紙代</strong><span>試算用</span></div>
+          <div class="field-grid two">
+            <label>箱の個数 <span>個</span><input id="quantity" name="quantity" type="number" min="1" max="500" step="1" value="24"></label>
+            <label>A4用紙単価 <span>円</span><input id="sheetCost" name="sheetCost" type="number" min="0" max="1000" step="1" value="32"></label>
+          </div>
+          <label class="check-line"><input id="autoRotate" name="autoRotate" type="checkbox" checked><span>印刷枚数が少ない向きに自動回転</span></label>
+        </form>
+        <div class="help-note"><strong>設計について</strong><p>底面と4側面、4つののりしろがある「ふたなしトレイ」の展開図です。厚紙の折り線から採寸する簡易設計で、紙厚は補正していません。</p></div>
+        <div class="secondary-actions"><button type="button" id="saveJson">設定を保存</button><button type="button" id="loadJson">設定を読込</button><input type="file" accept=".json,application/json" id="loadFile" hidden><button type="button" id="reset">初期化</button></div>
+      </section>
+      <section class="panel outcome" aria-labelledby="previewTitle">
+        <div class="section-head"><div class="step">02</div><div><span class="kicker">CUT & FOLD</span><h2 id="previewTitle">展開図をつくる</h2></div><span class="live-pill"><span></span> LIVE</span></div>
+        <div class="statistics">
+          <div class="stat"><span>箱1個あたり</span><strong id="pagesPerBox">1<small>枚</small></strong><span>A4の必要枚数</span></div>
+          <div class="stat"><span>紙代の合計</span><strong id="totalCost">¥768</strong><span id="totalQty">24個の場合</span></div>
+          <div class="stat"><span>展開図の寸法</span><strong id="netSize" class="small-stat">124 × 112</strong><span>mm・回転後の向き</span></div>
+        </div>
+        <div class="canvas-head"><strong>原寸展開プレビュー</strong><span id="tileLabel">A4 1ページ</span></div>
+        <div class="preview-stage"><div id="svgPreview" aria-live="polite"></div><span class="stage-caption">線は図解用です。保存したSVGはmm指定の実寸データ。</span></div>
+        <div class="inner-spec" id="innerSpec"></div>
+        <div class="warning" id="warning" role="status"></div>
+        <div class="action-grid"><button type="button" class="primary" id="downloadSvg">展開図 SVG を保存 <span aria-hidden="true">↗</span></button><button type="button" class="dark" id="printTiles">A4でタイル印刷 <span aria-hidden="true">↗</span></button></div>
+        <button type="button" class="text-action" id="downloadCsv">紙代・枚数の内訳 CSV を保存</button>
+        <p class="print-hint">印刷時は「実際のサイズ / 100%」「A4・縦・余白10mm」を指定し、テスト印刷で定規を当ててください。2枚以上では8mm重ねて貼り合わせます。</p>
+      </section>
+    </div>
+    <section class="howto"><div><span class="kicker">HOW IT WORKS</span><h2>つくり方は、3ステップ。</h2></div><div class="howto-steps"><div><b>01</b><strong>SVGを原寸で印刷</strong><span>1ページならそのまま。複数ページなら8mm重ねる。</span></div><div><b>02</b><strong>赤線で切り、青線で折る</strong><span>厚紙なら折り線を軽くスジ入れ。</span></div><div><b>03</b><strong>緑のタブをのりで固定</strong><span>必ず試作品を作り、適合と強度を確かめる。</span></div></div></section>
+  </main>
+  <footer>© PATABAKO · 入力は端末内のみで処理 · 通信・アカウント・外部API不要</footer>
+  <div id="printArea" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="engine.js"></script><script src="app.js"></script>
+</body>
+</html>
