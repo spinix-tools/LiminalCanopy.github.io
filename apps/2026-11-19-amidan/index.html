@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#352638"><title>あみ段 | 編み物・増減目の段取り</title><meta name="description" content="ゲージと寸法から袖の増減目を段ごとに計算する、登録不要の編み物ノート。">
+<style>
+:root{--ink:#322b3b;--rose:#83506e;--paper:#f8f3ec;--line:#e6d9d0;--muted:#756c75}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:system-ui,-apple-system,"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;color:var(--ink);line-height:1.55}header{background:var(--ink);color:#fff;padding:15px max(20px,calc((100vw - 1150px)/2));font-weight:850;letter-spacing:.05em}header span{font-size:.72rem;color:#e8bfce;margin-left:12px;font-weight:500}main{max-width:1150px;margin:auto;padding:32px 20px 65px}.eyebrow{font-weight:850;letter-spacing:.15em;font-size:.75rem;color:var(--rose)}h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.3;margin:8px 0 7px;letter-spacing:-.04em}h2{font-size:1.17rem;margin:0 0 5px}.subtitle{font-size:.86rem;color:var(--muted);margin:0 0 17px}.lead{margin:0;color:var(--muted);max-width:680px}.intro{margin:0 0 25px}.layout{display:grid;grid-template-columns:365px minmax(0,1fr);align-items:start;gap:18px}.panel{background:#fffefa;border:1px solid var(--line);border-radius:19px;overflow:hidden;box-shadow:0 12px 30px #32253b0a}.pad{padding:22px}.stack{display:grid;gap:17px}.section{font-size:.74rem;font-weight:900;letter-spacing:.11em;color:var(--rose);border-bottom:1px solid var(--line);padding:7px 0;margin:16px 0 11px}label{font-size:.81rem;font-weight:750;display:block;color:#5f4e60;margin-bottom:4px}input,select{display:block;width:100%;padding:10px;border:1px solid #dbcfce;background:#fff;border-radius:10px;font:inherit;color:var(--ink);outline-color:var(--rose)}.row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px}.field{margin-bottom:12px}.hint{color:var(--muted);font-size:.76rem;margin:12px 0}.tip{border-radius:12px;border:1px solid #e7d7dd;background:#f8f0f3;padding:11px;color:#6c5765;font-size:.79rem}.buttons{display:flex;flex-wrap:wrap;gap:8px}.btn{border:1px solid #d5c6d0;color:#744a66;background:#fff;border-radius:10px;padding:10px 12px;font-size:.85rem;font-weight:800;cursor:pointer}.btn:hover{background:#f5ebf0}.btn:disabled{opacity:.36;cursor:default}.btn.primary{background:var(--rose);color:white;border-color:var(--rose)}.btn.large{font-size:1.05rem;padding:13px}.btn.flex{flex:1}.dark{background:linear-gradient(130deg,#352c41,#695273);color:#fff;border:0}.dark .subtitle{color:#eee0eb}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.metric{background:#ffffff18;padding:13px;border-radius:11px;border:1px solid #ffffff25}.metric strong{display:block;font-size:clamp(1.35rem,2.5vw,1.9rem);line-height:1.25}.metric span{display:block;font-size:.74rem;color:#f5e3eb;margin-top:6px}.metric small{display:block;font-size:.7rem;color:#f1dce7;margin-top:3px}#chart svg{width:100%;height:auto}#chart{border-radius:13px;border:1px solid #e5dcd7;background:#faf7f4;padding:10px}#warn{margin-top:12px}.warn{background:#fff4e9;border:1px solid #e6c7aa;color:#80562c;border-radius:11px;padding:12px;font-size:.84rem}.good{background:#eef9f1;border:1px solid #cce8d6;color:#356447}.error{background:#fff0ee;border:1px solid #e5bbba;color:#923c42}.progresshead{display:flex;justify-content:space-between;align-items:center;gap:10px}.num{font-size:3.8rem;font-weight:900;color:var(--rose);letter-spacing:-.08em}.num small{font-size:1rem;color:var(--muted);letter-spacing:0}.action{font-size:1rem;font-weight:800;margin:8px 0 3px}.track{height:11px;background:#efe6e9;border-radius:11px;overflow:hidden;margin:15px 0}.fill{height:100%;background:linear-gradient(90deg,#82516e,#cc889b);width:0}.between{display:flex;justify-content:space-between;color:var(--muted);font-size:.78rem}.scroll{border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:470px}table{border-collapse:collapse;width:100%;text-align:left}th,td{padding:11px;border-bottom:1px solid #eee8e3;font-size:.84rem}th{font-size:.73rem;background:#faf6f3;color:var(--muted)}tr.done{background:#edf7ef}tr.next{background:#fff4e7}td:first-child{font-weight:850;color:#74506d}.tag{border-radius:100px;padding:4px 8px;background:#f1e2eb;color:#80556d;font-size:.76rem;font-weight:700}.tag.down{background:#e1f0e6;color:#3d7760}.smallbtn{padding:5px 8px;font-size:.73rem}footer{margin-top:31px;font-size:.77rem;color:#807783;text-align:center}#file{display:none}#saved{font-size:.72rem;color:#e1d5e3}@media(max-width:850px){.layout{grid-template-columns:1fr}}@media(max-width:520px){main{padding:22px 13px 42px}.pad{padding:16px}.metrics{gap:6px}.metric{padding:9px}.metric strong{font-size:1.27rem}.metric span{font-size:.65rem}.num{font-size:3.2rem}th,td{padding:9px 6px}td:last-child,th:last-child{display:none}header span{display:none}}@media print{header,aside,.no-print,footer{display:none!important}body{background:white}main{padding:0}.layout{display:block}.stack{display:block}.panel{border:0;box-shadow:none;break-inside:avoid;margin-bottom:16px}.dark{background:white;color:#222;border-bottom:2px solid #222}.dark .subtitle,.metric small,.metric span{color:#444}.metric{color:#222;border:1px solid #aaa}.scroll{max-height:none;overflow:visible}.warn{color:#222;background:white}}
+</style></head><body>
+<header>🧶 あみ段 <span>AMIDAN — KNITTING ROW PLANNER</span></header>
+<main><section class="intro"><div class="eyebrow">FROM SWATCH TO STITCHES</div><h1>袖の増減目、<br>一段ずつ迷わない。</h1><p class="lead">ゲージと仕上がり寸法を入力するだけ。左右対称の増減目を段に割り振り、手元で進捗を数える日本語ツール。</p></section>
+<div class="layout"><aside class="panel"><div class="pad"><h2>01 / 編み地の設計</h2><p class="subtitle">サンプルを変更して、すぐに再計算できます。</p>
+<form id="inputs" onsubmit="return false">
+<div class="field"><label for="project">作品名</label><input id="project" value="袖の増し目プラン" maxlength="60"></div>
+<div class="section">ゲージ（10cmあたり）</div>
+<div class="row"><div><label for="gaugeSt">目数</label><input id="gaugeSt" type="number" value="22" min="1" max="100" step=".1"></div><div><label for="gaugeRow">段数</label><input id="gaugeRow" type="number" value="28" min="1" max="100" step=".1"></div></div>
+<div class="section">完成後の目標寸法</div>
+<div class="row"><div><label for="startCm">開始の幅 cm</label><input id="startCm" type="number" value="20" min="1" max="200" step=".5"></div><div><label for="endCm">終了の幅 cm</label><input id="endCm" type="number" value="34" min="1" max="200" step=".5"></div></div>
+<div class="field"><label for="lengthCm">段方向の長さ cm</label><input id="lengthCm" type="number" value="40" min="1" max="200" step=".5"></div>
+<div class="section">模様と段の制約</div>
+<div class="row"><div><label for="multiple">模様の繰り返し目数</label><input id="multiple" type="number" value="2" min="1" max="16" step="1"></div><div><label for="offset">余り目数</label><input id="offset" type="number" value="0" min="0" max="15" step="1"></div></div>
+<div class="field"><label for="side">増減目可能な段</label><select id="side"><option value="odd">奇数段（表側）</option><option value="even">偶数段（裏側）</option><option value="all">すべての段</option></select></div>
+<div class="row"><div><label for="headGap">冒頭で増減しない段数</label><input id="headGap" type="number" value="4" min="0" max="400" step="1"></div><div><label for="tailGap">末尾で増減しない段数</label><input id="tailGap" type="number" value="4" min="0" max="400" step="1"></div></div>
+</form>
+<div class="tip">1回の増減目段につき「左右の端で各1目」＝計2目の変化を想定。模様の処理や編地の伸縮まで保証する計算ではありません。</div>
+<div class="section">持ち出し・保管</div>
+<div class="buttons no-print"><button id="downloadJson" class="btn">JSON保存</button><button id="uploadBtn" class="btn">JSON読込</button><button id="downloadCsv" class="btn">CSV段表</button><button id="printBtn" class="btn">印刷</button></div><input id="file" type="file" accept=".json,application/json"><p class="hint">すべて端末内で計算。進捗は自動保存します。ブラウザのデータ削除に備えてJSONでバックアップしてください。</p>
+</div></aside>
+<div class="stack">
+<section class="panel dark"><div class="pad"><div class="between"><h2 id="title">袖の増し目プラン</h2><span id="saved">端末内に保存</span></div><p class="subtitle">ゲージから丸めた目数と予定段数</p>
+<div class="metrics"><div class="metric"><strong id="stStart">44目</strong><span>開始の目数</span><small id="cmStart">20.0cm</small></div><div class="metric"><strong id="stEnd">74目</strong><span>終了の目数</span><small id="cmEnd">33.6cm</small></div><div class="metric"><strong id="totalRows">112段</strong><span>全体の段数</span><small id="eventNum">増減目15回</small></div></div></div></section>
+<section class="panel"><div class="pad"><h2>02 / シルエットの見取り図</h2><p class="subtitle">横方向が目数・縦方向が編み進む段数。●が増減目の段です。</p><div id="chart" role="img" aria-label="目数変化の図"></div><div id="warn" aria-live="polite"></div></div></section>
+<section class="panel"><div class="pad"><div class="progresshead"><div><div class="eyebrow">ROW TRACKER</div><h2>03 / いまの段</h2></div><div class="num" id="currentNumber">0 <small>/ 112段</small></div></div><div class="action" id="action">1段目から始めましょう。</div><p id="next" class="subtitle">次の増し目段を計算中</p><div class="track"><div id="bar" class="fill"></div></div><div class="between"><span id="percent">進捗 0%</span><span id="currentSt">現在 44目</span></div><div class="buttons no-print" style="margin-top:16px"><button class="btn large" id="minus">− 1段</button><button class="btn large primary flex" id="plus">＋ 1段 編めた</button><button class="btn" id="reset">0段へ</button></div></div></section>
+<section class="panel"><div class="pad"><div class="between"><h2>04 / 増減目カレンダー</h2><strong id="eventLabel">15回</strong></div><p class="subtitle">段番号を押せば、その段まで「編み終えた」と記録します。</p><div class="scroll"><table><thead><tr><th>段</th><th>操作</th><th>終了時</th><th>進捗</th></tr></thead><tbody id="events"></tbody></table></div><p class="hint">CSVは増減目のない段も含め、全段の目数を出力します。</p></div></section>
+</div></div><footer>あみ段 v0.1 · 外部送信・有料APIなし · 実寸と模様は編み始める前に必ず確認してください。</footer>
+</main>
+<script id="engine">
+(function(root){
+"use strict";
+function valid(v,name,min,max,int){var n=Number(v);if(v===""||!Number.isFinite(n)||n<min||n>max||(int&&!Number.isInteger(n)))throw Error(name+" は "+min+"〜"+max+" の範囲で入力してください。");return n;}
+function clean(v){
+if(!v||typeof v!=="object")throw Error("入力がありません。");
+var a={project:String(v.project||"無題").slice(0,60),gaugeSt:valid(v.gaugeSt,"ゲージ目数",1,100),gaugeRow:valid(v.gaugeRow,"ゲージ段数",1,100),startCm:valid(v.startCm,"開始幅",1,200),endCm:valid(v.endCm,"終了幅",1,200),lengthCm:valid(v.lengthCm,"長さ",1,200),multiple:valid(v.multiple,"繰り返し",1,16,true),offset:valid(v.offset,"余り目",0,15,true),headGap:valid(v.headGap,"冒頭余白",0,400,true),tailGap:valid(v.tailGap,"末尾余白",0,400,true),side:String(v.side)};
+if(a.offset>=a.multiple)throw Error("余り目は繰り返し目数より小さくしてください。");
+if(!["odd","even","all"].includes(a.side))throw Error("増減段の指定が不正です。");return a;
+}
+function nearest(raw,m,o,parity){var best=null;for(var k=2;k<=1400;k++)if(k%m===o&&(parity===null||k%2===parity)){if(best===null||Math.abs(k-raw)<Math.abs(best-raw))best=k;}if(best===null)throw Error("目数を決められません。");return best;}
+function makePlan(input){
+var d=clean(input),start=nearest(d.startCm*d.gaugeSt/10,d.multiple,d.offset,null),end=nearest(d.endCm*d.gaugeSt/10,d.multiple,d.offset,start%2);
+var count=Math.max(1,Math.round(d.lengthCm*d.gaugeRow/10));if(count>900)throw Error("900段以下にしてください。");
+var slots=[];for(var r=d.headGap+1;r<=count-d.tailGap;r++)if(d.side==="all"||(d.side==="odd"&&r%2===1)||(d.side==="even"&&r%2===0))slots.push(r);
+var needed=Math.abs(end-start)/2;if(needed>slots.length)throw Error("増減 "+needed+"回に対して使える段が "+slots.length+"段です。余白や寸法を見直してください。");
+var picked=[],used=new Set();for(var i=0;i<needed;i++){var j=Math.round((i+1)*(slots.length+1)/(needed+1))-1;var low=i===0?0:slots.indexOf(picked[i-1])+1;j=Math.min(Math.max(low,j),slots.length-(needed-i));picked.push(slots[j]);used.add(slots[j]);}
+var change=Math.sign(end-start)*2,st=start,rows=[],events=[],bad=0;for(var row=1;row<=count;row++){var delta=used.has(row)?change:0;st+=delta;var result={row:row,delta:delta,stitches:st,cm:st*10/d.gaugeSt,patternOk:st%d.multiple===d.offset};if(!result.patternOk)bad++;rows.push(result);if(delta)events.push(result);}
+return{input:d,start:start,end:end,total:count,events:events,rows:rows,bad:bad,startCm:start*10/d.gaugeSt,endCm:end*10/d.gaugeSt};
+}
+root.AMIDAN={clean:clean,nearest:nearest,makePlan:makePlan};
+})(typeof window!=="undefined"?window:globalThis);
+</script>
+<script>
+(function(){
+"use strict";
+var DEFAULT={project:"袖の増し目プラン",gaugeSt:22,gaugeRow:28,startCm:20,endCm:34,lengthCm:40,multiple:2,offset:0,headGap:4,tailGap:4,side:"odd"};
+var KEYS=Object.keys(DEFAULT),STORAGE="amidan-v1",data=Object.assign({},DEFAULT),current=0,plan=null;
+function e(id){return document.getElementById(id);}
+function store(){try{localStorage.setItem(STORAGE,JSON.stringify({schema:"amidan-v1",input:data,current:current}));e("saved").textContent="端末内に保存";}catch(err){e("saved").textContent="保存できません：JSON保存を";}}
+function init(){try{var old=JSON.parse(localStorage.getItem(STORAGE)||"null");if(old&&old.schema==="amidan-v1"){var candidate=Object.assign({},DEFAULT,old.input);AMIDAN.makePlan(candidate);data=candidate;current=Math.max(0,Math.floor(Number(old.current)||0));}}catch(err){}KEYS.forEach(function(k){e(k).value=data[k];});draw();}
+function f(n){return Number(n).toFixed(1);}
+function chart(p){
+var w=600,h=215,l=42,b=30,t=22,min=Math.min(p.start,p.end)-8,max=Math.max(p.start,p.end)+8;
+function x(n){return l+(n-min)/(max-min)*(w-l-18);}function y(n){return h-b-n/p.total*(h-b-t);}
+var points=x(p.start)+","+y(0)+" "+p.rows.map(function(a){return x(a.stitches)+","+y(a.row);}).join(" ");
+var points2=p.events.map(function(a){return "<circle cx='"+x(a.stitches)+"' cy='"+y(a.row)+"' r='3.5' fill='#d68f73'/>";}).join("");
+var now=current? p.rows[current-1].stitches:p.start;
+e("chart").innerHTML="<svg viewBox='0 0 "+w+" "+h+"'><line x1='"+l+"' y1='"+t+"' x2='"+l+"' y2='"+(h-b)+"' stroke='#d6c6cb'/><line x1='"+l+"' y1='"+(h-b)+"' x2='"+(w-10)+"' y2='"+(h-b)+"' stroke='#d6c6cb'/><polyline points='"+points+"' fill='none' stroke='#865678' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>"+points2+"<circle cx='"+x(now)+"' cy='"+y(current)+"' r='6' fill='white' stroke='#78516e' stroke-width='3'/><text x='5' y='"+(t+4)+"' font-size='12' fill='#786c77'>"+p.total+"段</text><text x='14' y='"+(h-b+4)+"' font-size='12' fill='#786c77'>0段</text><text x='"+x(p.start)+"' y='"+(h-6)+"' text-anchor='middle' font-size='12' fill='#6e576d'>"+p.start+"目</text><text x='"+x(p.end)+"' y='13' text-anchor='middle' font-size='12' fill='#6e576d'>"+p.end+"目</text></svg>";
+}
+function draw(){
+e("title").textContent=data.project||"無題";
+try{plan=AMIDAN.makePlan(data);current=Math.min(current,plan.total);}catch(err){plan=null;e("chart").textContent="入力値を調整してください。";e("warn").textContent="";e("events").replaceChildren();e("eventLabel").textContent="—";e("action").textContent=err.message;e("next").textContent="計算を再開するには設定を見直してください。";e("currentNumber").textContent="—";e("stStart").textContent=e("stEnd").textContent=e("totalRows").textContent="—";["plus","minus","reset","downloadCsv"].forEach(function(id){e(id).disabled=true;});return;}
+["plus","minus","reset","downloadCsv"].forEach(function(id){e(id).disabled=false;});
+e("stStart").textContent=plan.start+"目";e("stEnd").textContent=plan.end+"目";e("totalRows").textContent=plan.total+"段";e("cmStart").textContent="約"+f(plan.startCm)+"cm";e("cmEnd").textContent="約"+f(plan.endCm)+"cm";e("eventNum").textContent="増減目 "+plan.events.length+"回";e("eventLabel").textContent=plan.events.length+"回";
+var warnings=[];if(Math.abs(plan.startCm-plan.input.startCm)>.5)warnings.push("開始幅が希望より "+f(Math.abs(plan.startCm-plan.input.startCm))+"cm ずれます。");if(Math.abs(plan.endCm-plan.input.endCm)>.5)warnings.push("終了幅が希望より "+f(Math.abs(plan.endCm-plan.input.endCm))+"cm ずれます。");if(plan.bad)warnings.push(plan.bad+"段で模様の目数条件が成立しません。模様の位置を手動で調整してください。");
+var w=document.createElement("div");w.className=warnings.length?"warn":"warn good";w.textContent=warnings.length?"注意： "+warnings.join(" "):"✓ 計算上は指定の段条件を満たしています。実寸は試し編みで確認してください。";e("warn").replaceChildren(w);
+e("currentNumber").innerHTML=current+" <small>/ "+plan.total+"段</small>";
+var now=current?plan.rows[current-1]:null;
+e("action").textContent=current===0?"1段目からスタート":current===plan.total?"すべての段が完了しました！":now.delta?current+"段目 完了：両端で1目ずつ"+(now.delta>0?"増やしました":"減らしました"):current+"段目 完了：増減目なし";
+var next=plan.events.find(function(a){return a.row>current;});
+e("next").textContent=next?"次の"+(next.delta>0?"増し目":"減らし目")+"は "+next.row+"段目（あと"+(next.row-current)+"段）":"この先の増減目はありません。";
+e("percent").textContent="進捗 "+Math.round(current/plan.total*100)+"%";e("bar").style.width=(current/plan.total*100)+"%";e("currentSt").textContent="現在 "+(now?now.stitches:plan.start)+"目";
+e("minus").disabled=current===0;e("plus").disabled=current===plan.total;
+var list=e("events");list.replaceChildren();
+if(!plan.events.length){var tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=4;td.textContent="増減目はありません。";tr.appendChild(td);list.appendChild(tr);}
+plan.events.forEach(function(a){var tr=document.createElement("tr");tr.className=a.row<=current?"done":a===next?"next":"";var n=document.createElement("td");n.textContent=a.row+"段目";var op=document.createElement("td"),tag=document.createElement("span");tag.className="tag "+(a.delta<0?"down":"");tag.textContent=a.delta>0?"両端＋1目":"両端−1目";op.appendChild(tag);var st=document.createElement("td");st.textContent=a.stitches+"目";var action=document.createElement("td"),btn=document.createElement("button");btn.className="btn smallbtn";btn.dataset.row=String(a.row);btn.textContent=a.row<=current?"完了済":"完了にする";btn.disabled=a.row<=current;action.appendChild(btn);tr.append(n,op,st,action);list.appendChild(tr);});
+chart(plan);
+}
+function update(){var d={};KEYS.forEach(function(k){d[k]=e(k).value;});data=d;current=0;draw();if(plan)store();}
+function file(name,content,mime){var blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+e("inputs").addEventListener("input",update);e("inputs").addEventListener("change",update);
+e("plus").addEventListener("click",function(){if(plan&&current<plan.total){current++;draw();store();}});
+e("minus").addEventListener("click",function(){if(plan&&current>0){current--;draw();store();}});
+e("reset").addEventListener("click",function(){current=0;draw();store();});
+e("events").addEventListener("click",function(ev){var b=ev.target.closest("[data-row]");if(b&&plan){current=Number(b.dataset.row);draw();store();}});
+e("downloadJson").addEventListener("click",function(){file("amidan-project.json",JSON.stringify({schema:"amidan-v1",input:data,current:current},null,2),"application/json");});
+e("downloadCsv").addEventListener("click",function(){if(!plan)return;var rows=["段,増減,段終了時の目数,計算上の幅cm,模様条件","0,開始,"+plan.start+","+f(plan.startCm)+",適合"];plan.rows.forEach(function(a){rows.push([a.row,a.delta,a.stitches,f(a.cm),a.patternOk?"適合":"不一致"].join(","));});file("amidan-rows.csv","\ufeff"+rows.join("\r\n"),"text/csv;charset=utf-8");});
+e("uploadBtn").addEventListener("click",function(){e("file").click();});
+e("file").addEventListener("change",async function(){var selected=this.files[0];if(!selected)return;try{if(selected.size>100000)throw Error("ファイルが100KBを超えています。");var json=JSON.parse(await selected.text());if(json.schema!=="amidan-v1"||!json.input)throw Error("あみ段の保存データではありません。");var c=Object.assign({},DEFAULT,json.input),p=AMIDAN.makePlan(c);data=p.input;current=Math.max(0,Math.min(p.total,Math.floor(Number(json.current)||0)));KEYS.forEach(function(k){e(k).value=data[k];});draw();store();alert("読み込みました。");}catch(err){alert("読込できません： "+err.message);}this.value="";});
+e("printBtn").addEventListener("click",function(){window.print();});init();if(plan)store();
+})();
+</script></body></html>
