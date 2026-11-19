@@ -1,0 +1,35 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const E=require('./engine.js');
+function base(){return {rest:0,people:[{id:'a',name:'A',roles:'*',available:'09:00-15:00',maxMinutes:300},{id:'b',name:'B',roles:'受付',available:'09:00-15:00',maxMinutes:300}],shifts:[{id:'s',role:'受付',start:'09:00',end:'10:00',count:1,critical:false}],locks:[]};}
+const simple=(ps,ss,rest=0)=>({people:ps,shifts:ss,rest,locks:[]});
+test('parse time',()=>{assert.equal(E.minutes('09:05'),545);assert.ok(Number.isNaN(E.minutes('24:00')));assert.ok(Number.isNaN(E.minutes('9:05')));});
+test('parse windows',()=>assert.deepEqual(E.windows('09:00-12:00, 13:00-17:00'),[[540,720],[780,1020]]));
+test('wildcard windows',()=>assert.deepEqual(E.windows('*'),[[0,1440]]));
+test('inspect valid demo',()=>assert.deepEqual(E.inspect(base()).errors,[]));
+test('reject duplicate person ids',()=>{const d=base();d.people.push({...d.people[0]});assert.ok(E.inspect(d).errors.length);});
+test('reject duplicate shift ids',()=>{const d=base();d.shifts.push({...d.shifts[0]});assert.ok(E.inspect(d).errors.length);});
+test('reject invalid availability',()=>{const d=base();d.people[0].available='9-13';assert.ok(E.inspect(d).errors.length);});
+test('reject end before start',()=>{const d=base();d.shifts[0].end='08:00';assert.ok(E.inspect(d).errors.length);});
+test('reject count > 5',()=>{const d=base();d.shifts[0].count=6;assert.ok(E.inspect(d).errors.length);});
+test('reject noninteger rest',()=>{const d=base();d.rest=5.5;assert.ok(E.inspect(d).errors.length);});
+test('reject no avail',()=>{const d=base();d.people[0].available='';assert.ok(E.inspect(d).errors.length);});
+test('role matching',()=>{const v=E.inspect(base());assert.ok(E.eligible(v.data.people[1],v.seats[0]));v.seats[0].role='誘導';assert.equal(E.eligible(v.data.people[1],v.seats[0]),false);});
+test('availability must entirely contain slot',()=>{const v=E.inspect(base());v.data.people[0].available='09:00-09:45';assert.equal(E.eligible(v.data.people[0],v.seats[0]),false);});
+test('non overlapping with required rest',()=>{const a={start:540,end:600},b={start:610,end:670};assert.equal(E.compatible(a,b,15),false);assert.equal(E.compatible(a,b,10),true);});
+test('one person cannot fill overlapping seats',()=>{const d=base();d.people=[d.people[0]];d.shifts[0].count=2;const r=E.solve(d);assert.equal(r.coverage,1);});
+test('role scarcity gets full placement via search',()=>{const d=base();d.shifts.push({id:'s2',role:'案内',start:'09:00',end:'10:00',count:1});const r=E.solve(d);assert.equal(r.coverage,2);assert.equal(r.assignments.find(a=>a.shiftId==='s2').person,'a');});
+test('maximum time stops overscheduling',()=>{const d=base();d.people=[d.people[0]];d.people[0].maxMinutes=60;d.shifts.push({id:'s2',role:'受付',start:'10:00',end:'11:00',count:1});assert.equal(E.solve(d).coverage,1);});
+test('locked seats honored',()=>{const d=base();d.locks=[{seat:'s#0',person:'b'}];const r=E.solve(d);assert.equal(r.assignments[0].person,'b');assert.equal(r.assignments[0].locked,true);});
+test('invalid lock availability detected',()=>{const d=base();d.people[1].available='11:00-12:00';d.locks=[{seat:'s#0',person:'b'}];assert.equal(E.solve(d).ok,false);});
+test('conflicting locks rejected',()=>{const d=base();d.people=[d.people[0]];d.shifts[0].count=2;d.locks=[{seat:'s#0',person:'a'},{seat:'s#1',person:'a'}];assert.equal(E.solve(d).ok,false);});
+test('invalid lock duplicated rejected',()=>{const d=base();d.locks=[{seat:'s#0',person:'a'},{seat:'s#0',person:'b'}];assert.equal(E.solve(d).ok,false);});
+test('unknown lock warned not fatal',()=>{const d=base();d.locks=[{seat:'foo',person:'a'}];const r=E.solve(d);assert.equal(r.ok,true);assert.equal(r.warnings.length,1);});
+test('prioritize critical seat',()=>{const d=base();d.people=[d.people[0]];d.shifts=[{id:'normal',role:'受付',start:'09:00',end:'10:00',count:1,critical:false},{id:'critical',role:'受付',start:'09:00',end:'10:00',count:1,critical:true}];const r=E.solve(d);assert.equal(r.coverage,1);assert.equal(r.assignments.find(x=>x.shiftId==='critical').person,'a');});
+test('CSV BOM and formula injection protected',()=>{const d=base();d.people[0].name='=HYPERLINK("evil")';d.people=[d.people[0]];const s=E.exportCSV(d,E.solve(d));assert.equal(s.charCodeAt(0),0xfeff);assert.ok(s.includes("'=HYPERLINK"));});
+test('CSV quotes escaped',()=>{assert.equal(E.csvCell('A"B'),'"A""B"');});
+test('empty seats handled',()=>{const d=base();d.shifts=[];const r=E.solve(d);assert.equal(r.ok,true);assert.equal(r.total,0);});
+test('too many slots uses heuristic',()=>{const d=base();d.shifts=Array.from({length:17},(_,i)=>({id:'s'+i,role:'受付',start:'09:00',end:'10:00',count:1}));const r=E.solve(d);assert.equal(r.ok,true);assert.equal(r.method,'greedy heuristic');});
+test('minimum rest edge exact',()=>{const d=base();d.people=[d.people[0]];d.rest=15;d.shifts.push({id:'s2',role:'受付',start:'10:15',end:'11:15',count:1});assert.equal(E.solve(d).coverage,2);});
+function bruteMinimum(d){const v=E.inspect(d);let min=Infinity;const alloc=new Map();function rec(i,miss){if(miss>=min)return;if(i===v.seats.length){min=miss;return;}const s=v.seats[i];for(const p of v.data.people){if(E.canUse(p,s,alloc,v.seatMap,d.rest)){alloc.set(s.id,p.id);rec(i+1,miss);alloc.delete(s.id);}}rec(i+1,miss+(s.critical?5:1));}rec(0,0);return min;}
+test('random small cases match exhaustive minimum unsatisfied weight (300)',()=>{let seed=2749;const next=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};for(let k=0;k<300;k++){let people=Array.from({length:2+Math.floor(next()*3)},(_,i)=>({id:'p'+i,name:'P'+i,roles:next()>.45?'*':'受付',available:'09:00-13:00',maxMinutes:60*(1+Math.floor(next()*3))}));let shifts=Array.from({length:2+Math.floor(next()*4)},(_,i)=>{const start=9+Math.floor(next()*3);return {id:'s'+i,role:next()>.35?'受付':'案内',start:String(start).padStart(2,'0')+':00',end:String(start+1).padStart(2,'0')+':00',count:1,critical:next()>.75};});const d=simple(people,shifts,next()>.5?15:0),r=E.solve(d,{nodeLimit:500000});assert.equal(r.missedWeight,bruteMinimum(d),'scenario '+k);assert.equal(E.validateAssignments(E.inspect(d),new Map(r.assignments.filter(a=>a.person).map(a=>[a.seat,a.person]))).length,0);}});
