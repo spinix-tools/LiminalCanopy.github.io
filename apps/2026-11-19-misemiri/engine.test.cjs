@@ -1,0 +1,38 @@
+const test=require('node:test'),assert=require('node:assert/strict'),E=require('./engine.js');
+const sample=()=>E.sample(), deep=o=>JSON.parse(JSON.stringify(o));
+test('demo plan is valid and has no warnings',()=>{const p=sample();assert.equal(p.items.length,5);assert.equal(E.inspect(p).warnings.length,0);});
+test('schema rejects invalid version, payload and too many items',()=>{assert.throws(()=>E.normalize(null));assert.throws(()=>E.normalize({version:2,items:[]}));assert.throws(()=>E.normalize({version:1,items:{}}));assert.throws(()=>E.normalize({version:1,items:Array.from({length:121},()=>({}))}));});
+test('dimensions and inputs are clamped',()=>{const p=sample();p.width=1;p.depth=1;p.margin=-3;p.checkoutWidth=9999;p.items[0].w=10000;p.items[0].name='x'.repeat(90);const n=E.normalize(p);assert.equal(n.width,400);assert.equal(n.depth,300);assert.equal(n.margin,0);assert.equal(n.checkoutWidth,1800);assert.equal(n.items[0].w,4000);assert.equal(n.items[0].name.length,60);});
+test('deduplicates IDs',()=>{const p=sample();p.items[1].id=p.items[0].id;const n=E.normalize(p);assert.equal(new Set(n.items.map(i=>i.id)).size,5);});
+test('supports no items',()=>{const p=sample();p.items=[];const r=E.inspect(p);assert.equal(r.ratio,0);assert.equal(r.total,0);});
+test('rectangle intersection strict touch and gaps',()=>{const a={x:0,y:0,w:100,d:100},b={x:100,y:0,w:50,d:50};assert.equal(E.intersects(a,b),false);assert.equal(E.intersects(a,b,10),true);assert.equal(E.intersects(a,{x:500,y:0,w:20,d:20},20),false);});
+test('contained requires edges inside',()=>{const a={x:0,y:0,w:100,d:100};assert.ok(E.contained({x:10,y:10,w:30,d:30},a));assert.ok(!E.contained({x:-1,y:10,w:30,d:30},a));});
+test('snap handles negative and positive',()=>{assert.equal(E.snap(26),30);assert.equal(E.snap(24),20);assert.equal(E.snap(-24),-20);});
+test('checkout zone anchored bottom right',()=>{const z=E.checkoutZone(sample());assert.deepEqual(z,{x:1490,y:640,w:310,d:260});});
+test('overlapping items are both flagged',()=>{const p=sample();p.items[1].x=80;p.items[1].y=450;const r=E.inspect(p);assert.ok(r.flags.a.includes('overlap'));assert.ok(r.flags.b.includes('overlap'));});
+test('minimum gap flags too-close rectangles',()=>{const p=sample();p.items=[{id:'x',name:'X',type:'商品',x:20,y:400,w:100,d:100},{id:'y',name:'Y',type:'商品',x:130,y:400,w:100,d:100}];const r=E.inspect(p);assert.equal(r.warnings.filter(w=>w.code==='overlap').length,1);p.gap=0;assert.equal(E.inspect(p).warnings.filter(w=>w.code==='overlap').length,0);});
+test('wall margin detects overhang',()=>{const p=sample();p.items[0].x=0;assert.ok(E.inspect(p).flags.a.includes('outside'));});
+test('items can have negative positions and are flagged',()=>{const p=sample();p.items[0].x=-80;assert.ok(E.inspect(p).flags.a.includes('outside'));});
+test('cashier-only space flags goods',()=>{const p=sample();p.items[0].x=1500;p.items[0].y=670;assert.ok(E.inspect(p).flags.a.includes('checkout'));});
+test('cashier must fit entirely inside zone',()=>{const p=sample();p.items[4].x=1370;assert.ok(E.inspect(p).flags.e.includes('checkout'));});
+test('zero checkout space disables goods intrusion but flags cashier',()=>{const p=sample();p.checkoutWidth=0;const r=E.inspect(p);assert.ok(r.flags.e.includes('checkout'));assert.ok(!r.flags.a);});
+test('customer reach heuristic only for products',()=>{const p=sample();p.items[0].y=25;assert.ok(E.inspect(p).flags.a.includes('reach'));p.items[0].type='什器';assert.ok(!E.inspect(p).flags.a?.includes('reach'));});
+test('disabled reach never flags',()=>{const p=sample();p.items[0].y=25;p.reach=0;assert.ok(!E.inspect(p).flags.a?.includes('reach'));});
+test('ready count and total count',()=>{const r=E.inspect(sample());assert.equal(r.ready,2);assert.equal(r.total,5);});
+test('area ratio aggregates item areas without hiding overlaps',()=>{const p=sample();const r=E.inspect(p);const sum=p.items.reduce((s,i)=>s+i.w*i.d,0);assert.equal(r.occupied,sum);assert.equal(r.ratio,sum/(1800*900));});
+test('autoplacement retains original item IDs',()=>{const p=sample();const r=E.autoArrange(p);assert.deepEqual(r.plan.items.map(i=>i.id),p.items.map(i=>i.id));});
+test('autoplacement nonoverlapping and in bounds for default',()=>{const r=E.autoArrange(sample());assert.deepEqual(r.failed,[]);assert.ok(!E.inspect(r.plan).warnings.some(w=>['overlap','outside','checkout'].includes(w.code)));});
+test('autoplacement does not mutate source',()=>{const p=sample(),str=JSON.stringify(p);E.autoArrange(p);assert.equal(JSON.stringify(p),str);});
+test('autoplacement marks impossible items',()=>{const p=sample();p.width=400;p.depth=300;p.items=[{id:'huge',name:'too-big',w:800,d:800,x:0,y:0,type:'什器',qty:1}];const r=E.autoArrange(p);assert.deepEqual(r.failed,['huge']);});
+test('positionFits obeys no overlap and checkout zone',()=>{const p=sample();assert.equal(E.positionFits(p.items[0],p,p.items.slice(1)),true);assert.equal(E.positionFits({...p.items[0],x:0},p,[]),false);});
+test('csv has BOM, CRLF and labels',()=>{const s=E.toCsv(sample());assert.ok(s.startsWith('\ufeffID,名称'));assert.ok(s.includes('\r\n'));assert.ok(s.includes('イヤリング'));});
+test('csv formula text is emitted as text with quote escaping',()=>{const p=sample();p.items[0].name='"quoted, name"';assert.ok(E.toCsv(p).includes('""quoted, name""'));});
+test('SVG escapes untrusted artwork names and title',()=>{const p=sample();p.title='<script>bad</script>';p.items[0].name='<img onload="bad">';const s=E.toSvg(p);assert.ok(!s.includes('<script>'));assert.ok(!s.includes('<img'));assert.ok(s.includes('&lt;script&gt;'));assert.ok(s.includes('&quot;'));});
+test('SVG contains defined items and viewBox',()=>{const s=E.toSvg(sample());assert.match(s,/viewBox="-50 -75/);assert.match(s,/イヤリング/);});
+test('JSON roundtrip preserves checks and geometry',()=>{const p=sample(),n=E.normalize(JSON.parse(JSON.stringify(p)));assert.deepEqual(n,p);});
+for(const [width,depth,checkoutWidth,checkoutDepth] of [[900,500,200,150],[1200,650,260,200],[1800,900,310,260],[2400,1200,350,300]]){
+  test('auto layout geometry '+width+'x'+depth,()=>{const p=sample();p.width=width;p.depth=depth;p.checkoutWidth=checkoutWidth;p.checkoutDepth=checkoutDepth;p.items=[{id:'a',name:'A',w:140,d:90,type:'商品',qty:1},{id:'b',name:'B',w:150,d:100,type:'什器',qty:1},{id:'c',name:'C',w:120,d:80,type:'案内',qty:1},{id:'d',name:'D',w:120,d:70,type:'会計',qty:1}];const r=E.autoArrange(p);assert.deepEqual(r.failed,[]);assert.equal(E.inspect(r.plan).warnings.filter(w=>['outside','overlap','checkout'].includes(w.code)).length,0);});
+}
+test('spreadsheet formula names escaped in CSV',()=>{const p=sample();p.items[0].name='=HYPERLINK("https://example.com")';const c=E.toCsv(p);assert.ok(c.includes("'=HYPERLINK"));});
+test('same ID as generated replacement is resolved',()=>{const p=sample();p.items[0].id='item1';p.items[1].id='item1';const q=E.normalize(p);assert.equal(new Set(q.items.map(x=>x.id)).size,p.items.length);});
+test('large 100-item table autoplaces without algorithmic explosion',()=>{const p=sample();p.width=6000;p.depth=4000;p.checkoutWidth=0;p.checkoutDepth=0;p.items=Array.from({length:100},(_,i)=>({id:String(i),name:'object',x:0,y:0,w:70,d:70,type:'什器',qty:1}));const s=Date.now(),r=E.autoArrange(p);assert.equal(r.failed.length,0);assert.ok(Date.now()-s<3000,'packing should stay below 3 seconds');assert.equal(E.inspect(r.plan).warnings.length,0);});
