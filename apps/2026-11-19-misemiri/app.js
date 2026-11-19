@@ -1,0 +1,66 @@
+/* MISEMIRI UI - all data stays in the browser. */
+(function(){
+'use strict';
+const E=window.MiseEngine, KEY='misemiri.v1', colors={'商品':'#c8e8d8','什器':'#ded8f7','案内':'#f8deac','会計':'#f8c6a5'};
+let plan=E.sample(), selected='a', history=[], dragging=null;
+const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])), id=()=>('i'+Date.now().toString(36)+Math.random().toString(36).slice(2,8));
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(plan));}catch(e){notice('端末保存できませんでした。JSON保存を使ってください。');}}
+function notice(s){$('#toast').textContent=s;}
+function snapshot(){history.push(JSON.stringify(plan));if(history.length>35)history.shift();}
+function mutate(fn,msg='更新しました'){snapshot();fn();plan=E.normalize(plan);persist();render();notice(msg);}
+function undo(){if(!history.length)return;plan=E.normalize(JSON.parse(history.pop()));selected=plan.items.some(i=>i.id===selected)?selected:plan.items[0]?.id;persist();render();notice('1操作戻しました');}
+function exportFile(filename,content,mime){const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+function slug(){return 'misemiri-'+new Date().toISOString().slice(0,10);}
+function add(preset){if(plan.items.length>=120){notice('登録できるのは120点までです');return;}const name=typeof preset==='string'?preset:(preset?.name||'商品'),spec=typeof preset==='object'?preset:{};if(!name.trim()){notice('名前を入力してください');return;}
+ const item={id:id(),name:name.slice(0,60),x:plan.margin+20,y:plan.margin+20,w:spec.w||200,d:spec.d||160,type:spec.type||'商品',qty:spec.qty||1,ready:false};mutate(()=>{plan.items.push(item);selected=item.id;},'什器を追加しました');}
+function getSelected(){return plan.items.find(i=>i.id===selected);}
+function draw(){const info=E.inspect(plan),svg=$('#surface');svg.setAttribute('viewBox',`0 0 ${plan.width} ${plan.depth}`);svg.setAttribute('preserveAspectRatio','xMidYMid meet');const lines=[];
+lines.push(`<defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" stroke="#dce6df" stroke-width="2" fill="none"/></pattern></defs>`);
+lines.push(`<rect x="0" y="0" width="${plan.width}" height="${plan.depth}" fill="#fefdf9"/><rect x="0" y="0" width="${plan.width}" height="${plan.depth}" fill="url(#grid)"/>`);
+const m=plan.margin;if(m)lines.push(`<rect x="${m}" y="${m}" width="${Math.max(0,plan.width-2*m)}" height="${Math.max(0,plan.depth-2*m)}" fill="none" stroke="#a5bbb1" stroke-dasharray="14 10" stroke-width="4"/>`);
+const z=info.zone;if(z.w&&z.d)lines.push(`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.d}" fill="#fce6d9" fill-opacity=".75" stroke="#d89979" stroke-width="5" stroke-dasharray="15 12"/><text x="${z.x+16}" y="${z.y+34}" font-size="27" fill="#b77255" font-weight="700">会計帯</text>`);
+const r=plan.reach;if(r>0)lines.push(`<line x1="0" x2="${plan.width}" y1="${Math.max(0,plan.depth-r)}" y2="${Math.max(0,plan.depth-r)}" stroke="#d7b983" stroke-width="4" stroke-dasharray="10 10"/>`);
+for(const item of plan.items){let warn=(info.flags[item.id]||[]).length>0, sel=item.id===selected;const font=Math.max(18,Math.min(31,item.w/11));lines.push(`<g data-id="${esc(item.id)}" class="piece"><rect x="${item.x}" y="${item.y}" width="${item.w}" height="${item.d}" rx="11" fill="${colors[item.type]}" stroke="${sel?'#1e5363':warn?'#d44b3a':'#698178'}" stroke-width="${sel?8:warn?6:3}"/><text pointer-events="none" x="${item.x+item.w/2}" y="${item.y+item.d/2-5}" font-size="${font}" font-weight="700" text-anchor="middle" fill="#253746">${esc(item.name)}</text><text pointer-events="none" x="${item.x+item.w/2}" y="${item.y+item.d/2+font}" font-size="${Math.min(22,font*.85)}" text-anchor="middle" fill="#58666d">${item.w} × ${item.d}</text>${item.ready?`<circle pointer-events="none" cx="${item.x+17}" cy="${item.y+17}" r="12" fill="#32785f"/><path pointer-events="none" d="M ${item.x+10} ${item.y+17} l5 5 8 -10" fill="none" stroke="#fff" stroke-width="3"/>`:''}</g>`);}
+lines.push(`<rect x="1" y="1" width="${plan.width-2}" height="${plan.depth-2}" fill="none" stroke="#243746" stroke-width="5" pointer-events="none"/>`);svg.innerHTML=lines.join('');
+$('#sizeSummary').textContent=`${plan.width.toLocaleString('ja-JP')} × ${plan.depth.toLocaleString('ja-JP')} mm`;
+}
+function render(){const info=E.inspect(plan);$('#titleField').value=plan.title;document.querySelectorAll('[data-plan]').forEach(el=>el.value=plan[el.dataset.plan]);$('#undo').disabled=history.length===0;$('#statArea').textContent=(info.ratio*100).toFixed(1)+'%';$('#statReady').textContent=`${info.ready} / ${info.total}`;$('#statWarn').textContent=info.warnings.length+'件';$('#status').textContent=info.warnings.length?'調整が必要':'干渉なし';$('#status').classList.toggle('bad',!!info.warnings.length);
+ const n=$('#notices');n.innerHTML=info.warnings.length?`<div class="warningBox"><strong>⚠ ${info.warnings.length} 件の確認事項</strong><ul>${info.warnings.slice(0,8).map(w=>`<li>${esc(w.msg)}</li>`).join('')}${info.warnings.length>8?`<li>ほか${info.warnings.length-8}件</li>`:''}</ul></div>`:`<div class="good">✓ 寸法モデル内で干渉は見つかりませんでした。現物の安定性は別途確認してください。</div>`;
+ draw();renderList(info);renderDetail(info);renderPrint(info);
+}
+function renderList(info){$('#items').innerHTML=plan.items.map(i=>`<div class="itemRow" role="button" tabindex="0" data-select="${esc(i.id)}" aria-selected="${i.id===selected}"><input type="checkbox" aria-label="${esc(i.name)} の準備完了" data-ready="${esc(i.id)}" ${i.ready?'checked':''}><div><div class="name">${esc(i.name)}</div><div class="sub">${esc(i.type)} · ${i.w}×${i.d} mm · ${i.qty}点</div></div><span class="chip ${info.flags[i.id]?'alert':''}">${info.flags[i.id]?'要確認':'OK'}</span><span aria-hidden="true">›</span></div>`).join('')||'<p class="muted">まだ什器がありません。左のボタンから追加できます。</p>';
+}
+function renderDetail(info){const i=getSelected();if(!i){$('#detail').innerHTML='<p class="muted">図面か一覧で什器を選んでください。</p>';return;}
+const field=(text,key,value,min,max)=>`<label>${text}<input type="number" data-item="${key}" value="${value}" min="${min}" max="${max}" step="10"></label>`;
+$('#detail').innerHTML=`<div class="detailGrid"><label class="full">名称<input maxlength="60" data-item="name" value="${esc(i.name)}"></label><label class="full">分類<select data-item="type">${E.TYPES.map(t=>`<option value="${t}" ${t===i.type?'selected':''}>${t}</option>`).join('')}</select></label>${field('左から (mm)','x',i.x,-8000,16000)}${field('奥から (mm)','y',i.y,-8000,12000)}${field('幅 (mm)','w',i.w,20,4000)}${field('奥行 (mm)','d',i.d,20,3000)}<label class="full">搬入個数<input data-item="qty" type="number" min="0" max="99999" step="1" value="${i.qty}"></label></div><p class="detailInfo">${info.flags[i.id]?`⚠ ${info.flags[i.id].join(' / ')}`:'✓ 位置・間隔は基準内'}<br>位置は左奥を原点とします。手前はお客様側です。</p><div class="rowActions"><button data-act="rotate">↻ 90°回転</button><button data-act="duplicate">複製</button><button data-act="delete" class="danger">削除</button></div>`;
+}
+function renderPrint(info){$('#printOnly').innerHTML=`<h1>${esc(plan.title)} — 店ミリ 設営図</h1><div>机 ${plan.width}×${plan.depth} mm / 余白 ${plan.margin}mm / 間隔 ${plan.gap}mm / 警告 ${info.warnings.length}件</div><div class="printDrawing">${E.toSvg(plan)}</div><h2>持参・設営リスト</h2><table><thead><tr><th>済</th><th>名称</th><th>分類</th><th>数量</th><th>左から</th><th>奥から</th><th>占有 (mm)</th></tr></thead><tbody>${plan.items.map(i=>`<tr><td>${i.ready?'✓':'□'}</td><td>${esc(i.name)}</td><td>${i.type}</td><td>${i.qty}</td><td>${i.x}</td><td>${i.y}</td><td>${i.w}×${i.d}</td></tr>`).join('')}</tbody></table><p class="footnote">※ 位置は机左奥基準。お客様側は図の下。実際の設営では荷重・転倒・火気・会場規則等を別途確認してください。</p>`;}
+function handleField(ev){const el=ev.target,k=el.dataset.plan;if(k){const n=Number(el.value);if(!Number.isFinite(n)){render();return;}if(n===plan[k])return;mutate(()=>{plan[k]=n;},'机の条件を更新しました');return;}
+ const ik=el.dataset.item;if(ik){const current=getSelected();if(!current)return;const v=ik==='type'||ik==='name'?el.value:Number(el.value);if(v===current[ik])return;mutate(()=>{current[ik]=v;},'什器を更新しました');}}
+function coordinate(event){const svg=$('#surface'),point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;return point.matrixTransform(svg.getScreenCTM().inverse());}
+function onDown(e){const g=e.target.closest('[data-id]');if(!g)return;const i=plan.items.find(it=>it.id===g.dataset.id);if(!i)return;selected=i.id;const pt=coordinate(e);dragging={pointer:e.pointerId,id:i.id,startX:pt.x,startY:pt.y,x:i.x,y:i.y,moved:false};e.currentTarget.setPointerCapture?.(e.pointerId);render();}
+function onMove(e){if(!dragging||dragging.pointer!==e.pointerId)return;const pt=coordinate(e),i=plan.items.find(x=>x.id===dragging.id);if(!i)return;const x=E.snap(dragging.x+pt.x-dragging.startX),y=E.snap(dragging.y+pt.y-dragging.startY);if(x===i.x&&y===i.y)return;
+ if(!dragging.moved){snapshot();dragging.moved=true;}i.x=x;i.y=y;
+ // Only redraw the SVG during movement: keep the inspector and list stable.
+ draw();}
+function onUp(e){if(!dragging||dragging.pointer!==e.pointerId)return;const moved=dragging.moved;dragging=null;if(moved){plan=E.normalize(plan);persist();}render();if(moved)notice('ドラッグ位置を保存しました');}
+function keyboard(e){const tag=document.activeElement?.tagName;if(['INPUT','TEXTAREA','SELECT'].includes(tag))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return;}
+ const i=getSelected();if(!i)return;const directions={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]};if(directions[e.key]){e.preventDefault();const [dx,dy]=directions[e.key];mutate(()=>{i.x+=dx;i.y+=dy;},'10mm移動しました');}else if(e.key==='Delete'){mutate(()=>{plan.items=plan.items.filter(it=>it.id!==i.id);selected=plan.items[0]?.id;},'削除しました');}}
+function bind(){E.presets.forEach(p=>{const b=document.createElement('button');b.type='button';b.textContent=`＋ ${p.name}`;b.addEventListener('click',()=>add(p));$('#presets').appendChild(b);});
+ $('#add').addEventListener('click',()=>{add($('#newName').value);$('#newName').value='';});$('#newName').addEventListener('keydown',e=>{if(e.key==='Enter')$('#add').click();});
+ $('#titleField').addEventListener('change',e=>mutate(()=>{plan.title=e.target.value.slice(0,80)||'無題の出店計画';}));document.querySelectorAll('[data-plan]').forEach(el=>el.addEventListener('change',handleField));$('#detail').addEventListener('change',handleField);
+ $('#detail').addEventListener('click',e=>{const b=e.target.closest('[data-act]'),i=getSelected();if(!b||!i)return;switch(b.dataset.act){case 'rotate':mutate(()=>{[i.w,i.d]=[i.d,i.w];},'90°回転しました');break;case 'duplicate':if(plan.items.length>=120)return notice('120点までです');mutate(()=>{const copy={...i,id:id(),name:i.name+' コピー',x:i.x+30,y:i.y+30,ready:false};plan.items.push(copy);selected=copy.id;},'複製しました');break;case 'delete':mutate(()=>{plan.items=plan.items.filter(it=>it.id!==i.id);selected=plan.items[0]?.id;},'削除しました');break;}});
+ $('#items').addEventListener('click',e=>{if(e.target.matches('[data-ready]'))return;const row=e.target.closest('[data-select]');if(row){selected=row.dataset.select;render();}});$('#items').addEventListener('keydown',e=>{if(e.target.matches('[data-select]')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selected=e.target.dataset.select;render();}});
+ $('#items').addEventListener('change',e=>{if(!e.target.matches('[data-ready]'))return;const i=plan.items.find(x=>x.id===e.target.dataset.ready);if(i)mutate(()=>{i.ready=e.target.checked;},'搬入チェックを更新しました');});
+ const svg=$('#surface');svg.addEventListener('pointerdown',onDown);svg.addEventListener('pointermove',onMove);svg.addEventListener('pointerup',onUp);svg.addEventListener('pointercancel',onUp);document.addEventListener('keydown',keyboard);
+ $('#undo').addEventListener('click',undo);$('#auto').addEventListener('click',()=>{const result=E.autoArrange(plan);mutate(()=>{plan=result.plan;},result.failed.length?`${result.failed.length}点は置けず元の位置のままです`:'空き場所へ仮配置しました');});
+ $('#reset').addEventListener('click',()=>{if(window.confirm('現在の計画をデモに戻しますか？'))mutate(()=>{plan=E.sample();selected='a';},'デモに戻しました');});
+ $('#save').addEventListener('click',()=>{exportFile(slug()+'.json',JSON.stringify(plan,null,2),'application/json');notice('JSONを保存しました');});
+ $('#csv').addEventListener('click',()=>{exportFile(slug()+'.csv',E.toCsv(plan),'text/csv;charset=utf-8');notice('CSVを出力しました');});
+ $('#svg').addEventListener('click',()=>{exportFile(slug()+'.svg',E.toSvg(plan),'image/svg+xml');notice('SVG図面を出力しました');});
+ $('#print').addEventListener('click',()=>window.print());$('#load').addEventListener('click',()=>$('#file').click());
+ $('#file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>2e6)throw Error('2MB以下のJSONを指定してください');const incoming=E.normalize(JSON.parse(await file.text()));mutate(()=>{plan=incoming;selected=plan.items[0]?.id;},'JSON計画を読み込みました');}catch(err){notice('読み込み失敗: '+err.message);}finally{e.target.value='';}});
+}
+try{const saved=localStorage.getItem(KEY);if(saved){plan=E.normalize(JSON.parse(saved));selected=plan.items[0]?.id;}}catch(e){/* Invalid local data -> safe demo. */}
+bind();render();
+})();
