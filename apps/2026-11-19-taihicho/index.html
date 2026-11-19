@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>たいひ帳 — たい肥のC:Nと水分を同時に整える</title>
+<style>
+:root{--ink:#173d2e;--muted:#647469;--line:#d9dfd4;--cream:#f7f6ec;--leaf:#2d714d;--leaf2:#e6f1de;--clay:#dd8855;--danger:#ad3c33;--shadow:0 12px 36px rgba(23,61,46,.08)}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d89c52;outline-offset:2px}h1,h2,h3,p{margin:0}a{color:var(--leaf)}.wrap{max-width:1280px;margin:auto;padding:0 25px 80px}header{background:var(--ink);color:#f4f4de;padding:19px 0}.nav{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:13px}.mark{font-size:27px;background:#ffffff13;border:1px solid #ffffff30;border-radius:15px;width:53px;height:53px;text-align:center;line-height:53px}header h1{font-size:24px;letter-spacing:.04em;line-height:1.2}header small{color:#c0d0bd;font-size:11px;letter-spacing:.06em}header .tag{border:1px solid #a9c3a5;color:#d7e7d2;border-radius:50px;padding:7px 13px;font-size:12px}.hero{padding:32px 0 27px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:18px}.eyebrow{text-transform:uppercase;letter-spacing:.18em;color:#768f69;font-size:12px;font-weight:800}.hero h2{font-size:clamp(26px,3.4vw,42px);letter-spacing:-.03em;line-height:1.34;margin:6px 0 10px}.hero p{color:var(--muted);max-width:670px}.btn{border-radius:10px;border:1px solid var(--line);background:white;color:var(--ink);padding:10px 14px;font-weight:700;transition:background .12s}.btn:hover{background:#eef3e9}.btn.primary{background:var(--leaf);border-color:var(--leaf);color:white}.btn.primary:hover{background:#20583c}.btn.accent{background:#e0e9c9}.btn.small{padding:5px 9px;font-size:12px}.btn.danger{color:var(--danger)}.actions{display:flex;flex-wrap:wrap;gap:8px}.layout{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(300px,.86fr);gap:20px}.panel{background:white;border:1px solid #e2e4d8;border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-bottom:20px}.sectionbar{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:15px}.sectionbar h3{font-size:19px}.subtitle{font-size:12px;color:var(--muted);margin-top:3px}.num{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;background:#e5eee0;border-radius:10px;font-size:13px;font-weight:900;margin-right:7px}.field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:#506a58;font-weight:700}.field input,.field select{width:100%;border:1px solid #c9d3c9;padding:9px 10px;border-radius:9px;background:#fff;color:var(--ink);min-width:0}.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}.scroll{overflow-x:auto}.ingredients{width:100%;border-collapse:separate;border-spacing:0 7px;min-width:610px}.ingredients th{text-align:left;font-size:11px;color:#5c7464;font-weight:700;padding:0 7px}.ingredients td{background:#f4f6f1;padding:7px 5px}.ingredients td:first-child{border-radius:9px 0 0 9px}.ingredients td:last-child{border-radius:0 9px 9px 0}.ingredients input{width:100%;border:1px solid #d7dfd3;padding:8px 7px;background:white;border-radius:6px;color:var(--ink);font-size:13px}.ingredients .name{min-width:128px}.ingredients .w75{width:75px}.hint{font-size:12px;color:var(--muted);margin:12px 0}.targetbox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:13px 0 18px}.targetbox .field{background:#f6f8f4;padding:11px;border-radius:12px}.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{border:1px solid #dde4d8;padding:15px;border-radius:14px;background:#f8faf5}.metric.after{background:#e9f1dd;border-color:#bdceb3}.metric h4{margin:0 0 12px;font-size:13px}.value{font-size:clamp(24px,3vw,33px);letter-spacing:-.04em;font-weight:800;line-height:1.16}.unit{font-size:12px;color:var(--muted);font-weight:500}.submetric{border-top:1px solid #dbe3d5;margin-top:12px;padding-top:12px}.gauge{height:9px;background:#dfe8dc;border-radius:20px;position:relative;margin-top:11px;overflow:hidden}.gauge>i{display:block;height:100%;background:var(--clay);width:0;border-radius:20px}.metric.after .gauge>i{background:var(--leaf)}.status{display:inline-block;padding:4px 8px;border-radius:7px;font-weight:700;font-size:12px;background:#e4eadd;margin-top:10px}.status.warn{background:#fbe9d8;color:#8b531f}.status.bad{background:#f9e1df;color:#902f29}.solve{background:#f0f4e9;border:1px solid #d6e2cd;padding:16px;border-radius:14px}.solve .fields{grid-template-columns:1fr 1fr}.proposal{margin:14px 0;padding:12px;background:#fff;border-radius:10px;border:1px solid #d4ddcf}.proposal strong{color:#1a5638}.proposal .big{font-size:23px;font-weight:800}.error{border-left:4px solid #c77742;background:#fff2e6;padding:12px;font-size:13px;margin:10px 0;color:#804615;border-radius:6px}.notice{border-left:4px solid #92a777;background:#f1f5eb;padding:12px;font-size:12px;color:#526851;border-radius:6px;margin-top:12px}.log{font-size:12px;color:#687b69}.recipe{display:flex;flex-direction:column;gap:10px}.recipeitem{display:grid;grid-template-columns:95px 1fr 50px;gap:10px;align-items:center;font-size:12px}.progress{height:11px;background:#ecede8;border-radius:15px;overflow:hidden}.progress span{display:block;height:100%;background:#87ad83}.empty{padding:12px;color:#788577;text-align:center}.footer{font-size:12px;color:#718074;margin-top:12px}.mini{font-size:11px;color:var(--muted)}@media(max-width:900px){.layout{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.panel{margin-bottom:15px}}@media(max-width:600px){.wrap{padding:0 13px 60px}.panel{padding:16px}.nav .tag{display:none}.fields{grid-template-columns:1fr 1fr}.compare{gap:6px}.metric{padding:12px}.hero{padding-top:23px}.actions{gap:6px}.btn{padding:9px 10px}}@media print{header,.actions,.print-hide,.solve .fields,button{display:none!important}body{background:white}.wrap{max-width:none}.panel{box-shadow:none;break-inside:avoid;border:1px solid #ccc}.layout{display:block}.ingredients input{border:none;padding:2px}.hero{padding:10px 0}}
+</style></head><body>
+<header><div class="wrap nav"><div class="brand"><div class="mark">🌿</div><div><h1>たいひ帳</h1><small>TAIHI CHŌ / COMPOST BALANCE STUDIO</small></div></div><span class="tag">無料 · 端末内だけで計算 · 登録不要</span></div></header>
+<main class="wrap"><div class="hero"><div><div class="eyebrow">COMPOST RECIPE WORKBENCH</div><h2>生ごみと落ち葉の「ちょうどいい」を、<br>数字で試してから混ぜよう。</h2><p>重量・含水率・炭素／窒素比から現状を概算し、2種類の追加材で<strong> C:N比と水分の両方</strong>を目標へ近づける分量を計算します。</p></div><div class="actions print-hide"><button class="btn" id="reset">サンプルに戻す</button><button class="btn" id="print">🖨 印刷</button></div></div>
+<div class="layout"><div>
+<section class="panel"><div class="sectionbar"><div><h3><span class="num">1</span>いま混ぜる材料</h3><p class="subtitle">「重さ」は水分込みの実重量 (kg)。推定値は手元の材質に合わせて修正できます。</p></div><button class="btn small" id="add">＋ 材料を追加</button></div>
+<div class="scroll"><table class="ingredients" aria-label="材料の編集"><thead><tr><th>材料名</th><th>重量<br>kg</th><th>水分<br>%</th><th>C:N</th><th>乾物N<br>%</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p class="hint">C:Nは元素炭素:窒素の比、乾物N%は乾燥物に含まれる窒素の質量割合です。<strong>比の単純平均はしません。</strong></p>
+<div class="actions print-hide"><button class="btn" id="csv">材料CSV</button><button class="btn" id="save">設定JSON保存</button><button class="btn" id="load">JSON読込</button><input id="file" type="file" accept=".json,application/json" hidden></div></section>
+<section class="panel"><div class="sectionbar"><div><h3><span class="num">2</span>二つの目標</h3><p class="subtitle">推奨範囲は一般的な好気性コンポストの目安です。</p></div></div><div class="targetbox"><label class="field">目標 C:N 比<input id="targetCN" type="number" min="10" max="100" step="1" value="30"></label><label class="field">目標含水率 (%)<input id="targetM" type="number" min="20" max="85" step="1" value="55"></label></div><div class="compare"><div class="metric"><h4>現在の推定値</h4><div class="value" id="beforeCN">--</div><div class="unit">C:N 比</div><div class="gauge"><i id="beforeBarC"></i></div><div class="submetric"><div class="value" id="beforeM">--</div><div class="unit">含水率</div><div class="gauge"><i id="beforeBarM"></i></div></div><span class="status" id="beforeStatus">---</span></div><div class="metric after"><h4>追加後の試算</h4><div class="value" id="afterCN">--</div><div class="unit">C:N 比</div><div class="gauge"><i id="afterBarC"></i></div><div class="submetric"><div class="value" id="afterM">--</div><div class="unit">含水率</div><div class="gauge"><i id="afterBarM"></i></div></div><span class="status" id="afterStatus">---</span></div></div><p class="footer">※ 本ツールは配合直後の理論質量収支。発酵中の蒸発、分解、通気、温度、安全性は予測しません。</p></section>
+<section class="panel"><div class="sectionbar"><div><h3><span class="num">3</span>材料が担う役割</h3><p class="subtitle">全炭素量への寄与（計算の内訳）。</p></div></div><div id="contributions" class="recipe"></div></section>
+</div><div>
+<section class="panel"><div class="sectionbar"><div><h3><span class="num">4</span>追加する材料を試す</h3><p class="subtitle">2種類を選ぶと、C:Nと水分の同時達成量を連立方程式で求めます。</p></div></div><div class="solve"><div class="fields"><label class="field">追加材 A<select id="candidateA"></select></label><label class="field">追加材 B<select id="candidateB"></select></label></div><div class="proposal" id="proposal" aria-live="polite">計算しています…</div><div class="actions print-hide"><button id="apply" class="btn primary">この追加案を材料へ反映</button><button id="clearPlan" class="btn">試算を解除</button></div></div><p class="notice">💡 目標値と材料の性質によっては、両方を同時に満たす<strong>正の追加量が存在しません</strong>。その場合は無理に補正案を作りません。</p></section>
+<section class="panel"><div class="sectionbar"><div><h3>配合後の内訳</h3><p class="subtitle">水分・乾燥物・元素C・Nを質量から積算。</p></div></div><div id="totals" class="recipe"></div></section>
+<section class="panel"><div class="sectionbar"><div><h3>材料の推定値について</h3></div></div><p class="hint">初期の材料値は教材用の仮定です。品種・乾燥具合・土や水分の混入で大きく変動します。堆肥化の成否は酸素・粒度・温度・衛生管理にも左右されます。食肉・油・病原リスクのある物は、自治体や管理者の指示に従ってください。</p><p class="hint">EPAは目安としてC:N約30:1を紹介しています。数式は <code>乾物=重量×(1−含水率)</code>、<code>N=乾物×N%</code>、<code>C=N×C:N</code> を使用します。</p><p class="mini">参考: <a href="https://www.epa.gov/sustainable-management-food/approaches-composting" target="_blank" rel="noopener noreferrer">US EPA Composting</a> / <a href="https://www.city.ogaki.lg.jp/0000065367.html" target="_blank" rel="noopener noreferrer">大垣市 生ごみ処理容器補助</a></p></section>
+</div></div><p class="footer">たいひ帳 v1.0 · このページは完全オフラインで動作します。読み込んだ値の外部送信はありません。</p></main>
+<script>
+// ENGINE_START
+const CompostEngine = (() => {
+  'use strict';
+  const LIBRARY = [
+    {id:'leaves',name:'乾燥落葉',moisture:20,cn:60,nitrogen:0.7},
+    {id:'coffee',name:'コーヒーかす',moisture:60,cn:20,nitrogen:2.0},
+    {id:'cardboard',name:'細断した段ボール',moisture:10,cn:120,nitrogen:0.35},
+    {id:'grass',name:'刈りたての草',moisture:80,cn:17,nitrogen:2.4},
+    {id:'straw',name:'乾燥わら',moisture:12,cn:80,nitrogen:0.7},
+    {id:'water',name:'水（加水用）',moisture:100,cn:0,nitrogen:0}
+  ];
+  function finite(v){return typeof v==='number'&&Number.isFinite(v)}
+  function checkIngredient(m){
+    if(!m || typeof m.name!=='string' || !m.name.trim() || m.name.length>90) throw Error('材料名は1〜90文字にしてください');
+    if(!finite(m.mass)||m.mass<0||m.mass>100000) throw Error('重量は0〜100000kgで入力してください');
+    if(!finite(m.moisture)||m.moisture<0||m.moisture>100) throw Error('水分は0〜100%で入力してください');
+    if(!finite(m.cn)||m.cn<0||m.cn>2000) throw Error('C:Nは0〜2000の範囲にしてください');
+    if(!finite(m.nitrogen)||m.nitrogen<0||m.nitrogen>30) throw Error('乾物N%は0〜30%で入力してください');
+    if((m.cn===0)!==(m.nitrogen===0)) throw Error('C:Nと窒素が0のときは両方0（水など）にしてください');
+    if(m.cn*m.nitrogen/100 > 1.000001) throw Error('乾物中の炭素が100%を超える組合せです');
+  }
+  function balance(items){
+    if(!Array.isArray(items)||items.length>150) throw Error('材料は150件までです');
+    let mass=0,water=0,dry=0,n=0,c=0;
+    const contributions=[];
+    for(const m of items){
+      checkIngredient(m);
+      const dm=m.mass*(1-m.moisture/100), ni=dm*m.nitrogen/100, ca=ni*m.cn;
+      mass+=m.mass; water+=m.mass*m.moisture/100; dry+=dm;n+=ni;c+=ca;
+      contributions.push({name:m.name,mass:m.mass,water:m.mass*m.moisture/100,dry:dm,n:ni,c:ca});
+    }
+    return {mass,water,dry,n,c,cn:n>1e-12?c/n:null,moisture:mass>1e-12?water/mass*100:null,contributions};
+  }
+  function addMaterial(a,mass){return {name:a.name,mass,moisture:a.moisture,cn:a.cn,nitrogen:a.nitrogen}}
+  function solve(base,a,b,targetCN,targetM){
+    if(!finite(targetCN)||targetCN<10||targetCN>100||!finite(targetM)||targetM<20||targetM>85) throw Error('目標値が範囲外です');
+    checkIngredient(addMaterial(a,0));checkIngredient(addMaterial(b,0));
+    if(!finite(base.mass)||base.mass<=0||base.n<=0) return {ok:false,reason:'材料と窒素量を登録してください'};
+    const per = z=>{const n=(1-z.moisture/100)*z.nitrogen/100;return {a:n*(z.cn-targetCN), b:z.moisture/100-targetM/100}}
+    const u=per(a),v=per(b),D=targetCN*base.n-base.c,E=targetM/100*base.mass-base.water;
+    const det=u.a*v.b-v.a*u.b;
+    if(Math.abs(det)<1e-12) return {ok:false,reason:'この2素材の働きが重なり、解を一意に決められません。別の組合せを選んでください'};
+    let x=(D*v.b-v.a*E)/det,y=(u.a*E-D*u.b)/det;
+    if(x < -1e-8 || y < -1e-8) return {ok:false,reason:'両方の目標を満たす正の追加量がありません。材料か目標を変えてください'};
+    x=Math.max(0,x);y=Math.max(0,y);
+    if(x+y>100000 || !Number.isFinite(x+y)) return {ok:false,reason:'必要量が大きすぎます。配合条件を見直してください'};
+    const after=balance([...base.contributions.map(p=>({name:p.name,mass:p.mass,moisture:p.mass?100*p.water/p.mass:0,cn:p.n>0?p.c/p.n:0,nitrogen:p.dry>0?100*p.n/p.dry:0})),addMaterial(a,x),addMaterial(b,y)]);
+    return {ok:true,x,y,after};
+  }
+  function classify(cn,moisture){
+    if(cn===null||moisture===null) return {label:'入力待ち',severity:'bad'};
+    if(cn>=25&&cn<=35&&moisture>=50&&moisture<=60) return {label:'目安範囲',severity:'good'};
+    if(cn<15||cn>80||moisture<25||moisture>80) return {label:'大きく偏り',severity:'bad'};
+    return {label:'調整の余地あり',severity:'warn'};
+  }
+  function validatedProject(v){
+    if(!v||typeof v!=='object'||!Array.isArray(v.items)||v.items.length>150)throw Error('不正なプロジェクト形式です');
+    const items=v.items.map((x)=>{const i={name:String(x.name??''),mass:Number(x.mass),moisture:Number(x.moisture),cn:Number(x.cn),nitrogen:Number(x.nitrogen)};checkIngredient(i);return i;});
+    const targetCN=Number(v.targetCN),targetM=Number(v.targetM);
+    if(!finite(targetCN)||targetCN<10||targetCN>100||!finite(targetM)||targetM<20||targetM>85) throw Error('目標値が不正です');
+    return {items,targetCN,targetM};
+  }
+  function csv(items){
+    const cell=s=>{let t=String(s);if(/^[=+@\-\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
+    return '\ufeff'+[['材料','重量kg','水分%','C:N','乾物N%'],...items.map(x=>[x.name,x.mass,x.moisture,x.cn,x.nitrogen])].map(r=>r.map(cell).join(',')).join('\r\n');
+  }
+  return {LIBRARY,balance,solve,classify,validatedProject,addMaterial,csv,checkIngredient};
+})();
+// ENGINE_END
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), E=CompostEngine;
+const DEFAULT={items:[{name:'野菜くず',mass:3,moisture:82,cn:18,nitrogen:2.2},{name:'乾燥落葉',mass:0.8,moisture:20,cn:60,nitrogen:0.7}],targetCN:30,targetM:55};
+const KEY='taihicho-v1-20261119';let state=JSON.parse(JSON.stringify(DEFAULT)),plan=null;
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fileOut(name,data,type){const blob=new Blob([data],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){/* local storage may be disabled */}}
+function renderRows(){const tbody=$('rows');tbody.replaceChildren();state.items.forEach((m,i)=>{
+const tr=document.createElement('tr');const props=[['name','text','name'],['mass','number','w75'],['moisture','number','w75'],['cn','number','w75'],['nitrogen','number','w75']];
+for(const [prop,type,cls]of props){const td=document.createElement('td');const inp=document.createElement('input');inp.type=type;inp.className=cls;inp.value=m[prop];inp.setAttribute('aria-label',`${m.name} ${prop}`);if(type==='number'){inp.min='0';inp.step='any';inp.max=prop==='mass'?'100000':prop==='cn'?'2000':'100';} inp.addEventListener('change',()=>{const val=type==='number'?Number(inp.value):inp.value;const next={...m,[prop]:val};try{E.checkIngredient(next);state.items[i]=next;update()}catch(e){alert(e.message);inp.value=m[prop];}});td.append(inp);tr.append(td)}const td=document.createElement('td');const btn=document.createElement('button');btn.className='btn small danger';btn.textContent='削除';btn.setAttribute('aria-label',`${m.name}を削除`);btn.onclick=()=>{state.items.splice(i,1);renderRows();update()};td.append(btn);tr.append(td);tbody.append(tr)});
+}
+function num(n,d=1){return n===null||!Number.isFinite(n)?'—':n.toLocaleString('ja-JP',{maximumFractionDigits:d})}
+function decorate(prefix,r){$(prefix+'CN').textContent=r.cn===null?'—':num(r.cn,1)+' : 1';$(prefix+'M').textContent=r.moisture===null?'—':num(r.moisture,1)+'%';$(prefix+'BarC').style.width=(r.cn===null?0:Math.min(100,r.cn/90*100))+'%';$(prefix+'BarM').style.width=(r.moisture===null?0:r.moisture)+'%';const c=E.classify(r.cn,r.moisture);$(prefix+'Status').textContent=c.label;$(prefix+'Status').className='status '+(c.severity==='good'?'':c.severity)}
+function breakdown(r){const total=Math.max(r.c,0);$('contributions').innerHTML=r.contributions.filter(x=>x.mass>0).map(x=>`<div class="recipeitem"><span title="${esc(x.name)}">${esc(x.name.slice(0,9))}</span><div class="progress"><span style="width:${total?x.c/total*100:0}%"></span></div><strong>${total?num(x.c/total*100,0):0}%</strong></div>`).join('')||'<p class="empty">材料を追加してください</p>';}
+function totals(r){let a=[['総重量',num(r.mass,2)+' kg'],['うち水分',num(r.water,2)+' kg'],['乾燥物',num(r.dry,2)+' kg'],['元素炭素 C',num(r.c,3)+' kg'],['元素窒素 N',num(r.n,3)+' kg']];$('totals').innerHTML=a.map(([k,v])=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #edf0ea;padding:6px 0"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}
+function update(){let base;try{base=E.balance(state.items)}catch(e){$('proposal').innerHTML='<div class="error">'+esc(e.message)+'</div>';return;}store();decorate('before',base);breakdown(base);$('targetCN').value=state.targetCN;$('targetM').value=state.targetM;const a=E.LIBRARY.find(x=>x.id===$('candidateA').value)||E.LIBRARY[0],b=E.LIBRARY.find(x=>x.id===$('candidateB').value)||E.LIBRARY[1];
+try{plan=E.solve(base,a,b,state.targetCN,state.targetM)}catch(e){plan={ok:false,reason:e.message}}
+if(plan.ok){decorate('after',plan.after);totals(plan.after);$('proposal').innerHTML=`<p>目標を同時に満たす理論量：</p><p class="big"><strong>${esc(a.name)}</strong> ${num(plan.x,2)} kg</p><p class="big"><strong>${esc(b.name)}</strong> ${num(plan.y,2)} kg</p><p class="mini">追加合計 ${num(plan.x+plan.y,2)} kg。小数2桁は表示用の丸め値です。</p>`}else{decorate('after',base);totals(base);$('proposal').innerHTML='<div class="error">'+esc(plan.reason)+'</div>'} $('apply').disabled=!plan.ok||plan.x+plan.y<1e-8}
+function init(){
+for(const id of ['candidateA','candidateB']) E.LIBRARY.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;$(id).append(o)});
+$('candidateA').value='leaves';$('candidateB').value='coffee';try{const raw=localStorage.getItem(KEY);if(raw)state=E.validatedProject(JSON.parse(raw))}catch(e){};
+renderRows();update();
+$('add').onclick=()=>{state.items.push({name:'新しい材料',mass:0.5,moisture:40,cn:35,nitrogen:1});renderRows();update()};
+$('reset').onclick=()=>{state=JSON.parse(JSON.stringify(DEFAULT));$('candidateA').value='leaves';$('candidateB').value='coffee';renderRows();update()};
+$('print').onclick=()=>window.print();
+for(const id of ['targetCN','targetM'])$(id).addEventListener('change',()=>{const v=Number($(id).value);const test={...state,[id]:v};try{E.validatedProject(test);state=test;update()}catch(e){alert(e.message);$(id).value=state[id]}});
+for(const id of ['candidateA','candidateB'])$(id).onchange=update;
+$('clearPlan').onclick=()=>{decorate('after',E.balance(state.items));$('proposal').textContent='試算を解除しました。材料を選び直すと再計算します。';$('apply').disabled=true;plan=null};
+$('apply').onclick=()=>{if(!plan?.ok)return;const a=E.LIBRARY.find(x=>x.id===$('candidateA').value),b=E.LIBRARY.find(x=>x.id===$('candidateB').value);if(plan.x>0)state.items.push(E.addMaterial(a,plan.x));if(plan.y>0)state.items.push(E.addMaterial(b,plan.y));renderRows();update()};
+$('csv').onclick=()=>fileOut('taihicho-materials.csv',E.csv(state.items),'text/csv;charset=utf-8');
+$('save').onclick=()=>fileOut('taihicho-project.json',JSON.stringify({version:1,...state},null,2),'application/json');
+$('load').onclick=()=>$('file').click();$('file').onchange=async ev=>{const f=ev.target.files?.[0];if(!f)return;try{if(f.size>100000)throw Error('ファイルは100KB以内にしてください');const parsed=JSON.parse(await f.text());state=E.validatedProject(parsed);renderRows();update()}catch(e){alert('読込失敗: '+e.message)}ev.target.value=''};
+}
+init();
+})();
+</script></body></html>
