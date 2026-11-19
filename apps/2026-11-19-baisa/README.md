@@ -5,6 +5,7 @@
 ## 選定理由と市場調査
 
 - 日本：全日本コーヒー協会の2026-11-05更新統計によると、**2025年の国内コーヒー消費量は397,272トン（前年比99.3%）**。これは広いコーヒー市場の規模であって、本アプリのユーザー数・支払意欲を示すデータではない。https://ajca.or.jp/data/
+- 海外需要：米国National Coffee Associationの2026-09-15発表では、2026年6月調査で**米国成人の48%が前日にスペシャルティコーヒーを飲用**。焙煎記録アプリの需要・課金意向を直接示すものではない。https://www.prnewswire.com/news-releases/nca-coffee-tops-beverage-charts-again-specialty-coffee-hits-new-high-302878684.html
 - 日本の競合： [RoastGenius](https://roastgenius.app/) は温度記録・焙煎条件・カッピングスコアの管理を提供。[OLLA Brew Lab](https://ollabrewlab.com/ja) はArtisanなど複数形式の取り込み・RoR再生・バッチ比較を提供。
 - 海外の競合：[Artisan Roast Comparator](https://artisan-scope.org/docs/comparator/) は最大10バッチの曲線比較とイベントによる時間位置合わせ、[Tandy Coffee Roast Lab](https://tandycoffeeroastlab.com/) は焙煎CSV解析と欠陥候補の検出を提供。
 - 国内外に実用品があるため、**曲線比較自体は新規ではない**。世界の主要な焙煎アプリが既に深い機能を持ち、強い競争がある。
