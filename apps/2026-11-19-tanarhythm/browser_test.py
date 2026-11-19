@@ -69,6 +69,7 @@ def run():
             page.get_by_role('button',name='サンプルに戻す').click()
             check(page.locator('.productTable tbody tr').count()==5,'reset sample')
             page.locator('#importJson').set_input_files(str(json_path))
+            page.wait_for_function('document.querySelectorAll(".productTable tbody tr").length===6',timeout=5000)
             check(page.locator('.productTable tbody tr').count()==6,'re-import json')
             check(page.locator('.nameField').last.input_value()=='手づくり缶詰','re-import contents')
             previous_store=page.evaluate('window.__store')
