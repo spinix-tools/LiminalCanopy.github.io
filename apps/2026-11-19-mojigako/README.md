@@ -26,7 +26,7 @@
 
 ## 実行・検証
 - `node --test engine.test.cjs`：**23/23 合格**（JSON検証、変数、疑似翻訳、幅判定、CSV式注入対策など）。
-- `python browser_test.py`：**29/29 合格**（Playwright + Chromium、画面編集・フィルタ・エクスポート・端末保存模擬・390pxモバイル表示）。
+- `python browser_test.py`：**30/30 合格**（Playwright + Chromium、画面編集・フィルタ・エクスポート・端末保存模擬・390pxモバイル表示）。
 - Chromium環境では `file://` ナビゲーションが管理者設定で遮断されたため、**同一 `index.html` を Playwright の `set_content()` でロード**し、`localStorage` をテスト内メモリオブジェクトで模擬。通常ブラウザでの `file://` 直接起動と保存永続性は未検証。
 
 ## 制約・安全
