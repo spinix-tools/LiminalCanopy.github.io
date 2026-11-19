@@ -34,7 +34,7 @@
 ## テスト
 
 - `node --test engine.test.cjs` — エンジン単体テスト、500ケースのシード固定乱択幾何検査。
-- `python browser_test.py` — Chromium + Playwright で画面操作・ダウンロード・読込・保存・在庫確定・Undo・レスポンシブ画面を確認。
+- `python browser_test.py` — Chromium + Playwright + Pillow で画面操作・ダウンロード・読込・保存・在庫確定・Undo・レスポンシブ画面を確認。
 - `node --check engine.js && node --check app.js` — 構文検査。
 
 結果はこの実行で検証した内容に更新する。
