@@ -67,7 +67,7 @@ function charCount(text){var s=String(text||"");return typeof Intl.Segmenter==="
 function parseCaptions(text){
   var source=String(text).replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").trim();
   if(!source)return[];
-  source=source.replace(/^WEBVTT[^\n]*\n?/,"");
+  source=source.replace(/^WEBVTT[^\n]*\n?/,"").trim();
   var blocks=source.split(/\n[ \t]*\n/), out=[];
   for(var b=0;b<blocks.length;b++){
     var lines=blocks[b].split("\n"), first=lines[0].trim();
