@@ -100,7 +100,7 @@
 .pair{flex:1;display:grid;grid-template-columns:1fr 1fr;border:1px solid #172639;position:relative}.tile{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3mm;border-right:1px dotted #667788}.tile:last-of-type{border-right:0}.tile strong{font-size:72pt;line-height:1}.tile.blank{background:#f2f3f4;color:#8c929b}.edge{font-size:14pt;letter-spacing:1px}.direction{font-size:12pt}.corner{position:absolute;bottom:6mm;left:6mm;font-size:10pt}.fold{position:absolute;left:50%;top:50%;background:#fff;transform:translate(-50%,-50%) rotate(-90deg);font-size:9pt;padding:2mm 3mm;white-space:nowrap;color:#737f8b}
 @media screen{.sheet{margin:12px auto;box-shadow:0 8px 30px #0002;transform-origin:top center;max-width:100%}body{overflow-x:auto}}
 @media print{body{background:white}.sheet{margin:0;box-shadow:none}.sheet:last-of-type{page-break-after:auto;break-after:auto}}
-</style></head><body>${pages}<script>/* No network calls or external dependencies */<\/script></body></html>`;
+</style></head><body>${pages}</body></html>`;
   }
   return { integer, validate, makePlan, estimate, orderedSides, csv, escapeHTML, printHTML };
 });
