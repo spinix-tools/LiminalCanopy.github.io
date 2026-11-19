@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="窓の結露リスクを24時間の温湿度データと断熱対策で比べる、無料・登録不要のオフラインWebアプリ。">
+<title>窓つゆ時報 | TSUYUDOKEI</title>
+<link rel="stylesheet" href="style.css">
+<script src="engine.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="shell topbar-inner"><a href="#top" class="brand" aria-label="窓つゆ時報 ホーム"><span class="brand-mark">◒</span><span>窓つゆ時報<small>TSUYUDOKEI</small></span></a><span class="privacy"><span class="green-dot"></span> 端末内で計算・保存</span></div></header>
+<main class="shell" id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-text"><span class="eyebrow">WINDOW CONDENSATION STUDIO · 24H</span><h1 id="hero-title">結露は、<br><em>何時に起きる？</em></h1><p>窓の断熱と室内の湿度を、24時間の温度変化で見比べる。<br>水滴がつきやすい時間帯も、80%超の湿潤時間も、ひと目で。</p><div class="hero-tags"><span>01 / 条件を編集</span><span>02 / 2案を比較</span><span>03 / 対策を持ち帰る</span></div></div>
+    <div class="hero-art" aria-hidden="true"><div class="art-window"><div class="art-pane"><div class="art-moon"></div><div class="art-drip d1"></div><div class="art-drip d2"></div><div class="art-drip d3"></div></div><div class="art-pane other"><div class="art-sun"></div></div></div><div class="art-note">-6°C <span>OUTSIDE</span><br>20°C <span>INSIDE</span></div></div>
+  </section>
+  <div class="main-grid">
+    <aside class="sidebar" aria-label="比較条件">
+      <section class="panel" id="conditions"><div class="section-kicker">SETUP / 01</div><h2>比較する窓と湿度</h2><p class="hint">Aは今の状態、Bは検討中の対策です。Bで湿度だけを変えることもできます。</p>
+        <label class="field"><span>メモ名</span><input id="report-title" maxlength="60" type="text" autocomplete="off"></label>
+        <div class="scenario-editor a-editor"><div class="scenario-head"><span class="scenario-letter letter-a">A</span><strong>現在の状態</strong></div><label class="field"><span>窓の種類（U値の目安）</span><select id="a-preset" aria-label="現在の窓種"><option value="5.8">単板ガラス · U 5.8</option><option value="3.5">古い複層ガラス · U 3.5</option><option value="2.7">Low-E複層 · U 2.7</option><option value="1.8">内窓併用（概算）· U 1.8</option><option value="1.1">高断熱（概算）· U 1.1</option><option value="custom">U値を直接入力</option></select></label>
+        <div class="field-pair"><label class="field"><span>U値 W/(m²K)</span><input id="a-u" type="number" step="0.1" min="0.6" max="6.5"></label><label class="field"><span>湿度補正 %pt</span><input id="a-delta" type="number" step="1" min="-40" max="30"></label></div>
+        <label class="field"><span>窓ぎわの空気の動き</span><select id="a-rsi"><option value="0.13">通常（室内側抵抗0.13）</option><option value="0.2">厚いカーテン等（0.20）</option></select></label></div>
+        <div class="scenario-editor b-editor"><div class="scenario-head"><span class="scenario-letter letter-b">B</span><strong>対策の候補</strong></div><label class="field"><span>対策後の窓</span><select id="b-preset" aria-label="対策後の窓種"><option value="5.8">単板ガラス · U 5.8</option><option value="3.5">古い複層ガラス · U 3.5</option><option value="2.7">Low-E複層 · U 2.7</option><option value="1.8">内窓併用（概算）· U 1.8</option><option value="1.1">高断熱（概算）· U 1.1</option><option value="custom">U値を直接入力</option></select></label>
+        <div class="field-pair"><label class="field"><span>U値 W/(m²K)</span><input id="b-u" type="number" step="0.1" min="0.6" max="6.5"></label><label class="field"><span>湿度補正 %pt</span><input id="b-delta" type="number" step="1" min="-40" max="30"></label></div>
+        <label class="field"><span>窓ぎわの空気の動き</span><select id="b-rsi"><option value="0.13">通常（室内側抵抗0.13）</option><option value="0.2">厚いカーテン等（0.20）</option></select></label></div>
+        <button class="btn primary full" id="recalculate">この条件で比較する <span aria-hidden="true">↗</span></button>
+        <div id="form-error" class="form-error" role="alert" hidden></div>
+      </section>
+      <section class="panel panel-small"><div class="section-kicker">FILES</div><h2>保存・共有</h2><p class="hint">計算はこのブラウザ内だけ。クラウドに送信しません。</p><div class="button-stack"><button id="export-csv" class="btn secondary">CSVの結果を保存 ↓</button><button id="export-json" class="btn secondary">編集用JSONを保存 ↓</button><button id="import-json" class="btn secondary">JSONを読み込む ↑</button><button id="import-csv" class="btn secondary">CSVから温湿度を復元 ↑</button><button id="print-report" class="btn secondary">印刷する ↗</button></div><input id="file-json" type="file" accept=".json,application/json" hidden><input id="file-csv" type="file" accept=".csv,text/csv" hidden><p class="save-label" id="saved-label">● 端末内の下書き</p></section>
+    </aside>
+    <div class="content">
+      <section class="panel data-panel"><div class="section-kicker">FORECAST / 02</div><div class="head-row"><div><h2>24時間の結露予報</h2><p class="hint">2時間ごとの代表値を入力。1行を2時間継続する条件として換算します。</p></div><div class="head-tools"><button id="preset-cold" class="btn compact selected">寒波の日</button><button id="preset-mild" class="btn compact">穏やかな日</button></div></div>
+       <div class="summary-grid" id="summary-grid" aria-live="polite"></div>
+       <div class="chart-head"><div><h3>窓表面の相対湿度</h3><p>80% 以上は長時間の湿潤に注意 / 100% 以上は結露の計算条件</p></div><div class="legend"><span><i class="legend-line la"></i> A 現状</span><span><i class="legend-line lb"></i> B 対策</span></div></div>
+       <div class="chart-box"><svg id="risk-chart" role="img" aria-label="2時間ごとの推定窓表面相対湿度を比較する折れ線グラフ" viewBox="0 0 800 275" preserveAspectRatio="xMidYMid meet"></svg></div>
+       <div class="readout" id="key-insight"></div>
+      </section>
+      <section class="panel timeline-panel"><div class="section-kicker">MEASURE / 03</div><div class="head-row"><div><h2>温湿度の時刻表</h2><p class="hint">例の値は架空です。温湿度計の記録に置き換えてください。</p></div><span class="mini-pill">12枠 × 2時間</span></div>
+        <div class="table-scroll"><table class="hour-table"><thead><tr><th>時刻</th><th>外気温<br><small>°C</small></th><th>室温<br><small>°C</small></th><th>室内湿度<br><small>%</small></th><th>窓A<br><small>表面RH</small></th><th>窓B<br><small>表面RH</small></th></tr></thead><tbody id="hour-rows"></tbody></table></div>
+        <div class="table-bottom"><p>室内湿度はAに使用する基準値です。Bは設定した湿度補正を加えて計算します。</p><button class="btn compact" id="reset-all">初期例に戻す ↺</button></div>
+      </section>
+      <section class="note-grid"><article class="note-card"><span>HOW TO READ / A</span><h3>「結露」と「湿潤」を分ける</h3><p>水滴の発生目安は窓表面の推定相対湿度100%。80%は湿った状態の観察用目安です。80%を越えたからといってカビの発生が確定するわけではありません。</p></article><article class="note-card"><span>HOW TO READ / B</span><h3>窓枠・隅・実測は別</h3><p>窓ガラス中央相当の単純な定常モデルです。サッシ、熱橋、日射、風、夜間放射、空気の動き、水蒸気の移動、氷点下の霜を正確には再現しません。</p></article></section>
+    </div>
+  </div>
+  <footer><span>© 2026 TSUYUDOKEI · 無料・オフライン・登録不要</span><span>参考用の簡易比較です。施工判断や健康・安全診断には使えません。</span></footer>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
