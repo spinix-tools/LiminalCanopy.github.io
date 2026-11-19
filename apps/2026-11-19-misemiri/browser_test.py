@@ -75,11 +75,13 @@ with sync_playwright() as p:
     custom={'version':1,'title':'再読込テスト','width':900,'depth':600,'margin':20,'gap':10,'reach':0,'checkoutWidth':150,'checkoutDepth':140,
             'items':[{'id':'one','name':'テーブル上の棚','x':50,'y':50,'w':250,'d':150,'type':'什器','qty':3,'ready':True}]}
     page.locator('#file').set_input_files({'name':'restore.json','mimeType':'application/json','buffer':json.dumps(custom,ensure_ascii=False).encode()})
+    page.wait_for_function("document.querySelector('#titleField').value === '再読込テスト'")
     check('JSON title imported',page.locator('#titleField').input_value()=='再読込テスト')
     check('JSON items restored',page.locator('#items .itemRow').count()==1)
     check('JSON ready status restored',page.locator('#statReady').inner_text()=='1 / 1')
     # Invalid import must not destroy state
     page.locator('#file').set_input_files({'name':'invalid.json','mimeType':'application/json','buffer':b'{bad-json'})
+    page.wait_for_function("document.querySelector('#toast').textContent.includes('読み込み失敗')")
     check('bad JSON rejected',page.locator('#titleField').input_value()=='再読込テスト')
     check('error reported to user','読み込み失敗' in page.locator('#toast').inner_text())
     # Drag item from center to right; compare inspector mm
