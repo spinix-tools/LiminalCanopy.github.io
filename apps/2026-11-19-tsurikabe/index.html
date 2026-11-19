@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#27483d"><title>つりかべ｜釣銭の壁を開店前に</title>
+<style>
+:root{font-family:system-ui,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#244238;background:#f7f6f0}*{box-sizing:border-box}body{margin:0}.app{max-width:1160px;margin:auto;padding:0 22px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d8e1d5;padding:20px 0;gap:10px;flex-wrap:wrap}header h2{margin:0;font-size:25px}header small{font-size:10px;color:#879c8c}.logo{color:#d87a45}.hero{background:#e4ebe0;padding:34px 40px;border-radius:17px;margin:25px 0}.hero h1{font-size:clamp(30px,4vw,48px);margin:10px 0;letter-spacing:-1px}.hero h1 em{font-style:normal;color:#d4784d}.hero p{font-size:13px;color:#687e71;line-height:1.9}.tag{display:inline-block;font-size:11px;border:1px solid #b7c9b7;border-radius:40px;padding:6px 10px;margin:7px 6px 0 0}.tabs{display:flex;border-bottom:1px solid #dce3d9;margin-bottom:25px;gap:8px}.tabs button{border:0;border-bottom:3px solid transparent;background:none;color:#8e9e93;padding:13px 20px}.tabs button.active{border-bottom-color:#ce855b;color:#244238;font-weight:800}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 14px;flex-wrap:wrap}.heading h2{margin:0;font-size:21px}.section-id{color:#ba774a;letter-spacing:2px;font:700 10px monospace}.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:17px}.card{background:#fff;border:1px solid #e4e9e1;border-radius:13px;padding:23px;min-width:0}.card h3{margin:0 0 5px}.muted{font-size:11px;color:#84988c}.grid-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{font-size:12px;color:#647d6e;display:block;margin:12px 0}input,select{display:block;width:100%;padding:10px;border:1px solid #d8e2d8;border-radius:8px;background:#fff;color:#244238;font:inherit;margin-top:7px;font-size:13px}button{font:inherit;cursor:pointer;border-radius:8px;padding:10px 12px;border:1px solid #ccd9cc;background:#fff;color:#2f5744;font-weight:700;font-size:12px}button:focus-visible,input:focus-visible{outline:3px solid #e8ae77}button.primary{background:#274e3c;color:#fff;border-color:#274e3c}button.warn{color:#b46e4c;background:#fff8f4}button:disabled{opacity:.45}table{width:100%;border-collapse:collapse;min-width:440px}th{text-align:left;color:#8b9f90;font-size:11px}td{padding:5px 3px}td input{margin:0;padding:7px;font-size:12px}td:nth-child(1){width:38%}.scroll{overflow-x:auto}.denoms{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.denom{border:1px solid #e3e7df;background:#fbfcf9;border-radius:9px;padding:12px}.denom label{margin:0;color:#263e33;font-weight:800}.denom small{font-size:10px;color:#95a397}.denom input{text-align:right;font-weight:800}.money{font-weight:900;color:#244b3c}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.metric{background:#284b3e;color:white;border-radius:12px;padding:18px}.metric:nth-child(2){background:#e7b76b;color:#284b3e}.metric:nth-child(3){background:#e5ede5;color:#284b3e}.metric strong{font-size:32px;display:block;margin:9px 0}.metric span{font-size:11px;opacity:.8}.risk{display:grid;grid-template-columns:1fr 1.3fr 55px;gap:9px;align-items:center;margin:15px 0;font-size:12px}.risk .track{height:13px;border-radius:20px;background:#edf1ea;overflow:hidden}.risk .fill{height:100%;background:#7da18b;border-radius:20px}.risk:first-child .fill{background:#d28355}.risk b{text-align:right;font-size:18px}.note{font-size:11px;line-height:1.9;background:#f2f3e9;color:#6f8174;padding:15px;border-radius:9px;margin:17px 0 45px}.register-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:17px}.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.tile{text-align:left;padding:17px;display:flex;flex-direction:column;gap:8px}.tile.active{border:2px solid #d78b53;background:#fff8ee}.live-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf0eb;font-size:12px}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.buttons button{flex:1}.status{font-size:12px;background:#eef3ec;padding:12px;border-radius:8px;line-height:1.8}.bar-stats{display:flex;gap:12px;margin-bottom:16px}.bar-stats div{background:#e5efe5;border-radius:10px;padding:14px;flex:1;font-size:12px}.bar-stats b{font-size:22px;display:block}footer{font-size:11px;color:#94a69a;border-top:1px solid #e2e8de;padding:24px 0 40px}[hidden]{display:none!important}@media(max-width:780px){.grid,.register-grid{grid-template-columns:minmax(0,1fr)}.denoms{grid-template-columns:repeat(2,1fr)}.app{padding:0 12px}.hero{padding:24px}.card{padding:17px}.metrics{gap:6px}.metric{padding:12px}.metric strong{font-size:24px}.risk{grid-template-columns:120px 1fr 48px}.bar-stats b{font-size:17px}}
+</style>
+</head>
+<body><div class="app">
+<header><div><h2><span class="logo">¥</span> つりかべ</h2><small>TSURIKABE / MARKET CASH LAB</small></div>
+<div><button id="backup">JSON保存 ↓</button> <button id="importBtn">JSON復元</button> <input type="file" id="import" accept=".json" hidden></div></header>
+<section class="hero"><small>SMALL SHOP · CASH FLOAT EXPERIMENT</small><h1>釣銭の壁を、<br><em>開店前</em>に見つけよう。</h1><p>日本円の金種を変えて、同じお客様が来たとしたら？<br>マルシェ・模擬店の「釣銭が足りない」を事前に試算。</p><span class="tag">日本円10金種</span><span class="tag">80日分を比較</span><span class="tag">完全ローカル</span></section>
+<div class="tabs"><button class="active" data-tab="plan">01 出店前の準備</button><button data-tab="live">02 当日のミニレジ</button></div>
+<section id="plan">
+<div class="heading"><div><span class="section-id">01 — SET UP</span><h2>商品の値段と販売の見込み</h2></div><button id="reset" class="warn">↶ 初期サンプルに戻す</button></div>
+<div class="grid"><article class="card"><h3>商品一覧</h3><p class="muted">重みは商品の選ばれやすさ。合計100でなくても構いません。</p><div class="scroll"><table><thead><tr><th>商品名</th><th>価格</th><th>重み</th><th>在庫</th><th></th></tr></thead><tbody id="products"></tbody></table></div><button id="add">＋ 商品を追加</button></article>
+<article class="card"><h3>想定する1日</h3><label>お店の名前<input id="title" maxlength="60"></label><div class="grid-fields"><label>注文数<input id="expected" type="number" min="1" max="300"></label><label>現金比率 %<input id="cashPct" type="number" min="0" max="100"></label></div><label>お支払い傾向<select id="payment"><option value="normal">標準（千円札中心）</option><option value="big">高額紙幣が多い</option><option value="exact">ちょうど払いが多い</option></select></label><p class="note">同じ擬似注文列を使い、金種を足した場合との違いを測ります。売上予測や実測確率ではありません。</p></article></div>
+<div class="heading"><div><span class="section-id">02 — FLOAT</span><h2>持参する釣銭 <span class="money" id="total">¥0</span></h2></div></div>
+<article class="card"><div class="denoms" id="denoms"></div><p class="muted">客が渡す紙幣・硬貨の内訳は額面の大きい金種から分解した仮定です。</p></article>
+<div class="heading"><div><span class="section-id">03 — STRESS TEST</span><h2>80日の不足リスクを比較</h2></div><button id="planCsv">準備表CSV ↓</button></div>
+<div id="metrics" class="metrics"></div>
+<div class="grid" style="margin-top:15px"><article class="card"><h3>釣銭不足の起こる日の割合</h3><p class="muted">4案でまったく同じ注文・決済のシナリオを使用。</p><div id="risks"></div></article><article class="card"><h3>不足が起きた例</h3><div id="example" class="status"></div></article></div>
+<p class="note">計算モデル：1注文1商品、在庫上限あり、釣銭不足時は不成立、両替・他決済への変更なし。80回の擬似試行は現実の不足確率ではありません。準備の比較だけに使用してください。</p>
+</section>
+<section id="live" hidden><div class="heading"><div><span class="section-id">04 — CHECKOUT</span><h2>当日のミニレジ</h2></div><button id="restart">↶ 釣銭準備からレジを再作成</button></div>
+<div id="liveStats" class="bar-stats"></div><div class="register-grid"><article class="card"><h3>商品を選ぶ</h3><p class="muted">1回につき1商品。実際の決済処理は行いません。</p><div class="tiles" id="tiles"></div><div style="margin-top:20px"><label>お預かり金額（円）<input id="tender" type="number" min="1" max="1000000"></label><div class="buttons"><button data-tender="exact">ちょうど</button><button data-tender="1000">千円単位</button><button data-tender="5000">五千円単位</button><button data-tender="10000">一万円単位</button></div><div id="change" class="status"></div><div class="buttons"><button id="cash" class="primary">現金で記録</button><button id="cashless">キャッシュレスで記録</button></div></div></article>
+<article class="card"><h3>レジ内の金種</h3><div id="balance"></div><div class="heading"><h3>直近の取引</h3><div><button id="undo">↶ 戻す</button> <button id="salesCsv">CSV ↓</button></div></div><div id="history"></div></article></div><p class="note">レジは予定の準備金種をもとに独立して動作します。予定で追加した金種は、レジ初期化を行うまで反映されません。直近300件を端末内保存。</p></section>
+<footer>© 2026 TSURIKABE · データ外部送信なし・API不要・日本円限定 · 会計／税務サービスではありません。</footer></div>
+<script>
+(function(){
+"use strict";
+var D=[10000,5000,2000,1000,500,100,50,10,5,1], key="tsurikabe:standalone:v1";
+var SAMPLE={title:"週末の手づくりマルシェ",products:[{id:"a",name:"布小物",price:700,weight:5,stock:35},{id:"b",name:"焼き菓子セット",price:1200,weight:4,stock:26},{id:"c",name:"アクセサリー",price:2300,weight:2,stock:16}],drawer:[0,2,0,12,8,20,8,20,0,0],expected:24,cashPct:80,payment:"normal",seed:74021};
+function cp(x){return JSON.parse(JSON.stringify(x))}function yen(x){return "¥"+Math.round(x).toLocaleString("ja-JP")}function el(x){return document.getElementById(x)}
+function esc(x){return String(x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function safe(n,lo,hi){n=Number(n);return Number.isFinite(n)?Math.max(lo,Math.min(hi,Math.round(n))):lo}
+function normalize(raw){
+if(!raw||!Array.isArray(raw.products)||!Array.isArray(raw.drawer)||raw.drawer.length!==10||raw.products.length>40||raw.products.length<1)throw Error("商品・金種データが不正です");
+var p=raw.products.map(function(x,i){return {id:String(x.id||i).slice(0,40),name:String(x.name||"商品").slice(0,55),price:safe(x.price,1,999999),stock:safe(x.stock,0,10000),weight:safe(x.weight,0,1000)}});
+if(!p.some(function(x){return x.weight>0&&x.stock>0}))throw Error("販売可能な商品が必要です");
+return {title:String(raw.title||"マルシェ").slice(0,60),products:p,drawer:raw.drawer.map(function(n){return safe(n,0,9999)}),expected:safe(raw.expected,1,300),cashPct:safe(raw.cashPct,0,100),payment:["normal","big","exact"].includes(raw.payment)?raw.payment:"normal",seed:safe(raw.seed,1,999999999)};
+}
+function load(){try{var q=JSON.parse(localStorage.getItem(key));if(q&&q.config){var c=normalize(q.config);return {config:c,live:{drawer:Array.isArray(q.live.drawer)&&q.live.drawer.length===10?q.live.drawer.map(function(n){return safe(n,0,9999)}):c.drawer.slice(),sales:Array.isArray(q.live.sales)?q.live.sales.slice(-300):[]}}}}catch(e){}return {config:cp(SAMPLE),live:{drawer:SAMPLE.drawer.slice(),sales:[]}}}
+var state=load(),selected=state.config.products[0].id,initialTender=0,sims=[];
+function save(){try{localStorage.setItem(key,JSON.stringify(state))}catch(e){}}
+function total(d){return d.reduce(function(s,n,i){return s+n*D[i]},0)}
+function split(n){var c=D.map(function(d){var k=Math.floor(n/d);n-=k*d;return k});return c}
+function change(n,d){
+if(!Number.isSafeInteger(n)||n<0||total(d)<n)return null;
+var out=Array(10).fill(0),memo=new Set();
+function visit(i,left){if(left===0)return true;if(i===10)return false;var k=i+":"+left;if(memo.has(k))return false;
+for(var t=Math.min(d[i],Math.floor(left/D[i]));t>=0;t--){out[i]=t;if(visit(i+1,left-t*D[i]))return true}
+out[i]=0;memo.add(k);return false}
+return visit(0,n)?out:null;
+}
+function settle(drawer,price,tender){if(!Number.isInteger(tender)||tender<price||tender>1000000)return null;
+var recv=split(tender),temp=drawer.map(function(n,i){return n+recv[i]}),out=change(tender-price,temp);
+if(!out)return null;
+return {change:tender-price,notes:out,drawer:temp.map(function(n,i){return n-out[i]})};}
+function random(seed){var x=seed>>>0;return function(){x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}}
+function pick(products,roll){var all=products.filter(function(p){return p.weight>0}),sum=all.reduce(function(s,p){return s+p.weight},0),v=sum*roll;
+for(var p of all){v-=p.weight;if(v<0)return p}return all[all.length-1];}
+function pay(price,roll,mode){var exact=mode==="exact"?.55:mode==="big"?.07:.22;if(roll<exact)return price;
+var x=(roll-exact)/(1-exact),u=mode==="big"?(x<.2?1000:x<.55?5000:10000):mode==="exact"?(x<.75?1000:x<.96?5000:10000):(x<.62?1000:x<.89?5000:10000);return Math.ceil(price/u)*u;}
+function simulate(){
+var c=state.config,vs=[["現在の準備",[]],["100円玉を10枚追加",[[100,10]]],["500円玉4枚＋千円札3枚",[[500,4],[1000,3]]],["10円玉20枚＋100円玉5枚",[[10,20],[100,5]]]];
+var ev=[];for(var n=0;n<80;n++){var r=random((c.seed+Math.imul(n+1,1000003))>>>0),orders=[];
+for(var i=0;i<c.expected;i++){var p=pick(c.products,r());if(!p)break;var cash=r()*100<c.cashPct;orders.push({id:p.id,price:p.price,cash:cash,tender:cash?pay(p.price,r(),c.payment):0})}ev.push(orders)}
+return vs.map(function(v){
+var drawer=c.drawer.slice(),add=0;for(var x of v[1]){drawer[D.indexOf(x[0])]+=x[1];add+=x[0]*x[1]}
+var days=0,failed=0,sold=0,first=null;
+ev.forEach(function(day){var stock={},working=drawer.slice(),f=0;for(var order of day){var prod=c.products.find(function(p){return p.id===order.id});
+if((stock[prod.id]||0)>=prod.stock)continue;
+if(order.cash){var payment=settle(working,order.price,order.tender);
+if(!payment){f++;if(!first)first={price:order.price,tender:order.tender,name:prod.name};continue}working=payment.drawer;}
+stock[prod.id]=(stock[prod.id]||0)+1;sold++}if(f)days++;failed+=f});
+return {name:v[0],add:add,risk:Math.round(days/80*100),fails:(failed/80).toFixed(2),sold:(sold/80).toFixed(1),first:first};});
+}
+function drawPlan(){
+var c=state.config;el("title").value=c.title;el("expected").value=c.expected;el("cashPct").value=c.cashPct;el("payment").value=c.payment;
+el("products").innerHTML=c.products.map(function(p){return '<tr><td><input data-id="'+esc(p.id)+'" data-field="name" value="'+esc(p.name)+'" aria-label="商品名"></td><td><input type="number" data-id="'+esc(p.id)+'" data-field="price" value="'+p.price+'" aria-label="価格"></td><td><input type="number" data-id="'+esc(p.id)+'" data-field="weight" value="'+p.weight+'" aria-label="重み"></td><td><input type="number" data-id="'+esc(p.id)+'" data-field="stock" value="'+p.stock+'" aria-label="在庫"></td><td><button data-del="'+esc(p.id)+'">×</button></td></tr>'}).join("");
+el("denoms").innerHTML=D.map(function(d,i){return '<div class="denom"><label>'+yen(d)+'<input type="number" min="0" max="9999" data-denom="'+i+'" value="'+c.drawer[i]+'"></label><small>小計 '+yen(d*c.drawer[i])+'</small></div>'}).join("");
+el("total").textContent=yen(total(c.drawer));
+sims=simulate();var b=sims[0];
+el("metrics").innerHTML='<div class="metric"><span>釣銭不足が起こる日</span><strong>'+b.risk+'%</strong><span>現状の準備 / 80試行</span></div><div class="metric"><span>1日平均の釣銭不足</span><strong>'+b.fails+' 件</strong><span>現金会計の不成立数</span></div><div class="metric"><span>1日平均の成立注文</span><strong>'+b.sold+' 件</strong><span>キャッシュレスを含む</span></div>';
+el("risks").innerHTML=sims.map(function(x){return '<div class="risk"><div><b>'+esc(x.name)+'</b><div class="muted">＋'+yen(x.add)+'</div></div><div class="track"><div class="fill" style="width:'+x.risk+'%"></div></div><b>'+x.risk+'%</b></div>'}).join("");
+el("example").innerHTML=b.first?'商品：<b>'+esc(b.first.name)+'</b><br>売価 '+yen(b.first.price)+'、お預かり '+yen(b.first.tender)+' → 必要な釣銭 '+yen(b.first.tender-b.first.price)+' を用意できませんでした。':'80日分の試行では不足なし。ただし不足ゼロを保証しません。';
+}
+function remain(p){return Math.max(0,p.stock-state.live.sales.filter(function(s){return s.id===p.id}).length)}
+function curr(){return state.config.products.find(function(p){return p.id===selected})}
+function drawLive(){
+var p=curr();if(!p){selected=state.config.products[0].id;p=curr()}
+var sales=state.live.sales,sum=sales.reduce(function(v,s){return v+s.price},0);
+el("liveStats").innerHTML='<div>記録取引<b>'+sales.length+'件</b></div><div>売上<b>'+yen(sum)+'</b></div><div>現金残高<b>'+yen(total(state.live.drawer))+'</b></div>';
+el("tiles").innerHTML=state.config.products.map(function(x){return '<button class="tile '+(x.id===selected?'active':'')+'" data-pick="'+esc(x.id)+'" '+(!remain(x)?'disabled':'')+'><span>'+esc(x.name)+'</span><b>'+yen(x.price)+'</b><small>残 '+remain(x)+' 点</small></button>'}).join("");
+el("balance").innerHTML=D.map(function(d,i){return '<div class="live-row"><span>'+yen(d)+'</span><b>'+state.live.drawer[i]+'枚</b></div>'}).join("");
+el("history").innerHTML=sales.length?sales.slice().reverse().slice(0,20).map(function(x){return '<div class="live-row"><span>'+esc(x.name)+' <small>'+(x.cash?'現金':'キャッシュレス')+'</small></span><b>'+yen(x.price)+'</b></div>'}).join(""):'<p class="muted">まだ取引がありません。</p>';
+el("undo").disabled=!sales.length;el("cash").disabled=!remain(p);el("cashless").disabled=!remain(p);
+if(!initialTender||initialTender<p.price)initialTender=p.price;
+el("tender").value=initialTender;preview();
+}
+function preview(){var p=curr();if(!p||!remain(p)){el("change").textContent="販売可能な商品がありません";return}
+var tender=Number(el("tender").value),payment=settle(state.live.drawer,p.price,tender);
+el("change").textContent=payment?"お釣り "+yen(payment.change)+"　"+payment.notes.map(function(n,i){return n?yen(D[i])+"×"+n:""}).filter(Boolean).join(" / "):"⚠ 預かり額または釣銭の金種が不足しています"; }
+function sale(cash){var p=curr();if(!p||!remain(p))return alert("商品がありません");
+var tender=cash?Number(el("tender").value):0, before=state.live.drawer.slice(),paid=cash?settle(before,p.price,tender):{change:0,drawer:before};
+if(!paid)return alert("釣銭が作れません。支払方法または準備額を見直してください。");
+state.live.drawer=paid.drawer;state.live.sales.push({id:p.id,name:p.name,price:p.price,cash:cash,tender:tender,change:paid.change,before:before,at:new Date().toLocaleString("ja-JP")});state.live.sales=state.live.sales.slice(-300);
+initialTender=p.price;save();drawLive();}
+function csvRow(row){return row.map(function(x){return '"'+String(x).replace(/"/g,'""')+'"'}).join(",")}
+function download(name,body,type){var b=new Blob([body],{type:type}),url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000)}
+document.addEventListener("click",function(e){
+var btn=e.target.closest("button");if(!btn)return;
+if(btn.dataset.del){if(state.config.products.length===1)return alert("1件以上の商品が必要です");
+var n=cp(state.config);n.products=n.products.filter(function(p){return p.id!==btn.dataset.del});
+try{state.config=normalize(n)}catch(e){return alert(e.message)}selected=state.config.products[0].id;save();drawPlan();}
+if(btn.dataset.pick){selected=btn.dataset.pick;initialTender=curr().price;drawLive()}
+if(btn.dataset.tender){var p=curr(),u=btn.dataset.tender==="exact"?0:Number(btn.dataset.tender);initialTender=u?Math.ceil(p.price/u)*u:p.price;el("tender").value=initialTender;preview()}
+});
+document.addEventListener("change",function(e){
+var t=e.target,c=state.config;
+if(t.dataset.field){var p=c.products.find(function(x){return x.id===t.dataset.id}),f=t.dataset.field;if(!p)return;
+p[f]=f==="name"?String(t.value).slice(0,55):safe(t.value,f==="price"?1:0,f==="price"?999999:f==="weight"?1000:10000);drawPlan();save()}
+if(t.dataset.denom!==undefined){c.drawer[+t.dataset.denom]=safe(t.value,0,9999);drawPlan();save()}
+if(["title","expected","cashPct","payment"].includes(t.id)){c[t.id]=t.id==="title"?String(t.value).slice(0,60):t.id==="payment"?t.value:safe(t.value,t.id==="expected"?1:0,t.id==="expected"?300:100);
+drawPlan();save()}
+});
+document.querySelectorAll("[data-tab]").forEach(function(b){b.addEventListener("click",function(){var live=b.dataset.tab==="live";el("live").hidden=!live;el("plan").hidden=live;document.querySelectorAll("[data-tab]").forEach(function(x){x.classList.toggle("active",x===b)});if(live)drawLive()})});
+el("add").onclick=function(){if(state.config.products.length>=40)return alert("商品は40件まで");
+state.config.products.push({id:"p"+Date.now()+Math.random(),name:"新しい商品",price:500,weight:1,stock:10});save();drawPlan()};
+el("reset").onclick=function(){if(!confirm("サンプルに初期化しますか？"))return;state={config:cp(SAMPLE),live:{drawer:SAMPLE.drawer.slice(),sales:[]}};selected=SAMPLE.products[0].id;initialTender=0;save();drawPlan();drawLive()};
+el("restart").onclick=function(){if(!confirm("レジの記録を消して釣銭準備に戻しますか？"))return;state.live={drawer:state.config.drawer.slice(),sales:[]};save();drawLive()};
+el("tender").oninput=function(){initialTender=Number(el("tender").value);preview()};
+el("cash").onclick=function(){sale(true)};el("cashless").onclick=function(){sale(false)};
+el("undo").onclick=function(){var last=state.live.sales.pop();if(!last)return;state.live.drawer=last.before.slice();save();drawLive()};
+el("planCsv").onclick=function(){var rows=[["金種","枚数","金額"]];D.forEach(function(d,i){rows.push([d,state.config.drawer[i],d*state.config.drawer[i]])});
+rows.push(["計", "",total(state.config.drawer)],[],["試算","追加額","不足発生日%","平均不足","平均成立注文"]);sims.forEach(function(x){rows.push([x.name,x.add,x.risk,x.fails,x.sold])});download("tsurikabe-plan.csv","\ufeff"+rows.map(csvRow).join("\r\n"),"text/csv;charset=utf-8")};
+el("salesCsv").onclick=function(){var rows=[["日時","商品","価格","支払方法","預かり","釣銭"]];state.live.sales.forEach(function(s){rows.push([s.at,s.name,s.price,s.cash?"現金":"キャッシュレス",s.tender,s.change])});download("tsurikabe-sales.csv","\ufeff"+rows.map(csvRow).join("\r\n"),"text/csv;charset=utf-8")};
+el("backup").onclick=function(){download("tsurikabe-backup.json",JSON.stringify(state,null,2),"application/json")};
+el("importBtn").onclick=function(){el("import").click()};
+el("import").onchange=async function(e){var file=e.target.files[0];if(!file)return;try{if(file.size>1000000)throw Error("1MBを超えています");var raw=JSON.parse(await file.text());var cfg=normalize(raw.config||raw);state={config:cfg,live:{drawer:raw.live&&Array.isArray(raw.live.drawer)&&raw.live.drawer.length===10?raw.live.drawer.map(function(n){return safe(n,0,9999)}):cfg.drawer.slice(),sales:raw.live&&Array.isArray(raw.live.sales)?raw.live.sales.slice(-300):[]}};selected=cfg.products[0].id;initialTender=0;save();drawPlan();drawLive();alert("復元しました")}catch(err){alert("読み込みに失敗: "+err.message)}e.target.value=""};
+drawPlan();drawLive();
+})();
+</script></body></html>
