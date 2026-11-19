@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1720" />
+  <meta name="description" content="ポータブル電源の24時間負荷を時系列で比較。ピークと電池切れを避ける段取りを作成します。" />
+  <title>電源段取り | DENGEN DANDORI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="topline"><span class="brand-emblem" aria-hidden="true">⚡</span><span class="eyebrow">DENGEN DANDORI / OFFLINE PLANNER</span><span class="top-tag">24H · A/B</span></div>
+      <div class="hero-content">
+        <div>
+          <h1>電源<span>段取り</span><span class="heading-dot">.</span></h1>
+          <p class="hero-lead">使える電気を、使える時間に。</p>
+          <p class="hero-description">合計Whだけでは見えない「同時使用の山」と「途中の電池不足」。機器の予定を動かして、2つの電源案を並べて試せます。</p>
+        </div>
+        <div class="hero-card" aria-label="機能の説明"><div class="pulse-icon">◉</div><span class="hero-card-label">PLAN → SHIFT → COMPARE</span><strong>買う前に、<br />段取りを試す。</strong><span class="hero-card-bottom">ローカル動作・登録なし・外部通信なし</span></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="section-top first"><div><p class="section-index">01 / TWO POWER OPTIONS</p><h2>電源条件を比べる</h2></div><button class="text-button" id="btnReset" type="button">↻ サンプルに戻す</button></div>
+      <p class="section-explain">容量はWh、出力は連続定格W。太陽光は指定時間帯に一定出力と仮定します。数値は自分の機器の仕様に合わせてください。</p>
+      <div class="stations" id="stations"></div>
+
+      <div class="section-top"><div><p class="section-index">02 / DEVICE SCHEDULE</p><h2>機器の使用予定</h2></div><button class="primary-outline" id="btnAdd" type="button">＋ 機器を追加</button></div>
+      <div class="section-explain">時間は同じ日の00:00〜24:00。<b>移動可</b>にチェックすると、「開始可能」から「最終開始」までの間で自動段取りできます。変更は即反映されます。</div>
+      <div class="table-wrap"><table class="load-table"><thead><tr><th>機器 / 数量</th><th>電力・接続</th><th>開始</th><th>分</th><th>移動可 / 開始可能時間</th><th></th></tr></thead><tbody id="loads"></tbody></table></div>
+      <div class="actions-block">
+        <div class="target-control"><label for="target">段取りの基準</label><select id="target"><option value="A">電源Aを優先</option><option value="B">電源Bを優先</option></select></div>
+        <button id="btnOptimize" class="button-primary" type="button"><span aria-hidden="true">✦</span> 自動で段取りを改善</button>
+        <button id="btnUndo" class="button-quiet" type="button" disabled>元の段取りに戻す</button>
+      </div>
+      <div class="status-note" id="status" role="status" aria-live="polite">開始時間を手動変更するか、「自動で段取りを改善」を押してください。</div>
+
+      <div class="section-top"><div><p class="section-index">03 / REAL-TIME OUTLOOK</p><h2>24時間の見通し</h2></div><div class="inline-key"><span><i class="legend-dot a"></i>A 残量</span><span><i class="legend-dot b"></i>B 残量</span><span><i class="legend-dot load"></i>AC負荷</span></div></div>
+      <div class="summary-grid" id="summary"></div>
+      <div class="chart-panel"><div class="chart-head"><div><strong>残量の推移とAC同時出力</strong><small>折れ線：残量％（左軸）／ 面：AC負荷W（右軸）</small></div><span class="mini-tag">15 MIN INTERVALS</span></div><div id="chart" role="img" aria-label="AとBのバッテリー残量とAC負荷の24時間グラフ"></div><div class="chart-caption">残量は設定された予備容量より低下させず、不足分を「供給不足」として別計上します。定格出力超過は警告のみで実際の停止動作を再現しません。</div></div>
+      <div id="riskList" class="risk-list" aria-live="polite"></div>
+
+      <div class="section-top"><div><p class="section-index">04 / TAKE YOUR PLAN</p><h2>データを持ち出す</h2></div></div>
+      <div class="export-row">
+        <button type="button" class="button-quiet" id="btnJSON">↓ JSON保存</button>
+        <label class="button-quiet import-button" for="importFile">↑ JSON読込<input id="importFile" type="file" accept=".json,application/json" /></label>
+        <button type="button" class="button-quiet" id="btnCSV">↓ CSVレポート</button>
+        <button type="button" class="button-quiet" id="btnSVG">↓ SVGグラフ</button>
+        <button type="button" class="button-quiet" id="btnPrint">印刷</button>
+      </div>
+      <div class="disclaimer"><strong>このツールで判定できないこと</strong><p>数値は計画用の概算です。突入電流、瞬間最大出力、バッテリー劣化・温度、機器の間欠動作、ソーラー変動、発電機の安全な設置、ケーブルや配電の安全性は検証しません。医療機器など生命に関わる用途の可否判定には使わず、必ず機器メーカー・有資格者の指示を確認してください。</p></div>
+    </main>
+    <footer><span>⚡ DENGEN DANDORI · STATIC MVP</span><span>すべてのデータはこのブラウザ内で処理されます。</span></footer>
+  </div>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
