@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="theme-color" content="#102d28">
+<meta name="description" content="決済サービスの精算CSVと銀行入金CSVを、アップロードなしで突合。差額や重複候補を見える化する無料のローカルWebアプリ。">
+<title>ふりあわせ｜入金の答え合わせ</title><link rel="stylesheet" href="style.css">
+<script src="engine.js" defer></script><script src="app.js" defer></script>
+</head><body>
+<div class="shell">
+  <header class="topbar"><a class="brand" href="#top" aria-label="ふりあわせ ホーム"><span class="brandmark">≒</span><span>ふりあわせ<small>FURI-AWASE / LOCAL RECONCILER</small></span></a><div class="topright"><span class="privacy">● ファイルは外部送信しません</span><button id="reset" class="ghost small">初期化</button></div></header>
+  <main id="top">
+    <section class="hero"><div><p class="eyebrow">SETTLEMENT × BANK / NO SIGN-UP</p><h1>売上と入金、<br><em>数字のすき間を</em>見つける。</h1><p class="lead">決済サービスの精算表と銀行の入金表を照合。合致・候補重複・金額差・未入金を分けて、確認すべき行だけを残します。</p><div class="hero-actions"><button id="demo" class="primary">サンプルで試す <span aria-hidden="true">↗</span></button><button id="templateP" class="outline">精算CSVひな形 ↓</button><button id="templateB" class="outline">銀行CSVひな形 ↓</button></div></div><div class="hero-diagram" aria-hidden="true"><div class="diagram-label">TIE-OUT SNAPSHOT</div><div class="diagram-line"><span>売上</span><b>¥10,000</b></div><div class="diagram-line"><span>手数料</span><b>− ¥300</b></div><div class="diagram-divider"></div><div class="diagram-line big"><span>振込予定</span><b>¥9,700</b></div><div class="diagram-chain">↓ つきあわせる ↓</div><div class="diagram-bank"><span>銀行入金</span><strong>¥9,700</strong><span class="diagram-check">✓</span></div></div></section>
+    <section class="workspace" aria-labelledby="workspace-title"><div class="section-head"><div><p class="eyebrow">01 / IMPORT</p><h2 id="workspace-title">2つのCSVを読み込む</h2></div><div class="stepnote">Shift_JIS / UTF-8 対応・各5,000行まで</div></div>
+    <div class="import-grid"><article class="panel"><div class="panel-top"><div><span class="number">01</span><h3>精算・売上データ</h3></div><span class="mini">決済・ECプラットフォーム</span></div><label class="upload" for="p-file"><span class="upload-icon">⇧</span><strong>精算CSVを選択</strong><small>売上・手数料・返金・振込予定額</small><input type="file" id="p-file" accept=".csv,text/csv"></label><p class="file-detail" id="p-info">未読込</p><div id="p-map" class="mapping"></div></article>
+    <article class="panel"><div class="panel-top"><div><span class="number">02</span><h3>銀行の入金データ</h3></div><span class="mini">通帳・ネットバンキング</span></div><label class="upload" for="b-file"><span class="upload-icon">⇧</span><strong>銀行CSVを選択</strong><small>入金日・入金額・摘要</small><input type="file" id="b-file" accept=".csv,text/csv"></label><p class="file-detail" id="b-info">未読込</p><div id="b-map" class="mapping"></div></article></div>
+    <div class="settings"><div class="field"><label for="encoding">ファイル文字コード</label><select id="encoding"><option value="utf-8">UTF-8</option><option value="shift_jis">Shift_JIS</option></select></div><div class="field"><label for="lag">精算日→入金日の猶予</label><div class="field-input"><input id="lag" type="number" min="0" max="60" value="7"><span>日</span></div></div><div class="field"><label for="tolerance">自動照合の許容差</label><div class="field-input"><input id="tolerance" type="number" min="0" max="100000" value="0" step="1"><span>円</span></div></div><p class="settings-note">確実な1対1候補だけを自動照合します。誤った確定を避けるため、曖昧な組み合わせは手動確認へ。</p></div>
+    <div id="notice" class="notice" role="status" aria-live="polite">まず「サンプルで試す」か、左右のCSVを選択してください。</div></section>
+    <section class="results" aria-labelledby="result-title"><div class="section-head"><div><p class="eyebrow">02 / REVIEW</p><h2 id="result-title">照合ボード</h2></div><div class="actions"><button id="download" class="outline" disabled>判定CSVを出力 ↓</button><button id="print" class="ghost">印刷</button></div></div>
+    <div class="metrics"><div class="metric"><span>自動一致</span><strong id="m-auto">—</strong><small>判定を自動確定</small></div><div class="metric"><span>手動で確認済</span><strong id="m-manual">—</strong><small>人が選んだ組み合わせ</small></div><div class="metric attention"><span>要確認</span><strong id="m-review">—</strong><small>候補重複・不一致・未入金</small></div><div class="metric"><span>未使用の銀行明細</span><strong id="m-bank">—</strong><small>精算表に対応なし</small></div></div>
+    <div class="result-tools"><div class="field"><label for="filter">ステータス</label><select id="filter"><option value="all">すべて</option><option value="review">要確認だけ</option><option value="auto">自動一致</option><option value="manual">手動確認済</option></select></div><div class="field search"><label for="search">絞り込み</label><input id="search" placeholder="精算ID・金額・日付を検索" type="search"></div><div class="legend">✓ 自動照合　 /　 ◌ 要確認　 /　 ◇ 手動照合</div></div>
+    <div id="results" class="result-list"><div class="empty">CSVを読み込むと、ここに照合結果が並びます。</div></div>
+    <div class="bankpanel"><div><h3>対応が見つかっていない銀行明細</h3><p>別用途の入金が混ざっていても、自動で精算と結び付けません。</p></div><div id="unmatched" class="unmatched">—</div></div>
+    </section>
+    <footer><div class="foot-brand">ふりあわせ <span> / FURI-AWASE</span></div><p>この画面での照合は参考情報です。振込の確定・会計処理・税務判断は、原本と決済サービスの正式な精算資料で確認してください。</p><p>すべてブラウザ内で実行。外部通信・アカウント登録・データ保存はありません。ページを閉じると読み込んだ明細は破棄されます。</p></footer>
+  </main>
+</div>
+</body></html>
