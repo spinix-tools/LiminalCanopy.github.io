@@ -1,0 +1,18 @@
+const assert=require("node:assert/strict");
+const {test}=require("node:test");
+const e=require("./engine.js");
+const demo=e.copy(e.defaults);
+test("demo produces 12 scheduled tasks",()=>assert.equal(e.solve(demo).items.length,12));
+test("all tasks end no later than serving",()=>assert.ok(e.solve(demo).items.every(i=>i.end<=0)));
+test("dependencies respected",()=>{const s=e.solve(demo);for(const x of s.items)if(x.after)assert.ok(s.items.find(y=>y.id===x.after).end<=x.start);});
+test("resource capacities never exceeded",()=>{const p=e.copy(demo);for(const resource of ["hand","burner","rice","oven"]){const s=e.solve(p);for(let t=s.from;t<0;t++){assert.ok(s.items.filter(x=>x.start<=t&&t<x.end&&x.requirements.includes(resource)).length<=p.capacity[resource]);}}});
+test("two burners never slower on demo",()=>{const q=e.copy(demo);q.capacity.burner=2;assert.ok(e.solve(q).span<=e.solve(demo).span);});
+test("clock wraps to previous and next day",()=>{assert.equal(e.clock("00:05",-10),"23:55 前日");assert.equal(e.clock("23:55",10),"00:05 翌日");});
+test("dependency cycle rejected",()=>{const p=e.copy(demo);p.steps[0].after="s3";assert.throws(()=>e.solve(p),/循環/);});
+test("missing equipment rejected",()=>{const p=e.copy(demo);p.capacity.rice=0;assert.throws(()=>e.solve(p));});
+test("cross-dish dependency rejected",()=>{const p=e.copy(demo);p.steps[0].after="s4";assert.throws(()=>e.solve(p));});
+test("duration bounds rejected",()=>{for(const n of [-1,0,181,1.5]){const p=e.copy(demo);p.steps[0].mins=n;assert.throws(()=>e.solve(p));}});
+test("invalid clock rejected",()=>{const p=e.copy(demo);p.serve="25:00";assert.throws(()=>e.solve(p));});
+test("CSV escapes quote, contains BOM",()=>{const p=e.copy(demo);p.steps[0].name='test,"quote"';const c=e.csv(p);assert.ok(c.startsWith("\ufeff"));assert.ok(c.includes('""quote""'));});
+test("comparison returns three plans",()=>{const c=e.comparison(demo);assert.ok(c.base.span>0&&c.withBurner.span>0&&c.withHelper.span>0);});
+test("double-occupation of hand is counted",()=>{const p=e.copy(demo);p.capacity.hand=1;const s=e.solve(p);for(let t=s.from;t<0;t++)assert.ok(s.items.filter(x=>x.start<=t&&t<x.end&&x.requirements.includes("hand")).length<=1);});

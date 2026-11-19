@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f7f0"><meta name="description" content="コンロと手の空きを見ながら、夕食の調理工程を逆算するオフライン段取り表。">
+<title>コンロ譜｜夕食の段取りを一枚に</title>
+<link rel="stylesheet" href="./style.css">
+<script defer src="./engine.js"></script><script defer src="./app.js"></script>
+</head>
+<body>
+<div class="shell">
+<header class="header"><a class="brand" href="#" aria-label="コンロ譜 トップ"><span class="brand-icon">♨</span><span><strong>コンロ譜</strong><small>KONROFU / KITCHEN ORCHESTRATOR</small></span></a><div class="top-meta"><span class="status-dot"></span>保存はこの端末のみ <span class="counter">beta 01</span></div></header>
+<main>
+<section class="hero">
+ <div class="hero-content"><div class="eyebrow"><span class="line"></span> DINNER, IN HARMONY.</div><h1>夕食の段取りを、<br><em>ひと目で。</em></h1><p>「手はひと組、コンロは一口」。限られた台所の設備を取り合わず、何をいつ始めるかを食卓の時刻から逆算します。</p><div class="hero-pills"><span>✳ 複数料理を並行計画</span><span>✳ 調理器具の衝突を回避</span><span>✳ 登録・送信なし</span></div></div>
+ <div class="hero-art" aria-hidden="true"><div class="plate"><div class="plate-center"><span>19:00</span><small>いただきます</small></div></div><span class="herb h1">✺</span><span class="herb h2">✳</span><span class="spark s1">✦</span><span class="spark s2">✧</span></div>
+</section>
+<section class="controls" aria-labelledby="setup-title"><div class="section-label">01 <span>CONDITIONS</span></div><div class="section-heading"><h2 id="setup-title">今日の台所</h2><span class="quiet">人数と設備を変えると、工程表を再計算します</span></div>
+<div class="settings-grid"><label>食べ始める時刻 <input id="serve" type="time" value="19:00"></label><label>調理する人数 <select id="hand"><option value="1">1人</option><option value="2">2人</option><option value="3">3人</option></select></label><label>コンロ <select id="burner"><option value="1">1口</option><option value="2">2口</option><option value="3">3口</option><option value="4">4口</option></select></label><label>オーブン <select id="oven"><option value="0">なし</option><option value="1">1台</option><option value="2">2台</option></select></label><label>炊飯器 <select id="rice"><option value="0">なし</option><option value="1">1台</option><option value="2">2台</option></select></label></div>
+</section>
+<section class="dashboard" aria-labelledby="result-title"><div class="section-label">02 <span>THE PLAN</span></div><div class="section-heading"><h2 id="result-title">仕上がりの道筋</h2><button id="print" class="btn subtle" type="button">⎙ 印刷する</button></div><div id="error" class="error" role="alert" hidden></div>
+<div class="metrics"><div class="metric"><div class="metric-label">最初の作業 <span>START AT</span></div><strong id="metric-start">--:--</strong><small>最初に手を動かす時刻</small></div><div class="metric"><div class="metric-label">全体の調理時間 <span>TIME WINDOW</span></div><strong id="metric-span">--<i> 分</i></strong><small>最初の作業から提供まで</small></div><div class="metric"><div class="metric-label">最長の仕上がり待ち <span>HOLD</span></div><strong id="metric-hold">--<i> 分</i></strong><small>料理が完成してから提供まで</small></div></div>
+<div class="plan-card"><div class="plan-card-heading"><h3>並行調理タイムライン</h3><span id="plan-summary">準備しています</span></div><div id="axis" class="axis"></div><div id="timeline" class="timeline" aria-live="polite"></div><div class="legend"><span><i class="swatch sw1"></i>鮭のソテー</span><span><i class="swatch sw2"></i>豆腐のみそ汁</span><span><i class="swatch sw3"></i>炊きたてご飯</span><span><i class="swatch sw4"></i>青菜のおひたし</span></div></div>
+<div class="whatif"><div class="whatif-head"><span class="mini-label">WHAT IF?</span><h3>設備がもうひとつあったら？</h3><p>いまの条件と「コンロを1口増やす」「料理する人を1人増やす」を比較。</p></div><div id="compare" class="compare-grid"></div></div>
+<div id="hold-notes" class="hold-notes"></div></section>
+<section class="editor" aria-labelledby="edit-title"><div class="section-label">03 <span>THE RECIPE STEPS</span></div><div class="section-heading"><h2 id="edit-title">工程を組み立てる</h2><span class="quiet">変更は即時に上のタイムラインに反映</span></div><p class="editor-intro">同じ料理の「前工程」を指定すると、その完了後に次の工程が始まります。加熱中にも人が必要な工程は「手も使う」を選んでください。</p><div id="step-list" class="step-list"></div>
+<form id="add-form" class="add-form"><h3>＋ 工程を追加する</h3><div class="add-grid"><label>料理名<input id="add-dish" maxlength="50" required placeholder="例：野菜炒め"></label><label>作業名<input id="add-name" maxlength="60" required placeholder="例：炒める"></label><label>分数<input id="add-mins" type="number" min="1" max="180" value="5" required></label><label>設備<select id="add-resource"><option value="hand">手作業</option><option value="burner">コンロ</option><option value="oven">オーブン</option><option value="rice">炊飯器</option><option value="none">置いておく</option></select></label><label>前工程<select id="add-after"><option value="">なし（最初の工程）</option></select></label><label class="checklabel"><input id="add-attention" type="checkbox">加熱中も手を使う</label></div><button class="btn solid" type="submit">工程を追加 <span>＋</span></button></form>
+</section>
+<section class="actions"><div><div class="mini-label">YOUR WORKSPACE</div><h2>次の夕食にも使えるように。</h2><p>プランをJSONで持ち出し、工程表はCSVで共有できます。入力情報は外部へ送信しません。</p></div><div class="action-buttons"><button id="export-json" class="btn outline">↓ JSON保存</button><label class="btn outline import-btn">↑ JSON読込<input id="import-json" type="file" accept=".json,application/json" hidden></label><button id="export-csv" class="btn outline">↓ CSV工程表</button><button id="reset" class="btn reset">↺ デモに戻す</button></div></section>
+</main>
+<footer><span>♨ KONROFU</span><span>台所を、少し軽やかに。</span><span>© 2026 · Local-first MVP</span></footer>
+</div></body></html>
