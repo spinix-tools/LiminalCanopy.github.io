@@ -30,8 +30,8 @@ WebVTTのキューID・NOTE・STYLE・位置指定や、SRTの元番号はラウ
 
 ## 検証
 - GitHubから再取得したHTMLのエンジンに対し、同梱のengine.test.cjsのsuiteをV8で実行：**938 / 938合格**（300乱数ケースのSRT/VTT往復、衝突なし時間延長、CPS、時刻移動など）
-- HTMLのアプリ用JSをV8で構文評価し、軽量DOMモック上でデモ読込、追加/Undo、全消去、プリセット変更、延長、時刻移動、レイアウト切替、SRT/VTT/CSV出力など**11 / 11合格**
-- **未検証**：Node.js CLIからの単体テスト実行、実ブラウザでの描画・ファイル保存、実動画での音声同期、実ユーザーによる使いやすさ。Node 18+向けに node engine.test.cjs を同梱（外部依存なし）
+- HTMLのアプリ用JSをV8で構文評価し、軽量DOMモック上でデモ読込、追加/Undo、全消去、プリセット変更、延長、時刻移動、レイアウト切替、SRT/VTT/CSV出力など**12 / 12合格**
+- **未検証**：Node.js CLIからの単体テスト実行、実ブラウザでの描画・ファイル保存、実動画での音声同期、実ユーザーによる使いやすさ。Node 18+向けに node engine.test.cjs および node ui-smoke.test.cjs を同梱（外部依存なし）
 
 ## 保存先・ライセンス
 spinix-tools/LiminalCanopy.github.io の hourly-app-lab/apps/2026-11-19-jimakujogi/ のみ。mainと既存サイトを変更しない。MIT License。新規API課金や個人情報の収集なし。
