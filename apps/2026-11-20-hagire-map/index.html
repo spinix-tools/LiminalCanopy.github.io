@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="はぎれ地図: 生地の端切れを優先して縫い代込みの裁断を計画する、完全オフラインWebアプリ。">
+<title>はぎれ地図 — 端切れから、次の一作へ。</title>
+<link rel="stylesheet" href="style.css">
+<script src="engine.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-icon" aria-hidden="true">▧</span><div><strong>はぎれ地図 <span class="roman">HAGIRE MAP</span></strong><small>OFFLINE CUTTING STUDIO · v1</small></div></div><span class="top-pill">● 端末の中だけで動作します</span></header>
+<main>
+<section class="hero"><div class="hero-inner"><p class="eyebrow">MATERIALS, NOT WASTE.</p><h1>端切れから、<br><em>次の一作へ。</em></h1><p>家にある布を先に使う。縫い代・柄の方向・裁断間隔をまとめて考えて、手元の布から何が作れるかを確かめる。</p><div class="hero-actions"><button id="demo" class="button ghost">サンプルに戻す</button><button id="fresh" class="button ghost">新規プロジェクト</button></div></div><div class="hero-art" aria-hidden="true"><div class="patch patch-a">linen</div><div class="patch patch-b">cotton</div><div class="patch patch-c">save offcuts</div></div></section>
+<section class="work-title"><div><p class="eyebrow">01 / YOUR MATERIALS</p><h2>素材と裁断パーツ</h2></div><div class="project-input"><label for="projectName">プロジェクト名</label><input id="projectName" maxlength="70" autocomplete="off" placeholder="作品の名前"></div></section>
+<div class="editing-grid">
+<section class="panel"><div class="section-head"><div><h3>手元の布 <span class="count" id="stockCount">0</span></h3><p>端切れ・新品を登録。同じ生地名のパーツを配置します。</p></div><button class="button add" id="addStock">＋ 布を追加</button></div><div class="table-scroll"><table class="edit-table"><thead><tr><th>名称</th><th>生地の種類 / 色</th><th>分類</th><th>幅 mm</th><th>高さ mm</th><th>枚数</th><th><span class="sr-only">削除</span></th></tr></thead><tbody id="stockRows"></tbody></table></div></section>
+<section class="panel"><div class="section-head"><div><h3>切り出すパーツ <span class="count" id="partCount">0</span></h3><p>寸法は仕上がり。縫い代を四辺に自動加算します。</p></div><button class="button add" id="addPart">＋ パーツを追加</button></div><div class="table-scroll"><table class="edit-table"><thead><tr><th>名称</th><th>生地の種類 / 色</th><th>幅 mm</th><th>高さ mm</th><th>枚数</th><th>縫い代 mm/辺</th><th>90°回転</th><th><span class="sr-only">削除</span></th></tr></thead><tbody id="partRows"></tbody></table></div></section>
+</div>
+<section class="settings-bar"><label class="setting"><span>裁断間隔 <small>隣接パーツ間</small></span><div class="suffix-input"><input id="gap" type="number" min="0" max="50" step="1"><span>mm</span></div></label><div class="setting-note"><strong>配置ポリシー</strong><span>端切れ優先 ／ 生地別に配置 ／ 縫い代を加算 ／ 複数の並べ方を比較</span></div><button id="calculate" class="button primary">↻ 配置を計算</button></section>
+<section class="result-title"><div><p class="eyebrow">02 / THE CUTTING MAP</p><h2>裁断マップ</h2><p>まず使う布と、残せる端切れを見える形に。</p></div><div class="toolbar"><button id="csv" class="button light">CSV</button><button id="svg" class="button light">SVG図面</button><button id="saveJson" class="button light">JSON保存</button><button id="loadJson" class="button light">JSON読込</button><button id="print" class="button light">印刷</button><input type="file" id="jsonFile" accept=".json,application/json" hidden></div></section>
+<div id="errors" class="error" role="alert" hidden></div>
+<div id="summary" class="summary"><div class="metric"><span>配置できたパーツ</span><strong id="placedMetric">–</strong><small>必要枚数に対して</small></div><div class="metric"><span>使用する布</span><strong id="sheetsMetric">–</strong><small>うち端切れ <b id="scrapMetric">–</b> 枚</small></div><div class="metric"><span>使用布の面積利用率</span><strong id="effMetric">–</strong><small>縫い代を含む裁断面積</small></div><div class="metric critical"><span>未配置</span><strong id="missingMetric">–</strong><small>布の不足・並べ方の限界を確認</small></div></div>
+<div id="unplaced" class="unplaced" hidden></div>
+<div class="diagram-head"><span><i class="dot blue"></i> 切り出すパーツ</span><span><i class="dot pattern"></i> まだ使える領域</span><span><i class="dot edge"></i> 裁断間隔</span></div>
+<div id="diagrams" class="diagrams"></div>
+<div class="carry-panel"><div><h3>次の制作に、余り布を引き継ぐ</h3><p id="carryMessage">布を実際に裁断した後だけ確定してください。計画中は在庫は減りません。</p></div><div class="carry-buttons"><button id="undo" class="button light" disabled>↶ 確定を取り消す</button><button id="commit" class="button primary">裁断完了 → 在庫更新</button></div></div>
+<div class="fineprint"><p><b>計算の注意：</b>長方形のみ対応。複数のヒューリスティックによる近似配置で、最少消費・最適解は保証しません。柄合わせ、布の伸び・歪み・耳、曲線や縫製工程は考慮しません。図面の寸法と実物は裁断前に必ず照合してください。</p><p><b>プライバシー：</b>入力値はブラウザ内で計算・端末保存。外部API、アカウント登録、アクセス解析はありません。共有PCでは端末保存に注意してください。</p></div>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+</main>
+<footer><strong>はぎれ地図</strong><span>Small scraps. Next stories. — Local-first tool for makers.</span></footer>
+</body></html>
