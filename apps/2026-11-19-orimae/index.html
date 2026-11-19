@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#132b37"><meta name="description" content="中綴じコピー本の面付け・費用・印刷テストを一画面で確認。登録不要・端末内完結。"><title>おりまえ | コピー本の印刷前チェック</title><link rel="stylesheet" href="style.css"><script src="engine.js" defer></script><script src="app.js" defer></script></head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">折</div><div><strong>おりまえ</strong><small>ORIMAE · PRINT PRE-FLIGHT</small></div></div>
+  <div class="eyebrow">PROJECT / 01</div><h1>折る前に、<br><em>確かめよう。</em></h1><p class="lead">中綴じのページ順・印刷枚数・コストを<br>迷わず確かめる、コピー本の試作室。</p>
+  <form id="settings" autocomplete="off">
+   <div class="group-title"><span>01</span> 冊子の仕様</div>
+   <label for="title">冊子タイトル</label><input id="title" name="title" value="はじめての小冊子" maxlength="90">
+   <div class="two"><div><label for="pages">本文＋表紙ページ数</label><input id="pages" name="pages" type="number" min="1" max="120" value="14" required></div><div><label for="copies">作成部数</label><input id="copies" name="copies" type="number" min="1" max="1000" value="30" required></div></div>
+   <div class="two"><div><label for="binding">綴じ方向</label><select id="binding" name="binding"><option value="right">右綴じ（縦書き）</option><option value="left">左綴じ（横書き）</option></select></div><div><label for="paper">印刷用紙</label><select id="paper" name="paper"><option>A4</option><option>B4</option><option>A3</option><option>Letter</option></select></div></div>
+   <div class="group-title second"><span>02</span> 予算と試験印刷</div>
+   <div class="two"><div><label for="paperPerSheet">用紙 / 枚（円）</label><input id="paperPerSheet" name="paperPerSheet" type="number" min="0" max="10000" value="3"></div><div><label for="inkPerSide">印刷 / 面（円）</label><input id="inkPerSide" name="inkPerSide" type="number" min="0" max="10000" value="8"></div></div>
+   <label for="testSheets">試し刷り枚数（両面）</label><input id="testSheets" name="testSheets" type="number" min="0" max="50" value="1">
+   <div class="group-title second"><span>03</span> プリンターの癖</div>
+   <label class="check"><input type="checkbox" id="backRotate" name="backRotate"><span>裏面の印字を180°回転</span></label>
+   <label class="check"><input type="checkbox" id="backReverse" name="backReverse"><span>手動両面用：裏面を逆順で出力</span></label>
+   <p class="sidebar-note">プリンターによって回転・給紙順が異なります。最初の1枚で表裏の上下とページ順を必ず確認してください。</p>
+  </form>
+  <div class="sidebar-bottom"><span class="privacy-dot"></span> ログイン不要 · データ送信なし<br><small>入力内容はこの端末内だけに保存されます</small></div>
+</aside>
+<main class="main">
+  <header class="topbar"><div><span class="crumb">WORKSPACE</span><span class="slash">/</span><span>中綴じ・印刷前シミュレーター</span></div><span class="status"><i></i> オフラインで動作</span></header>
+  <section class="intro"><div><div class="sup">PRINT BEFORE YOU FOLD <span>✳</span></div><h2>印刷前チェック</h2><p>ページを入れるだけで、面付け・必要枚数・試し刷り用台紙が完成します。</p></div><div class="stamp">READY<br>TO FOLD<span>↗</span></div></section>
+  <section class="metrics" aria-live="polite"><div class="metric"><div class="metric-label">総ページ数 <span>01</span></div><div class="metric-value"><b id="mPages">16</b><span>ページ</span></div><small id="mBlank">空白 +2</small></div><div class="metric"><div class="metric-label">1冊あたり <span>02</span></div><div class="metric-value"><b id="mSheets">4</b><span>枚</span></div><small id="mPaper">A4 → A5</small></div><div class="metric"><div class="metric-label">全体の必要用紙 <span>03</span></div><div class="metric-value"><b id="mPhysical">121</b><span>枚</span></div><small id="mProof">試し刷り 1枚込み</small></div><div class="metric featured"><div class="metric-label">概算コスト <span>04</span></div><div class="metric-value">¥<b id="mCost">2,299</b></div><small id="mEach">1冊あたり 約¥77</small></div></section>
+  <section class="workspace">
+    <div class="workspace-heading"><div><span class="section-kicker">LAYOUT / PREVIEW</span><h3>面付けシート <span id="sheetTotal" class="subcount">全4枚</span></h3><p>紙の表と裏に、どのページが並ぶかを確認できます。</p></div><div class="legend"><span><i class="legend-front"></i>表</span><span><i class="legend-back"></i>裏</span><span><i class="legend-blank"></i>空白</span></div></div>
+    <div class="workspace-body"><div class="sheet-list" id="sheetList" aria-label="シート一覧"></div><div class="sheet-detail"><div class="detail-top"><div><span class="section-kicker">SHEET INSPECTOR</span><h4 id="detailTitle">01 <small>/ 枚目</small></h4></div><div class="pill" id="detailPill">外側の紙</div></div><div class="visual-side-label">FRONT <span>表面 · 二つ折り前</span></div><div id="previewFront" class="paper-preview"></div><div class="visual-side-label back-label">BACK <span>裏面 · 二つ折り前</span></div><div id="previewBack" class="paper-preview"></div><div class="detail-footer"><label class="check marked"><input type="checkbox" id="verified"> <span>この紙のページ順を確認した</span></label><span class="muted" id="verifyCount">0/4 チェック済</span></div></div></div>
+  </section>
+  <section class="export-panel"><div><span class="section-kicker">PRINT & SHARE</span><h3>試し刷りから、はじめる。</h3><p>番号入りの台紙を印刷して折り、ページ順と表裏を確認。実際の原稿PDFを加工する機能ではありません。</p></div><div class="actions"><button id="downloadAll" class="primary" type="button">↧ 試験台紙を保存（HTML）</button><button id="downloadCSV" class="secondary" type="button">↓ 面付け表 CSV</button><button id="downloadFront" class="secondary" type="button">表面のみ</button><button id="downloadBack" class="secondary" type="button">裏面のみ</button></div></section>
+  <section class="guide"><div class="guide-title"><span class="section-kicker">GUIDE / 3 STEPS</span><h3>3つの確認ポイント</h3></div><div class="steps"><div><b>01</b><strong>番号入り台紙を印刷</strong><p>用紙を横向き、原寸100%、両面は短辺とじを出発点に。プリンター側の「冊子印刷」はOFF。</p></div><div><b>02</b><strong>折って、ページをめくる</strong><p>「1 → 2 → 3」の順に読めるか、表裏が上下逆でないかを確認します。</p></div><div><b>03</b><strong>必要なら裏面を調整</strong><p>裏面の回転・出力順を切り替えて再印刷。手動両面は給紙の向きを実機で確認。</p></div></div></section>
+  <footer class="footer">ORIMAE <span>—</span> 小さな本を、もっと自由に。 <span class="footer-right">Made for little books, everywhere. © 2026</span></footer>
+</main></div>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>
