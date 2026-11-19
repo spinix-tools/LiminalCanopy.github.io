@@ -40,7 +40,7 @@
 
 ## テスト（2026-11-19）
 
-- `node --test engine.test.cjs` → **56/56 合格**。センサー/縦横、画角、距離境界、背景紙、室内奥行、候補比較、CSV injection・JSON validation・600超の数値組合せも検査。
+- `node --test engine.test.cjs` → **56/56 合格**。センサー/縦横、画角、距離境界、背景紙、室内奥行、候補比較、CSV injection・JSON validation・300超の数値組合せも検査。
 - `node --check engine.js` / `node --check app.js` → **両方合格**。
 - `python browser_test.py` → **37/37 合格**。Chromiumで実画面を操作し、各条件変更、状態反映、候補切替、CSV/JSON/SVGダウンロード、JSON復元・不正ファイル拒否、初期化、モバイル横スクロール抑制、SVG描画を検査。デスクトップ/モバイルの `desktop.png`, `mobile.png` を生成。
 - **試験の環境制約:** 当環境ではブラウザの `file://` 遷移が `net::ERR_BLOCKED_BY_ADMINISTRATOR` で遮断されたため、ブラウザE2Eは同じHTML/CSS/JSを `set_content`/`add_script_tag` で読み込ませ、`localStorage` をメモリで模擬した。したがって通常ブラウザの直接起動、端末への保存永続性、複数ブラウザの互換、実写・印刷は未検証。
