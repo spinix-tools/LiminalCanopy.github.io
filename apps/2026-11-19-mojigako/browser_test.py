@@ -39,6 +39,7 @@ with sync_playwright() as p:
     row.locator('input[data-field="target"]').press('Tab')
     check('変数不一致' not in page.locator('tr[data-key="cart.summary"]').inner_text(),'edit repairs token')
     check('There are {count} items' in page.locator('#translatedValue').inner_text(),'preview updates')
+    check('There are {count} items' in page.locator('#target').input_value(),'JSON editor reflects table edit')
     row=page.locator('tr[data-key="checkout.button"]')
     row.locator('input[data-field="width"]').fill('400')
     row.locator('input[data-field="width"]').press('Tab')
