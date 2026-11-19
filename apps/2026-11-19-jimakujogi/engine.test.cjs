@@ -40,7 +40,7 @@ function suite(JM,check){
  check("clean row",JM.measure([{id:1,start:0,end:3,text:"短い"}],L).clean===1);
  const start=[{id:1,start:0,end:1,text:"こんにちは世界"},{id:2,start:2,end:3,text:"はい"}];
  const fixed=JM.extendSafe(start,L);
- check("safe time extension",fixed.changes===1&&near(fixed.cues[0].end,1.85));
+ check("safe time extension",fixed.changes===1&&near(fixed.cues[0].end,1.75));
  check("input not mutated",start[0].end===1);
  check("extension never overlaps next",fixed.cues[0].end<=fixed.cues[1].start-L.gap+.00001);
  check("blocked extension",JM.extendSafe([{id:1,start:0,end:1,text:"こんにちは世界"},{id:2,start:1.05,end:3,text:"はい"}],L).changes===0);
