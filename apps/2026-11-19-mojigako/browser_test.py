@@ -1,0 +1,85 @@
+"""Playwright Chromium smoke test. Run: python browser_test.py"""
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import json
+
+HTML=Path(__file__).with_name('index.html').read_text(encoding='utf-8')
+passes=[]
+def check(cond, name):
+    assert cond, name
+    passes.append(name)
+with sync_playwright() as p:
+    browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+    page=browser.new_page(viewport={'width':1440,'height':900},accept_downloads=True)
+    errors=[]
+    page.on('pageerror',lambda e: errors.append(str(e)))
+    page.goto('about:blank')
+    page.evaluate("""() => { const bag={}; Object.defineProperty(window,'localStorage',{configurable:true,value:{setItem(k,v){bag[k]=v},getItem(k){return bag[k]??null}}}) }""")
+    page.set_content(HTML,wait_until='load')
+    check(page.title().startswith('文字がこ'),'title')
+    check(page.locator('#rows tr').count()==10,'10 sample rows')
+    check(page.locator('#mTotal').inner_text()=='10','metrics total')
+    check(int(page.locator('#mError').inner_text())>=2,'missing and variable mismatch')
+    check(int(page.locator('#mOverflow').inner_text())>=1,'overflow present')
+    check(page.locator('#selectedKey').inner_text()=='checkout.button','selected initial')
+    page.locator('#mode').select_option('pseudo')
+    check('⟦' in page.locator('#previewValue').inner_text(),'pseudo preview')
+    check('·' in page.locator('#previewValue').inner_text(),'pseudo expanded')
+    page.locator('#mode').select_option('target')
+    check('Review your order' in page.locator('#previewValue').inner_text(),'target preview')
+    page.locator('#search').fill('cart.summary')
+    check(page.locator('#rows tr').count()==1,'search filter')
+    check(page.locator('#rows tr').first.get_attribute('data-key')=='cart.summary','search hit')
+    page.locator('#search').fill('')
+    page.locator('#filter').select_option('over')
+    check(page.locator('#rows tr').count()>0,'overflow filter')
+    page.locator('#filter').select_option('all')
+    row=page.locator('tr[data-key="cart.summary"]')
+    row.locator('input[data-field="target"]').fill('There are {count} items')
+    row.locator('input[data-field="target"]').press('Tab')
+    check('変数不一致' not in page.locator('tr[data-key="cart.summary"]').inner_text(),'edit repairs token')
+    check('There are {count} items' in page.locator('#translatedValue').inner_text(),'preview updates')
+    row=page.locator('tr[data-key="checkout.button"]')
+    row.locator('input[data-field="width"]').fill('400')
+    row.locator('input[data-field="width"]').press('Tab')
+    check('400px' in page.locator('#ruler').inner_text(),'width adjustment')
+    page.locator('#source').fill('not JSON')
+    page.locator('#apply').click()
+    check('JSONの構文' in page.locator('#message').inner_text(),'invalid JSON message')
+    check(page.locator('#mTotal').inner_text()=='10','invalid JSON preserves state')
+    page.locator('#source').fill('{"save":"保存 {name}"}')
+    page.locator('#target').fill('{"save":"Saved {name}"}')
+    page.locator('#apply').click()
+    check(page.locator('#mTotal').inner_text()=='1','apply edited JSON')
+    check(page.locator('#mError').inner_text()=='0','correct token no critical error')
+    with page.expect_download() as d:
+        page.locator('#outTarget').click()
+    download=d.value
+    check(download.suggested_filename=='mojigako-target.json','target JSON export name')
+    check(json.loads(Path(download.path()).read_text())['save']=='Saved {name}','target JSON export content')
+    with page.expect_download() as d:
+        page.locator('#outReport').click()
+    check(d.value.suggested_filename.endswith('.csv'),'CSV export')
+    with page.expect_download() as d:
+        page.locator('#outPseudo').click()
+    ps=json.loads(Path(d.value.path()).read_text())
+    check('{name}' in ps['save'],'pseudo preserves placeholder')
+    with page.expect_download() as d:
+        page.locator('#backup').click()
+    backup=Path(d.value.path()).read_bytes()
+    check(b'"source"' in backup,'backup JSON content')
+    page.set_content(HTML,wait_until='load')
+    check(page.locator('#mTotal').inner_text()=='1','localStorage persistence')
+    # restore sample baseline for screenshots
+    page.locator('#demo').click()
+    check(page.locator('#mTotal').inner_text()=='10','demo restore')
+    check(not errors,'no JavaScript exceptions: '+str(errors))
+    page.screenshot(path=str(Path(__file__).with_name('desktop.png')),full_page=True)
+    mobile=browser.new_page(viewport={'width':390,'height':844},device_scale_factor=1)
+    mobile.set_content(HTML,wait_until='load')
+    check(mobile.locator('#mTotal').inner_text()=='10','mobile loads')
+    check(mobile.locator('#apply').is_visible(),'mobile form accessible')
+    mobile.screenshot(path=str(Path(__file__).with_name('mobile.png')),full_page=True)
+    browser.close()
+print(f'PASS {len(passes)}/{len(passes)} browser assertions')
+print('\n'.join('OK '+x for x in passes))
