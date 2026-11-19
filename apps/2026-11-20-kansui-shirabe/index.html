@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#092e39">
+  <meta name="description" content="換水案A/Bと硝酸塩（NO₃）の経時変化・使用水量・変動幅をブラウザだけで比較するツール。">
+  <title>換水しらべ — KANSUI SHIRABE</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header class="site-header">
+  <div class="brand"><div class="brand-symbol" aria-hidden="true">≋</div><div><strong>換水しらべ</strong><span>KANSUI SHIRABE</span></div></div>
+  <div class="header-right"><span class="local-indicator"><span class="pulse"></span>ローカルで計算</span><button class="quiet" id="resetBtn" type="button">デモへ戻す</button><button class="quiet" id="printBtn" type="button">印刷</button></div>
+</header>
+<main id="main">
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero-text"><p class="eyebrow"><span class="tinyline"></span> WATER CHANGE DECISION LAB / 01</p>
+      <h1 id="heroTitle">水を替える前に、<br><em>２つの未来</em>を比べよう。</h1>
+      <p>「週1回まとめて」と「少量をこまめに」。硝酸塩（NO₃）の予測推移と水の使用量を、同じ条件で見比べます。</p>
+      <div class="hero-tags"><span>無料・ログイン不要</span><span>外部通信なし</span><span>日本語 / ppm / L</span></div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="water-graphic"><div class="tank-top"></div><div class="water-wave w1"></div><div class="water-wave w2"></div><div class="water-caption">N O ₃ <small> / planning model</small></div><div class="tank-bottom"></div></div>
+      <div class="hero-graphic-label"><b>比べるのは、</b><br>予定と変化と負担。</div>
+    </div>
+  </section>
+  <section class="ticker" aria-label="計算概要"><div><span class="ticker-label">水槽</span><strong id="tickerTank">—</strong></div><div><span class="ticker-label">予測日数</span><strong id="tickerHorizon">—</strong></div><div><span class="ticker-label">A の総換水量</span><strong id="tickerA">—</strong></div><div><span class="ticker-label">B の総換水量</span><strong id="tickerB">—</strong></div></section>
+  <div class="workspace">
+    <section class="left-column" aria-label="条件と計画を編集">
+      <div class="panel settings-panel"><div class="panel-heading"><div><span class="section-number">01 / WATER PROFILE</span><h2>水槽と水質の条件</h2></div><span class="small-label">編集可能</span></div>
+        <div class="field-grid">
+          <label class="field wide"><span>水槽の名前</span><input data-field="name" type="text" maxlength="60" aria-label="水槽の名前"></label>
+          <label class="field"><span>実際の水量 <small>L</small></span><input data-field="volume" type="number" min="1" max="10000" step="1"></label>
+          <label class="field"><span>現在のNO₃ <small>ppm</small></span><input data-field="current" type="number" min="0" max="1000" step="0.1"></label>
+          <label class="field"><span>換水用水のNO₃ <small>ppm</small></span><input data-field="tap" type="number" min="0" max="1000" step="0.1"></label>
+          <label class="field"><span>1日の正味変化 <small>ppm/日</small></span><input data-field="dailyRise" type="number" min="-20" max="50" step="0.05"></label>
+          <label class="field"><span>管理目安 <small>ppm</small></span><input data-field="limit" type="number" min="0.1" max="500" step="0.5"></label>
+          <label class="field"><span>予測期間 <small>日</small></span><select data-field="horizon"><option value="14">14日</option><option value="28">28日</option><option value="42">42日</option><option value="56">56日</option><option value="90">90日</option></select></label>
+        </div>
+        <div class="measure-box"><div class="measure-heading"><strong>測定2回から、増加ペースを推定</strong><span>その間に換水・添加がなかった場合</span></div>
+          <div class="measure-fields"><label>最初 <small>ppm</small><input type="number" data-measure="start" step="0.1" min="0" max="1000"></label><label>最後 <small>ppm</small><input type="number" data-measure="end" step="0.1" min="0" max="1000"></label><label>間隔 <small>日</small><input type="number" data-measure="days" step="1" min="1" max="60"></label></div>
+          <div class="measure-foot"><span id="rateHint">—</span><button class="mini-btn" id="applyRate" type="button">推定値を使う <span aria-hidden="true">↗</span></button></div>
+        </div>
+      </div>
+      <div class="panel plan-panel"><div class="panel-heading"><div><span class="section-number">02 / TWO ROUTINES</span><h2>換水プランを組む</h2></div></div>
+        <div class="plan-editor a"><div class="plan-top"><span class="plan-letter">A</span><label class="plan-name"><span class="visually-hidden">プランAの名前</span><input data-plan="a" data-key="name" type="text" maxlength="60"></label></div><div class="plan-inputs"><label>換水間隔 <small>日</small><input type="number" data-plan="a" data-key="interval" min="1" max="30" step="1"></label><label>1回の割合 <small>%</small><input type="number" data-plan="a" data-key="percent" min="0" max="80" step="1"></label><label>初回 <small>日目</small><input type="number" data-plan="a" data-key="firstDay" min="1" max="30" step="1"></label></div><div class="plan-hint" id="planHintA">—</div></div>
+        <div class="plan-editor b"><div class="plan-top"><span class="plan-letter">B</span><label class="plan-name"><span class="visually-hidden">プランBの名前</span><input data-plan="b" data-key="name" type="text" maxlength="60"></label></div><div class="plan-inputs"><label>換水間隔 <small>日</small><input type="number" data-plan="b" data-key="interval" min="1" max="30" step="1"></label><label>1回の割合 <small>%</small><input type="number" data-plan="b" data-key="percent" min="0" max="80" step="1"></label><label>初回 <small>日目</small><input type="number" data-plan="b" data-key="firstDay" min="1" max="30" step="1"></label></div><div class="plan-hint" id="planHintB">—</div></div>
+        <div class="plan-foot">初日は「今日=0日」とし、設定した初回日から定期換水します。上限値は医療・飼育上の安全基準ではなく、あなたが設定する比較用の目安です。</div>
+      </div>
+      <div class="panel library-panel"><div class="panel-heading"><div><span class="section-number">04 / MY DATA</span><h2>保存と持ち出し</h2></div></div><div class="export-grid"><button id="saveBtn" type="button">↧ 端末に保存</button><button id="jsonBtn" type="button">↓ JSON書出し</button><label class="import-button" for="importFile">↑ JSON読込み<input id="importFile" type="file" accept=".json,application/json" hidden></label><button id="csvBtn" type="button">↓ CSV書出し</button><button id="svgBtn" type="button">↓ グラフSVG</button><button id="clearBtn" type="button">× 保存を削除</button></div><p>入力はこのブラウザ内のみで処理します。JSONには入力値だけを保存します。氏名・連絡先などは入力しないでください。</p></div>
+    </section>
+    <section class="right-column" aria-label="計算結果">
+      <div class="panel chart-panel"><div class="panel-heading chart-head"><div><span class="section-number">03 / FORECAST & COMPARE</span><h2>水質の予測ライン</h2></div><span class="model-pill">単純混合モデル</span></div>
+        <div class="chart-topline"><div class="legend"><span><i class="leg-a"></i>プラン A</span><span><i class="leg-b"></i>プラン B</span><span><i class="leg-limit"></i>管理目安</span></div><div class="chart-toggle">薄い帯：正味変化 ±30%</div></div>
+        <div id="chart" class="chart-area" role="img" aria-label="2つの換水プランの硝酸塩濃度の予測グラフ"></div>
+        <div class="chart-slider"><label for="daySlider">注目する日 <strong id="dayLabel">—</strong></label><input id="daySlider" type="range" min="0" max="42" step="1" value="14"><div class="range-extents"><span>今日</span><span id="dayEnd">—</span></div></div>
+        <div class="day-cards"><div class="day-card a"><span>A の当日換水後</span><strong id="dayA">—</strong><small id="dayAChange">—</small></div><div class="day-card b"><span>B の当日換水後</span><strong id="dayB">—</strong><small id="dayBChange">—</small></div></div>
+        <p class="chart-foot">計算順序：毎日「正味増減 →（予定日なら）完全混合後に部分換水」。帯は ±30% の仮定を置いた感度確認で、統計的な信頼区間ではありません。</p>
+      </div>
+      <div class="panel verdict-panel"><div class="panel-heading"><div><span class="section-number">05 / SIDE-BY-SIDE</span><h2>比べてわかること</h2></div></div>
+        <div class="verdict-title" id="verdictTitle">—</div><p class="verdict-detail" id="verdictDetail">—</p>
+        <div class="compare-table-wrap"><table class="compare-table"><thead><tr><th scope="col">比較項目</th><th scope="col" class="col-a">A</th><th scope="col" class="col-b">B</th></tr></thead><tbody id="comparisonRows"></tbody></table></div>
+        <div class="inverse-grid"><div class="inverse a"><div><span>プランA / 定常ピークを目安以下に</span><strong id="needA">—</strong></div><button id="useNeedA" type="button">提案値を反映</button><small id="needNoteA">—</small></div><div class="inverse b"><div><span>プランB / 定常ピークを目安以下に</span><strong id="needB">—</strong></div><button id="useNeedB" type="button">提案値を反映</button><small id="needNoteB">—</small></div></div>
+      </div>
+      <div class="panel calendar-panel"><div class="panel-heading"><div><span class="section-number">06 / YOUR NEXT DAYS</span><h2>換水日の見取り図</h2></div><span class="small-label">直近14日</span></div><div id="calendar" class="calendar-grid" aria-label="今後14日間の換水予定"></div><p class="calendar-note">A・Bそれぞれの予定を表示。日付ではなく今日からの日数で計算するため、開始日は自由に設定できます。</p></div>
+    </section>
+  </div>
+  <section class="notes" aria-label="モデルの注意事項"><div class="note-mark">!</div><div><h2>水槽の現実は、計算より複雑です。</h2><p>これはNO₃のみの単純予測です。給餌量・植物の吸収・ろ過・水の蒸発・水草肥料・底床・新規水槽の変化を直接モデル化しません。NH₃/NH₄⁺、NO₂⁻、pH、水温、硬度や生体の状態も別途確認してください。<b>実際の換水量・頻度を機械的に決めるものではありません。</b>NO₃とNO₃-Nは異なる単位です。</p></div></section>
+</main>
+<footer><div class="brand brand-footer"><div class="brand-symbol" aria-hidden="true">≋</div><div><strong>換水しらべ</strong><span>SMALL TOOLS, CLEARER CHOICES</span></div></div><span>Made for deliberate fishkeeping · v1.0 · offline first</span></footer>
+<div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+</body>
+</html>
