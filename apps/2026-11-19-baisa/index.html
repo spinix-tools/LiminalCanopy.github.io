@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#15221d"><meta name="description" content="2本のコーヒー焙煎カーブを黄変・1ハゼ・排出の工程で揃えて比較するオフラインWebアプリ">
+<title>焙差 BAISA — 焙煎カーブの違いを読む</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="engine.js"></script><script defer src="app.js"></script>
+</head>
+<body>
+<header class="topbar"><div class="wrap topbar-inner"><div class="brand"><span class="brandmark">B<span>.</span></span><span>焙差 <small>BAISA / ROAST DIFF</small></span></div><span class="local-pill"><span class="dot"></span> LOCAL ONLY · 通信不要</span></div></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">ROAST PROFILE COMPARATOR / 01</div><div class="hero-layout"><div><h1>焙煎の「違い」を、<br><em>工程ごと</em>に見る。</h1><p>同じ豆を、別の日に焼いた。その2本を「投入からの時間」だけで比べていませんか？ 黄変と1ハゼを揃えると、時間の差と温度の差を分けて観察できます。</p></div><div class="hero-decoration" aria-hidden="true"><svg viewBox="0 0 310 190"><path d="M0 160 Q56 143 86 126 T162 83 T310 33" fill="none" stroke="#e9ae70" stroke-width="4"/><path d="M0 176 Q48 134 83 131 T163 93 T310 55" fill="none" stroke="#9ac6b7" stroke-width="3" stroke-dasharray="8 7"/><circle cx="196" cy="74" r="9" stroke="#e9ae70" fill="#1b3029" stroke-width="3"/><circle cx="204" cy="78" r="4" fill="#9ac6b7"/></svg><span>PROFILE A <b>—</b> PROFILE B</span></div></div></section>
+<section class="mainwork" aria-label="焙煎プロファイル比較">
+<div class="section-heading"><div><div class="eyebrow dark">01 / INPUT</div><h2>比較する2つのバッチ</h2></div><button id="demo" class="button soft">↺ デモ値に戻す</button></div>
+<div class="profiles">
+<section class="profile profile-a"><header><span class="chip amber">A / BASE</span><h3>基準バッチ</h3></header><label>バッチ名<input id="name-a" maxlength="80" value="バッチ A / 基準"></label><div class="event-grid"><label>黄変 <span>m:ss</span><input id="yellow-a" value="3:30" inputmode="numeric"></label><label>1ハゼ <span>m:ss</span><input id="crack-a" value="7:00" inputmode="numeric"></label><label>排出 <span>m:ss</span><input id="drop-a" value="9:30" inputmode="numeric"></label></div><label>焙煎CSV <span>time,bt の2列（秒,°C）</span><textarea id="csv-a" spellcheck="false" rows="6" aria-label="バッチAのCSV"></textarea></label><label class="upload">↑ CSVファイルを選択<input type="file" id="file-a" accept=".csv,text/csv,text/plain"></label></section>
+<section class="profile profile-b"><header><span class="chip mint">B / COMPARE</span><h3>比較バッチ</h3></header><label>バッチ名<input id="name-b" maxlength="80" value="バッチ B / 比較"></label><div class="event-grid"><label>黄変 <span>m:ss</span><input id="yellow-b" value="3:45" inputmode="numeric"></label><label>1ハゼ <span>m:ss</span><input id="crack-b" value="7:30" inputmode="numeric"></label><label>排出 <span>m:ss</span><input id="drop-b" value="10:00" inputmode="numeric"></label></div><label>焙煎CSV <span>time,bt の2列（秒,°C）</span><textarea id="csv-b" spellcheck="false" rows="6" aria-label="バッチBのCSV"></textarea></label><label class="upload">↑ CSVファイルを選択<input type="file" id="file-b" accept=".csv,text/csv,text/plain"></label></section>
+</div>
+<div id="error" class="error" role="alert" hidden></div>
+</section>
+<section class="result-section"><div class="section-heading"><div><div class="eyebrow dark">02 / ALIGN & COMPARE</div><h2>温度の重なりを可視化</h2></div><div class="segmented" role="group" aria-label="比較基準"><button class="mode active" data-mode="phase" aria-pressed="true">工程で揃える</button><button class="mode" data-mode="crack" aria-pressed="false">1ハゼで揃える</button><button class="mode" data-mode="elapsed" aria-pressed="false">経過時間</button></div></div>
+<div class="metrics"><div class="metric"><span>平均温度差 <small>(絶対値)</small></span><strong id="mae">—</strong><small>同じ比較軸で100分割</small></div><div class="metric"><span>最大温度差 <small>(絶対値)</small></span><strong id="max-gap">—</strong><small id="max-at">—</small></div><div class="metric"><span>1ハゼ後の時間割合差</span><strong id="dtr">—</strong><small>B − A / percentage points</small></div><div class="metric"><span>排出温度差</span><strong id="drop-gap">—</strong><small>B − A / °C</small></div></div>
+<div class="chart-card"><div class="chart-top"><div class="legend"><span><i class="line-a"></i>バッチ A</span><span><i class="line-b"></i>バッチ B</span></div><span id="axis-note">工程の進捗 (%)</span></div><div id="chart" class="chart" role="img" aria-label="2バッチの比較温度曲線"></div><div class="scrub"><label for="cursor">比較位置 <b id="cursor-label">50%</b></label><input type="range" id="cursor" min="0" max="100" step="1" value="50"><span id="cursor-detail" aria-live="polite">—</span></div></div>
+<div class="phase-grid" id="phase-grid"><div><span>乾燥（投入→黄変）</span><strong id="phase-dry">—</strong></div><div><span>黄変→1ハゼ</span><strong id="phase-maillard">—</strong></div><div><span>1ハゼ→排出</span><strong id="phase-develop">—</strong></div></div>
+<div class="roast-table"><h3>工程別の実測サマリー</h3><div class="scroll"><table><thead><tr><th>バッチ</th><th>黄変</th><th>1ハゼ</th><th>排出</th><th>1ハゼ後の割合</th><th>排出温度</th></tr></thead><tbody id="summary-rows"></tbody></table></div></div>
+<div class="actions"><button class="button primary" id="export-csv">↧ 比較データCSV</button><button class="button soft" id="export-json">↧ プロジェクトJSON</button><label class="button soft import-btn">↑ JSON読込<input type="file" id="import-json" accept=".json,application/json"></label><button class="button soft" id="export-svg">↧ グラフSVG</button><button class="button soft" id="print">▤ 印刷</button></div>
+</section>
+<section class="notes"><div><div class="eyebrow dark">03 / INTERPRETATION</div><h2>見えているのは「差」であり、<br>味の優劣ではありません。</h2></div><p>工程比較は各バッチの〈投入→黄変→1ハゼ→排出〉をそれぞれ3等分して揃える処理です。<strong>時間伸縮した曲線</strong>なのでRoRそのものや風味の良し悪しは示しません。センサー位置・校正・豆・投入量が違えば温度差に解釈上の制限があります。比較は同じ豆・同じセンサー構成での利用を想定しています。</p></section>
+</main><footer class="wrap footer"><span>BAISA / 焙差 — designed for the curious roaster.</span><span>MIT · Offline-first · No account / No API</span></footer>
+</body></html>
