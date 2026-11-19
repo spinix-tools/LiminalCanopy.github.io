@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>店ミリ | 卓上ブース設営プランナー</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="top"><div class="brand"><span class="mark" aria-hidden="true">▦</span><div><strong>店ミリ <small>MISEMIRI</small></strong><span>マルシェの机を、ミリ単位で。</span></div></div><nav class="actions" aria-label="保存と出力"><button id="undo" title="1操作戻す">↶ 戻す</button><button id="save">JSON保存</button><button id="load">JSON読込</button><button id="csv">CSV</button><button id="svg">SVG図面</button><button class="primary" id="print">印刷</button><input type="file" id="file" accept=".json,application/json" hidden></nav></header>
+<main class="shell">
+ <aside class="left panel"><div class="panelTitle"><span class="eyebrow">01 / SETUP</span><h2>机の条件</h2></div><label class="field wide"><span>出店名・計画名</span><input id="titleField" maxlength="80" placeholder="出店計画"></label><div class="fields"><label class="field"><span>机の幅 (mm)</span><input type="number" min="400" max="8000" step="10" data-plan="width"></label><label class="field"><span>机の奥行 (mm)</span><input type="number" min="300" max="5000" step="10" data-plan="depth"></label><label class="field"><span>端からの余白 (mm)</span><input type="number" min="0" max="400" step="10" data-plan="margin"></label><label class="field"><span>什器どうしの間隔 (mm)</span><input type="number" min="0" max="200" step="10" data-plan="gap"></label><label class="field"><span>手前からの目安 (mm)</span><input type="number" min="0" max="1500" step="10" data-plan="reach"></label><label class="field"><span>会計帯の幅 (mm)</span><input type="number" min="0" max="1800" step="10" data-plan="checkoutWidth"></label><label class="field"><span>会計帯の奥行 (mm)</span><input type="number" min="0" max="1200" step="10" data-plan="checkoutDepth"></label></div><p class="helper">会計帯は机の手前右。商品が会計帯に入り込むと注意を表示します。</p>
+ <div class="panelTitle spaced"><span class="eyebrow">02 / OBJECTS</span><h2>配置するもの</h2></div>
+ <div class="quick" id="presets"></div><div class="field topfield"><span>自由に追加</span><div class="addrow"><input id="newName" maxlength="60" placeholder="例：アクリルスタンド"><button id="add" class="primary" aria-label="什器を追加">＋ 追加</button></div></div>
+ <div class="subactions"><button id="auto">自動で仮配置</button><button id="reset" class="quiet">デモに戻す</button></div>
+ <p class="helper">自動配置はサイズ順に空きを探す近似処理です。最適配置を保証しません。</p>
+ </aside>
+ <section class="work panel"><div class="workspaceHeader"><div><span class="eyebrow">03 / LIVE PLAN</span><h1>出店レイアウト</h1><p>ドラッグで移動、クリックで選択。矢印キーで10mm微調整できます。</p></div><span class="status" id="status">準備中</span></div>
+ <div class="statbar"><div><b id="statArea">—</b><small>机の使用面積率（重なり含む）</small></div><div><b id="statReady">—</b><small>準備できた什器</small></div><div><b id="statWarn">—</b><small>要確認</small></div></div>
+ <div class="canvasShell"><div class="ruler"><span>奥側 / 作家側</span><span id="sizeSummary">1800 × 900 mm</span></div><div class="svgWrap"><svg id="surface" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="実寸比率の机の配置図"></svg></div><div class="legend"><span>↓ 手前 / お客様側</span><span class="litem"><i class="swatch goods"></i>商品</span><span class="litem"><i class="swatch fixture"></i>什器</span><span class="litem"><i class="swatch sign"></i>案内</span><span class="litem"><i class="swatch cashier"></i>会計</span></div></div>
+ <div class="notice" id="notices" aria-live="polite"></div>
+ <div class="tableHeader"><h2>搬入・設営チェック</h2><small>数量や準備済みの状態も図面と一緒に保存されます</small></div><div class="list" id="items"></div>
+ </section>
+ <aside class="right panel"><div class="panelTitle"><span class="eyebrow">04 / INSPECT</span><h2>選択中の什器</h2></div><div id="detail"><p class="muted">図面か一覧で什器を選んでください。</p></div><div class="tip"><strong>設営時の確認ポイント</strong><p>寸法はすべて上から見た占有範囲です。警告は重なり・端の余白・会計帯・商品への手の届きやすさの<b>目安</b>で、転倒防止や通行安全の判定ではありません。</p></div><div id="toast" class="toast" role="status" aria-live="polite"></div></aside>
+</main>
+<section id="printOnly" aria-label="印刷図面"></section>
+<footer>MISEMIRI · オフライン利用可能 / 登録不要 / 端末にのみ保存 · 計測値は現物で再確認してください。</footer>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
