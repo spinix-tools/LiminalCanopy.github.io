@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#133d31">
+  <meta name="description" content="プランターの枠を超えず、収穫の空白を減らす種まき計画。ブラウザだけで動く無料の連作プランナー。">
+  <title>種つなぎ | 小さな菜園のリレー計画</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="shell top-inner"><a href="#top" class="brand" aria-label="種つなぎの先頭へ"><span class="brand-mark" aria-hidden="true">✳</span><span>種つなぎ <small>TANE TSUNAGI</small></span></a>
+    <div class="header-end"><span class="offline-mark">● オフライン・登録不要</span><button class="top-btn" id="downloadJson">↧ JSON保存</button><button class="top-btn secondary" id="downloadCsv">↧ CSV</button></div>
+  </div>
+</header>
+<main id="top" class="shell">
+  <section class="hero"><div class="hero-copy"><span class="eyebrow">SMALL GARDEN, STEADY HARVEST</span><h1>収穫の空白を、<br><em>次の種</em>で埋める。</h1><p>限られたプランターで、いつ・何を蒔く？ 育成期間と収穫量をもとに、無理のない「ずらし播き」を組み立てる。</p><div class="hero-chips"><span>✦ プランター枠を超えない</span><span>✦ 週ごとの収穫を可視化</span><span>✦ 端末内だけで完結</span></div></div><div class="hero-art" aria-hidden="true"><div class="art-sun"></div><div class="art-plot one"><span class="sprout">❧</span><span class="soil"></span></div><div class="art-plot two"><span class="sprout">♧</span><span class="soil"></span></div><div class="art-plot three"><span class="sprout">❦</span><span class="soil"></span></div><div class="art-label">GROW · HARVEST · REPEAT</div></div></section>
+  <div class="workspace">
+    <aside class="sidebar">
+      <section class="panel setup"><div class="panel-heading"><span class="section-no">01</span><div><h2>庭の条件</h2><p>計画の土台を設定</p></div></div>
+        <div class="field-grid"><label>開始日 <input id="startDate" type="date"></label><label>計画期間 <select id="weeks"><option value="8">8週間</option><option value="12">12週間</option><option value="16">16週間</option><option value="20">20週間</option><option value="24">24週間</option></select></label><label>使える枠数 <input id="capacity" type="number" min="1" max="24" step="1"></label><label>週の目標量 <input id="target" type="number" min="1" max="30" step="1"></label></div>
+        <p class="hint">1枠＝管理できるプランター等の区画1つ。収穫量は自分で決める共通単位（例：1食分）です。</p>
+      </section>
+      <section class="panel crops-panel"><div class="panel-heading"><span class="section-no">02</span><div><h2>作物の登録</h2><p>各作物のモデル値を編集</p></div></div><div id="cropList" class="crop-list"></div><button class="add-btn" id="addCrop">＋ 作物を追加 <span id="cropCount">4 / 8</span></button><details class="help-legend"><summary>各項目の意味</summary><p>育成：播種から収穫開始までの週数。収穫：採れる週数。枠：1回の種まきが占める枠数。週量：収穫期の各週に採れる量。開始・終了：計画内で播ける週番号（0始まり）。上限：最大の播種回数。</p></details></section>
+      <section class="panel pins-panel"><div class="panel-heading"><span class="section-no">03</span><div><h2>必ず播く日</h2><p>手動固定を守って自動補完</p></div></div><div class="pin-add"><label>作物<select id="pinCrop"></select></label><label>種まき週<select id="pinWeek"></select></label><button id="addPin" class="solid-btn">＋ 固定</button></div><div id="pinnedList" class="pinned-list"><p class="hint">固定した予定はありません。</p></div></section>
+      <div class="sidebar-foot"><button id="resetSample" class="text-btn">↺ サンプルに戻す</button><label for="importJson" class="text-btn import-btn">↥ JSONを読込</label><input id="importJson" type="file" accept=".json,application/json" hidden></div>
+    </aside>
+    <div class="results">
+      <section class="results-head"><div><span class="eyebrow green">YOUR HARVEST OUTLOOK</span><h2>収穫リレーの見通し</h2><p>どの週に収穫があり、いつ枠が空くか。</p></div><div class="strategy"><span>計画スタイル</span><div class="mode-switch" role="group" aria-label="計画スタイル"><button data-mode="coverage" class="active" aria-pressed="true">収穫をつなぐ</button><button data-mode="lowwork" aria-pressed="false">種まきを減らす</button></div></div></section>
+      <div id="errorBanner" class="error-banner" role="alert" hidden></div>
+      <div id="stats" class="stat-grid" aria-live="polite"></div>
+      <section class="panel chart-panel"><div class="panel-top"><div><h3>週別の収穫見込み</h3><p>目標に届かない週を見つける</p></div><span class="key-guide"><i class="key-bar"></i>予定収穫 <i class="key-line"></i>目標</span></div><div id="harvestChart" class="chart-frame"></div><div id="summary" class="insight"></div></section>
+      <section class="panel timeline-panel"><div class="panel-top"><div><h3>プランターの利用カレンダー</h3><p>薄色＝育成中、濃色＝収穫中、●＝種まき</p></div><button id="printPlan" class="light-btn">⎙ 印刷</button></div><div id="timeline" class="timeline-scroll"></div><div id="capacityChart" class="capacity-row"></div></section>
+      <section class="panel task-panel"><div class="panel-top"><div><h3>種まきの予定</h3><p>日付は各週の開始日で表示</p></div><span class="tiny-label">NEXT SOWINGS</span></div><div id="taskList" class="tasks"></div></section>
+      <section class="caution"><strong>栽培適期と収量は保証しません。</strong> サンプル値は動作説明用です。地域・気温・日照・品種・栽培方法で実際の育成期間と収穫量は変わります。種袋や地域の指導情報を優先して入力し、農薬や食の安全判断には使用しないでください。</section>
+    </div>
+  </div>
+</main>
+<footer><div class="shell footer-inner"><span>✳ 種つなぎ / TANE TSUNAGI</span><span>すべての計算はこのブラウザ内で実行。外部送信なし。 · MIT License</span></div></footer>
+</body></html>
