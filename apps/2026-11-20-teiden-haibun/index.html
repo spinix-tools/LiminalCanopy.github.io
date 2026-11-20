@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="停電時のポータブル電源を、時間割と優先度から比較・見直す。無料・登録不要・端末内完結。">
+  <title>停電配分室 | 防災の電力使用計画</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="engine.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">計画画面へ</a>
+  <header class="masthead">
+    <div class="masthead__inner">
+      <div class="brand"><span class="brand__logo" aria-hidden="true">⚡</span><div><strong>停電配分室</strong><span>TEIDEN HAIBUN</span></div></div>
+      <div class="masthead__meta"><span class="dot"></span> 無料 · オフライン · データは端末内</div>
+    </div>
+  </header>
+  <main id="main" class="shell">
+    <section class="hero">
+      <div><div class="eyebrow">POWER-OUTAGE PLANNING LAB</div><h1>その電池で、<br><em>何を、いつまで</em>使える？</h1><p>家電ごとの使用時間と優先度を入力すると、停電中の電池残量を1時間刻みで試算。<strong>通常案と省エネ案</strong>を比べられます。</p></div>
+      <div class="hero__aside"><span class="mini-label">計画の見取り図</span><div class="hero__illustration" aria-hidden="true"><div class="battery-shape"><div class="battery-shape__charge"></div></div><div class="hero__power">24<span>H</span></div><div class="hero__tiny">電力の使い道を見える化</div></div></div>
+    </section>
+    <section class="panel settings-panel" aria-labelledby="settings-title">
+      <div class="panel-head"><div><div class="eyebrow">01 / BATTERY</div><h2 id="settings-title">電源の条件</h2></div><span class="hint">製品本体の表示に合わせて変更</span></div>
+      <div class="settings-grid">
+        <label>電池容量 <span>Wh</span><input data-setting="capacityWh" type="number" min="1" max="100000" step="1" value="1024"></label>
+        <label>初期充電 <span>%</span><input data-setting="initialPct" type="number" min="1" max="100" step="1" value="95"></label>
+        <label>残しておく予備 <span>%</span><input data-setting="reservePct" type="number" min="0" max="90" step="1" value="20"></label>
+        <label>変換効率 <span>%</span><input data-setting="efficiencyPct" type="number" min="30" max="100" step="1" value="85"></label>
+        <label>連続定格出力 <span>W</span><input data-setting="outputW" type="number" min="1" max="30000" step="1" value="600"></label>
+        <label>計画期間 <span>時間</span><select data-setting="hours"><option value="24">24時間</option><option value="48">48時間</option><option value="72">72時間</option></select></label>
+      </div>
+      <div class="settings-foot">※ 消費電力は実機の仕様や測定値を入力してください。「平均稼働率」は消費エネルギーの概算に使用します。起動時突入電流の判定には対応していません。</div>
+    </section>
+    <section class="panel devices-panel" aria-labelledby="devices-title">
+      <div class="panel-head"><div><div class="eyebrow">02 / APPLIANCES</div><h2 id="devices-title">家電の使用予定</h2></div><button type="button" class="btn btn--secondary" id="add-device">＋ 家電を追加</button></div>
+      <p class="intro">時間は0〜24時で設定し、翌日以降も同じ時間割を繰り返します。開始と終了が同じなら24時間使用です。</p>
+      <div class="table-scroll"><table class="device-table"><thead><tr><th scope="col">家電</th><th scope="col">W</th><th scope="col">台数</th><th scope="col">稼働率 %</th><th scope="col">開始</th><th scope="col">終了</th><th scope="col">優先度</th><th scope="col" aria-label="削除">操作</th></tr></thead><tbody id="devices-body"></tbody></table></div>
+      <div class="device-legend"><span><i class="legend-swatch legend-swatch--must"></i>必須（省エネ案でも保持）</span><span><i class="legend-swatch legend-swatch--flex"></i>任意（必要に応じて削減）</span></div>
+    </section>
+    <section class="results" aria-labelledby="results-title">
+      <div class="section-head"><div><div class="eyebrow">03 / COMPARE</div><h2 id="results-title">試算結果</h2></div><span class="section-head__note">数値を変えると自動再計算</span></div>
+      <div class="result-cards" id="result-cards" aria-live="polite"></div>
+      <div class="panel chart-panel"><div class="panel-head"><div><h3>電池残量の推移</h3><p class="muted">予備容量を下回らない計算。下限に達した後の需要は「未供給」に計上</p></div><span class="pill">1時間刻み</span></div><div id="chart" class="chart-container" role="img" aria-label="時間ごとの電池残量比較"></div><div class="chart-legend"><span><i class="line-swatch line-swatch--a"></i>通常案</span><span><i class="line-swatch line-swatch--b"></i>省エネ案</span><span><i class="line-swatch line-swatch--reserve"></i>予備残量</span></div></div>
+      <div class="panel advice-panel"><div class="advice-icon">✦</div><div><span class="eyebrow">RECOMMENDATION</span><h3 id="advice-title">省エネ案の提案</h3><p id="advice-text"></p><ul id="warnings" class="warnings"></ul></div></div>
+      <div class="panel detail-panel"><div class="panel-head"><div><h3>時間帯別の内訳</h3><p class="muted">必要電力と未供給を具体的に確認できます</p></div><label class="day-select">表示日 <select id="day-select"><option value="1">1日目</option></select></label></div><div class="table-scroll"><table class="hours-table"><thead><tr><th scope="col">時刻</th><th scope="col">通常案の必要電力</th><th scope="col">省エネ案の必要電力</th><th scope="col">通常案の残量</th><th scope="col">省エネ案の残量</th><th scope="col">未供給（通常 / 省エネ）</th></tr></thead><tbody id="hour-rows"></tbody></table></div></div>
+    </section>
+    <section class="panel export-panel"><div><div class="eyebrow">04 / SAVE</div><h2>計画を持ち帰る</h2><p>この端末に自動保存。JSONは別端末への移動用、CSVは計算結果の点検用です。</p></div><div class="export-actions"><button type="button" class="btn btn--primary" id="export-json">↓ 設定をJSON保存</button><button type="button" class="btn btn--secondary" id="import-json">↑ JSONを読み込む</button><button type="button" class="btn btn--secondary" id="export-csv">↓ 結果をCSV出力</button><button type="button" class="btn btn--plain" id="print">印刷</button><button type="button" class="btn btn--plain" id="reset">サンプルに戻す</button><input id="import-file" type="file" accept=".json,application/json" hidden></div><p role="status" id="status" class="status"></p></section>
+    <div class="safety"><strong>大切な注意</strong>　これは停電対策の概算ツールで、通電や接続の安全確認・医療機器の使用判断には使えません。実際の定格出力、突入電流、電池劣化、温度、機器との相性、メーカーの取扱説明書を必ず確認してください。エンジン式発電機は屋内で使わないでください。</div>
+  </main>
+  <footer class="footer">TEIDEN HAIBUN / 2026 · No account, no upload, no paid API · <a href="README.md">README / sources</a></footer>
+</body>
+</html>
