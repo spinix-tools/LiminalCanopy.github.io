@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>拍間 GAP | 無音で測る拍のゆらぎ</title>
+<style>
+:root {font-family: "Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;color:#e8f5f2;background:#0b1420;line-height:1.55}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 60% 30% at 100% 0%,#173b40 0%,transparent 90%),#0b1420}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f6cc75;outline-offset:3px}
+.wrap{max-width:1120px;margin:auto;padding:24px 24px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:9px 0 34px}
+.logo{font-size:23px;font-weight:800;letter-spacing:.1em}.logo span{color:#a4e3cc}.top-note{font-size:12px;color:#9cafb4;border:1px solid #35505b;border-radius:20px;padding:6px 12px}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;margin-bottom:30px}.kicker{color:#a5dbcb;font-size:12px;font-weight:800;letter-spacing:.2em}
+h1{font-size:clamp(29px,4.4vw,52px);letter-spacing:-.04em;line-height:1.28;margin:12px 0 16px}h1 strong{color:#b7f4d9}.desc{color:#a6b8c4;font-size:15px;max-width:600px}
+.pulse-art{position:relative;min-height:210px;border-radius:22px;border:1px solid #36545b;overflow:hidden;background:linear-gradient(135deg,#13303c,#12212f)}
+.pulse-art:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 58px,#284a50 59px,#284a50 60px);opacity:.55}
+.pulse-art svg{width:100%;height:210px;position:relative}.pulse-art small{position:absolute;bottom:15px;right:20px;color:#a8e4d6;font-size:11px;letter-spacing:.11em}
+section.panel{background:#111f2e;border:1px solid #2a4251;border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 12px 40px #060c1220}
+section.panel h2{font-size:19px;margin:0 0 6px}section.panel .lead{margin:0 0 20px;color:#98aeba;font-size:13px}
+.label-number{font-size:11px;letter-spacing:.14em;color:#86e0bf;margin-right:9px}
+.settings{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:11px;margin:18px 0}
+.setting label{display:block;color:#a8b9c1;font-size:12px;margin-bottom:6px}
+.setting input,.setting select{display:block;width:100%;border:1px solid #36505d;background:#0b1724;border-radius:10px;color:#f5f7f7;padding:10px 9px}
+.control{display:flex;align-items:center;flex-wrap:wrap;gap:11px}.primary,.secondary,.ghost{border-radius:10px;border:1px solid #3f5c67;padding:11px 19px;font-weight:800}
+.primary{background:#b3f3d4;color:#092624;border-color:#b3f3d4}.secondary{background:#20384a;color:#e4f4ef}.ghost{background:transparent;color:#acced3}
+.primary:not(:disabled):hover{background:#d2ffe7}.secondary:not(:disabled):hover,.ghost:not(:disabled):hover{border-color:#a8e6d5}
+.tiny{font-size:12px;color:#8fa9b7}.status{margin-left:auto;color:#b8edd6;font-size:13px;font-weight:700}
+.stage{display:grid;grid-template-columns:1fr 215px;gap:24px;align-items:center;margin:15px 0}.board{border:1px solid #325063;background:#0a1726;border-radius:15px;padding:20px;min-width:0}
+.phase-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#a1c8c8}
+.phase-title{font-size:27px;font-weight:850;margin:9px 0 13px}.beats{display:flex;gap:10px;margin:15px 0 19px}
+.beat-dot{width:20px;height:20px;border:1px solid #42616c;background:#162b3b;border-radius:50%;transition:background .07s}.beat-dot.live{background:#b8f4d2;box-shadow:0 0 0 7px #a9ecc82a}.beat-dot.muted.live{background:#f4b775;box-shadow:0 0 0 7px #ffcc8820}
+.progress{height:7px;background:#233f4d;border-radius:10px;overflow:hidden}.progress>div{height:100%;width:0;background:#b2f6d6;transition:width .15s}
+.tap{width:100%;min-height:145px;border-radius:18px;border:2px solid #88d7c9;background:radial-gradient(circle at 50% 25%,#2e6664,#15353d);font-size:31px;font-weight:900;color:#eafff5;touch-action:manipulation;user-select:none}
+.tap:active{transform:scale(.98);background:#396d67}.tap small{display:block;font-size:12px;font-weight:600;color:#b2dfd8;margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric{padding:16px;background:#0b1926;border:1px solid #2c4552;border-radius:13px}.metric .key{color:#9eb5c2;font-size:12px}.metric .val{font-size:clamp(21px,3vw,32px);font-weight:900;line-height:1.4;font-variant-numeric:tabular-nums}
+.metric .note{font-size:11px;color:#8aa7ad}
+.graph{min-height:210px;border:1px solid #2c4653;background:#0a1825;border-radius:15px;padding:14px}
+.graph svg{width:100%;max-height:190px;display:block}.legend{font-size:12px;color:#9bb1bf;margin-bottom:12px}
+.tablebox{overflow:auto;border:1px solid #2b4555;border-radius:12px}table{border-collapse:collapse;width:100%;font-size:13px;text-align:left;white-space:nowrap}th,td{padding:12px 15px;border-bottom:1px solid #263c48}th{color:#a8c0c9;font-weight:600;background:#162b3a}tr:last-child td{border-bottom:0}td em{font-style:normal;color:#c0f6da}
+.twocol{display:grid;grid-template-columns:1.55fr 1fr;gap:17px;margin-top:16px}.foot{font-size:12px;color:#8ca3af;margin-top:16px}
+.callout{font-size:13px;padding:13px 15px;border-left:3px solid #e9bf70;background:#1e2c34;color:#cbd7cf;margin:17px 0;border-radius:0 9px 9px 0}
+.summary{color:#b9c9cf;font-size:13px}
+.file-label{display:inline-flex;gap:7px;align-items:center;cursor:pointer;padding:10px 15px;border:1px solid #415d69;border-radius:10px;font-weight:750;font-size:13px;color:#d1ece1}.file-label input{display:none}
+footer{color:#75939c;font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:10px}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.pulse-art{min-height:120px}.pulse-art svg{height:125px}.settings{grid-template-columns:repeat(3,minmax(0,1fr))}.stage{grid-template-columns:1fr}.tap{min-height:100px}.metrics{grid-template-columns:repeat(2,1fr)}.twocol{grid-template-columns:1fr}}
+@media(max-width:480px){.wrap{padding:16px 13px 48px}.top{padding-bottom:16px}.top-note{display:none}.settings{grid-template-columns:repeat(2,minmax(0,1fr))}section.panel{padding:16px}.status{margin-left:0;width:100%}.metric{padding:12px}.control button{flex:1}.control .file-label{flex:1}}
+@media print{body{background:#fff;color:#111}.wrap{max-width:none}.hero,.top-note,.control,.settings,.tap,footer,.foot,.callout{display:none!important}section.panel,.metric,.graph,.tablebox{box-shadow:none;border-color:#bbb;background:white;color:#111;break-inside:avoid}#practice{display:none}.metric .key,.metric .note,.legend,.lead{color:#444!important}section.panel h2{color:#111}.board{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="logo">拍間 <span>GAP</span><small style="font-size:11px;letter-spacing:.15em;display:block;color:#92b6b7;font-weight:500">HAKUMA / RHYTHM LAB</small></div><div class="top-note">登録不要 · 外部送信なし · Web Audio</div></header>
+<div class="hero">
+ <div><div class="kicker">SILENCE REVEALS THE BEAT</div><h1>音が消えたあと、<br><strong>拍はどこへ行く？</strong></h1><p class="desc">クリック音が鳴る小節と無音の小節を交互に。画面をタップして、自分のテンポの「早まり」「遅れ」「抜け」を音の有無ごとに観察します。</p></div>
+ <div class="pulse-art" aria-hidden="true"><svg viewBox="0 0 420 210"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#a6eaca"/><stop offset="1" stop-color="#f4bb73"/></linearGradient></defs><path d="M0 108 H52 L70 108 L85 48 L105 175 L124 90 L138 110 H185 L201 108 L218 64 L240 150 L254 108 H300" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M300 108 H420" fill="none" stroke="#77a5aa" stroke-dasharray="5 9" stroke-width="3"/><circle cx="300" cy="108" r="8" fill="#f4ba73"/></svg><small>PLAY / SILENCE / RECONNECT</small></div>
+</div>
+<section class="panel" id="practice">
+ <h2><span class="label-number">01 / SETUP</span> 拍をつくる</h2><p class="lead">準備の1小節が鳴ってから計測開始。演奏や発声の録音は行いません。</p>
+ <div class="settings">
+  <div class="setting"><label for="bpm">テンポ（BPM）</label><input type="number" id="bpm" min="40" max="220" value="90"></div>
+  <div class="setting"><label for="meter">拍子</label><select id="meter"><option value="2">2拍子</option><option value="3">3拍子</option><option value="4" selected>4拍子</option><option value="5">5拍子</option><option value="6">6拍子</option><option value="7">7拍子</option></select></div>
+  <div class="setting"><label for="hearBars">鳴る小節</label><input type="number" id="hearBars" min="1" max="8" value="2"></div>
+  <div class="setting"><label for="muteBars">無音小節</label><input type="number" id="muteBars" min="1" max="8" value="2"></div>
+  <div class="setting"><label for="rounds">繰り返し</label><input type="number" id="rounds" min="1" max="8" value="3"></div>
+  <div class="setting"><label for="latency">入力補正（ms）</label><input type="number" id="latency" min="-200" max="200" value="0"></div>
+ </div>
+ <div class="control"><button class="primary" id="start">▶ 練習を開始</button><button class="ghost" id="stop" disabled>■ 終了</button><button class="secondary" id="demo">サンプル結果を見る</button><span class="status" id="status" role="status">設定を調整して開始</span></div>
+ <p class="tiny">入力補正：タップが記録上遅れる環境なら正の値で差し引きます。自動校正ではありません。音声は再生ボタン操作でのみ開始します。</p>
+ <div class="stage">
+  <div class="board"><div class="phase-heading"><span id="cycle">ROUND — / —</span><span id="clock">00:00 / 00:00</span></div><div class="phase-title" id="phase">READY TO FEEL</div><div class="beats" id="beats" aria-label="拍位置"></div><div class="progress" aria-label="経過率"><div id="progress"></div></div></div>
+  <button id="tap" class="tap" disabled aria-label="今の拍を記録する">TAP<span aria-hidden="true"> ◉</span><small>クリック / SPACE キー</small></button>
+ </div>
+</section>
+<section class="panel" id="report">
+ <h2><span class="label-number">02 / READOUT</span> 拍のゆらぎを読む</h2><p class="lead">遅れは＋、早まりは－。音が戻る最初の1拍も、独立して記録します。</p>
+ <div class="metrics">
+  <div class="metric"><div class="key">記録できた拍</div><div class="val" id="rate">—</div><div class="note">想定拍に対する一致率</div></div>
+  <div class="metric"><div class="key">平均絶対ずれ</div><div class="val" id="mae">—</div><div class="note">タップ済みの拍のみ</div></div>
+  <div class="metric"><div class="key">平均先行 / 遅延</div><div class="val" id="bias">—</div><div class="note">＋ 遅れ / − 早まり</div></div>
+  <div class="metric"><div class="key">余分なタップ</div><div class="val" id="extra">—</div><div class="note">重複・計測範囲外の記録</div></div>
+ </div>
+ <div class="callout" id="interpret">「サンプル結果を見る」で、無音の長さによる傾向を先に確認できます。手動タップには画面操作や音声出力の遅延が含まれます。</div>
+ <div class="twocol">
+  <div><div class="legend">拍ごとの誤差：中央線が0ms / <span style="color:#a9f0d0">● 鳴る拍</span> / <span style="color:#ffcb8c">● 無音拍・再開拍</span></div><div class="graph" id="graph" aria-label="タップ誤差の散布図"><p class="summary">計測後にグラフを表示します。</p></div></div>
+  <div><div class="legend">無音の何小節目でずれる？</div><div class="tablebox"><table><thead><tr><th>区間</th><th>一致率</th><th>平均ずれ</th></tr></thead><tbody id="groups"><tr><td colspan="3">結果がありません</td></tr></tbody></table></div></div>
+ </div>
+ <div class="control" style="margin-top:22px"><button id="exportCsv" class="secondary" disabled>↓ 誤差CSV</button><button id="exportJson" class="secondary" disabled>↓ セッションJSON</button><label class="file-label">↑ JSONを復元<input type="file" id="importJson" accept=".json,application/json"></label><button id="print" class="ghost" disabled>印刷</button><button id="clear" class="ghost">結果を消去</button></div>
+ <div class="foot">本ツールは指で打った時刻と予定拍の差を測る練習用の参考値です。演奏音の認識・体内リズムの診断・正確な測定器としての保証はありません。データはブラウザ内に保存し、エクスポート時のみファイル化します。</div>
+</section>
+<footer><div>HAKUMA GAP · © 2026 · オフライン動作 / ローカル保存</div><div>音声・マイク・アカウント・外部サービス不要</div></footer>
+</div>
+<script src="engine.js"></script>
+<script>
+(function () {
+ "use strict";
+ var E = window.HakumaEngine, els = {}, fields = ["bpm","meter","hearBars","muteBars","rounds","latency"];
+ var storeKey = "hakuma-gap-v1", running = null, last = null, ctx = null, intervalId = 0, frame = 0;
+ function $(s){return document.getElementById(s);}
+ fields.concat(["start","stop","demo","status","cycle","clock","phase","beats","progress","tap","rate","mae","bias","extra","interpret","graph","groups","exportCsv","exportJson","importJson","print","clear"]).forEach(function (x){els[x] = $(x);});
+ function current() { var a={}; fields.forEach(function (k){a[k]=els[k].value;});return E.config(a);}
+ function setConfig(c) {fields.forEach(function (k){els[k].value=String(c[k]);});}
+ function save() {
+   try {localStorage.setItem(storeKey, JSON.stringify({config:current(), session:last ? {config:last.config,taps:last.taps} : null}));}
+   catch (e) {els.status.textContent="端末保存は利用できません";}
+ }
+ try {
+   var saved=JSON.parse(localStorage.getItem(storeKey)||"null");
+   if(saved && saved.config) setConfig(E.config(saved.config));
+   if(saved && saved.session){var recovered=E.restore(E.serialize(saved.session.config,saved.session.taps));last={config:recovered.config,taps:recovered.taps,plan:recovered.plan,result:recovered.result};}
+ }catch(e){}
+ function timeLabel(ms){var s=Math.max(0,Math.floor(ms/1000));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+ function setRunning(on){fields.forEach(function(k){els[k].disabled=on;});els.start.disabled=on;els.demo.disabled=on;els.stop.disabled=!on;els.tap.disabled=!on;}
+ function drawDots(meter,which,quiet){els.beats.replaceChildren();for(var i=1;i<=meter;i++){var b=document.createElement("span");b.className="beat-dot"+(i===which?" live"+(quiet?" muted":""):"");b.setAttribute("aria-hidden","true");els.beats.appendChild(b);}}
+ function setBoard(plan,elapsed){
+   var index=Math.max(0,Math.min(plan.beats.length-1,Math.floor(Math.max(0,elapsed)/plan.intervalMs)));
+   var beat=plan.beats[index], phase=beat.phase==="countin"?"準備のカウント":beat.phase==="quiet"?"SILENCE / 無音":"CLICK / 音あり";
+   els.phase.textContent=phase;els.cycle.textContent=beat.phase==="countin"?"COUNT IN":("ROUND "+beat.round+" / "+plan.config.rounds+" · "+beat.bar+"小節目");
+   els.clock.textContent=timeLabel(elapsed)+" / "+timeLabel(plan.totalMs);
+   els.progress.style.width=String(Math.min(100,100*elapsed/plan.totalMs))+"%";
+   drawDots(plan.config.meter,beat.beat,beat.phase==="quiet");
+ }
+ function beep(at,accent){
+   if(!ctx)return;
+   var oscillator=ctx.createOscillator(), gain=ctx.createGain();
+   oscillator.type="sine";oscillator.frequency.setValueAtTime(accent?930:680,at);
+   gain.gain.setValueAtTime(0.0001,at);gain.gain.exponentialRampToValueAtTime(accent?.18:.09,at+.008);
+   gain.gain.exponentialRampToValueAtTime(.0001,at+.07);
+   oscillator.connect(gain);gain.connect(ctx.destination);oscillator.start(at);oscillator.stop(at+.085);
+ }
+ function audioTick(){
+   if(!running)return;
+   if(!ctx)return;
+   var now=ctx.currentTime;
+   while(running.next<running.plan.beats.length && running.audioOrigin+running.plan.beats[running.next].timeMs/1000 < now+.13){
+     var b=running.plan.beats[running.next++];
+     if(b.audible && running.audioOrigin+b.timeMs/1000 >= now-.02)beep(running.audioOrigin+b.timeMs/1000,b.beat===1);
+   }
+ }
+ function displayFrame(){
+   if(!running)return;
+   var elapsed=performance.now()-running.origin;
+   setBoard(running.plan,Math.min(running.plan.totalMs,elapsed));
+   if(elapsed>=running.plan.totalMs+100){finish(true);return;}
+   frame=requestAnimationFrame(displayFrame);
+ }
+ function finish(completed){
+   if(!running)return;
+   var r=running;running=null;
+   clearInterval(intervalId);cancelAnimationFrame(frame);
+   setRunning(false);
+   if(completed){
+     var result=E.analyze(r.plan,r.taps,r.config.latency);
+     last={config:r.config,taps:r.taps,plan:r.plan,result:result};
+     render();save();els.status.textContent="計測完了 · 結果を表示しました";
+   }else{els.status.textContent="途中終了 · 集計対象外（前回の結果は保持）";}
+   els.phase.textContent=completed?"SESSION COMPLETE":"PAUSED";
+ }
+ async function start(){
+   if(running)return;
+   var c=current(), plan=E.makePlan(c);
+   setConfig(c);save();
+   var audio=null;
+   try{
+     var AC=window.AudioContext||window.webkitAudioContext;
+     if(AC){if(!ctx || ctx.state==="closed")ctx=new AC();await ctx.resume();audio=ctx;}
+   }catch(e){audio=null;}
+   if(audio && audio.state!=="running")audio=null;
+   running={config:c,plan:plan,taps:[],next:0,origin:performance.now()+180,audioOrigin:audio?audio.currentTime+.18:0};
+   setRunning(true);els.status.textContent=audio?"再生中 · 拍に合わせてタップ":"無音モード · 音声を使用できません";
+   intervalId=setInterval(audioTick,25);audioTick();displayFrame();
+ }
+ function tap(){
+   if(!running)return;
+   var t=performance.now()-running.origin;
+   if(t<0 || t>running.plan.totalMs)return;
+   running.taps.push(Math.round(t*100)/100);
+   els.tap.style.borderColor="#f9cc84";
+   setTimeout(function(){els.tap.style.borderColor="#88d7c9";},90);
+ }
+ function setText(id,value){els[id].textContent=value;}
+ function fmt(n){return n===null?"—":(n>0?"+":"")+n+" ms";}
+ function row(triple){var tr=document.createElement("tr");triple.forEach(function(t){var td=document.createElement("td");td.textContent=String(t);tr.appendChild(td);});return tr;}
+ function render(){
+   var r=last&&last.result;["exportCsv","exportJson","print"].forEach(function(k){els[k].disabled=!r;});
+   if(!r){setText("rate","—");setText("mae","—");setText("bias","—");setText("extra","—");setText("interpret","「サンプル結果を見る」で無音の長さによる傾向を確認できます。");els.groups.replaceChildren(row(["結果がありません","",""]));els.graph.textContent="計測後にグラフを表示します。";return;}
+   setText("rate",String(r.total.hitRate)+"%");setText("mae",r.total.meanAbsMs===null?"—":String(r.total.meanAbsMs)+" ms");
+   setText("bias",fmt(r.total.meanSignedMs));setText("extra",String(r.extras));
+   var quiet=r.phases.quiet, heard=r.phases.heard;
+   setText("interpret","音あり "+heard.hitRate+"% / 無音 "+quiet.hitRate+"% が拍に対応。"+
+     (quiet.meanSignedMs===null?"無音のタップ記録はありません。":("無音の平均偏り "+fmt(quiet.meanSignedMs)+"。"))+
+     " 待機遅延や入力補正も影響するため、数値だけで実演技能は断定できません。");
+   els.groups.replaceChildren();
+   [["音あり",heard],["無音",quiet],["復帰の1拍",r.phases.return]].concat(r.curve.map(function(x){return ["無音 "+x.bar+"小節目",x.summary];})).forEach(function(entry){
+     els.groups.appendChild(row([entry[0],entry[1].hitRate+"%",fmt(entry[1].meanSignedMs)]));
+   });
+   drawGraph(r);
+ }
+ function drawGraph(result){
+   var ns="http://www.w3.org/2000/svg", svg=document.createElementNS(ns,"svg");
+   svg.setAttribute("viewBox","0 0 740 185");svg.setAttribute("role","img");
+   svg.setAttribute("aria-label","タップ済み拍の予定からの誤差。上は遅れ、下は早まり。");
+   var list=result.rows, maxY=Math.max(80,Math.min(300,Math.ceil(Math.max(0,...list.filter(function(x){return x.errorMs!==null;}).map(function(x){return Math.abs(x.errorMs);}))/50)*50)));
+   function element(name,attrs,text){
+     var e=document.createElementNS(ns,name);Object.keys(attrs).forEach(function(k){e.setAttribute(k,String(attrs[k]));});if(text!==undefined)e.textContent=text;svg.appendChild(e);return e;
+   }
+   [1,0,-1].forEach(function(k){var y=90-k*72;element("line",{x1:25,y1:y,x2:722,y2:y,stroke:k===0?"#91acb1":"#2d4955","stroke-dasharray":k===0?"none":"4 6","stroke-width":k===0?1.5:1});element("text",{x:2,y:y+4,fill:"#9db7bd","font-size":10},String(k*maxY));});
+   var stride=Math.max(1,Math.ceil(list.length/260));
+   list.forEach(function(r,i){if(r.errorMs===null || i%stride!==0)return;var x=25+697*(i/Math.max(1,list.length-1)),y=90-72*Math.max(-1,Math.min(1,r.errorMs/maxY));
+     var dot=element("circle",{cx:x,cy:y,r:3.25,fill:r.phase==="heard"?"#b5f1d5":"#ffc78e",opacity:.88});var title=document.createElementNS(ns,"title");title.textContent="第"+r.round+"巡 / "+r.phase+" / "+r.errorMs+"ms";dot.appendChild(title);
+   });
+   els.graph.replaceChildren(svg);
+ }
+ function download(content,name,mime){
+   var blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},4000);
+ }
+ fields.forEach(function(k){els[k].addEventListener("change",function(){setConfig(current());save();els.status.textContent="設定を更新しました";});});
+ els.start.addEventListener("click",function(){start().catch(function(e){els.status.textContent="開始できません："+e.message;setRunning(false);});});
+ els.stop.addEventListener("click",function(){finish(false);});
+ els.tap.addEventListener("click",tap);
+ document.addEventListener("keydown",function(ev){
+   if(ev.code==="Space" && running && !ev.repeat && !/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(ev.target.tagName)){ev.preventDefault();tap();}
+ });
+ els.demo.addEventListener("click",function(){
+   var p=E.makePlan(current()),t=E.demoTaps(p);
+   last={config:p.config,plan:p,taps:t,result:E.analyze(p,t,p.config.latency)};
+   setBoard(p,p.totalMs-1);els.phase.textContent="DEMO / 模擬データ";els.status.textContent="サンプル結果を表示しました";render();save();
+ });
+ els.exportCsv.addEventListener("click",function(){if(last)download(E.csv(last.result),"hakuma-gap-errors.csv","text/csv;charset=utf-8");});
+ els.exportJson.addEventListener("click",function(){if(last)download(E.serialize(last.config,last.taps),"hakuma-gap-session.json","application/json;charset=utf-8");});
+ els.importJson.addEventListener("change",async function(ev){
+   var f=ev.target.files&&ev.target.files[0];if(!f)return;
+   try{if(f.size>1000000)throw Error("1MBを超えるファイルです");var s=E.restore(await f.text());setConfig(s.config);last={config:s.config,taps:s.taps,plan:s.plan,result:s.result};setBoard(s.plan,s.plan.totalMs-1);els.phase.textContent="IMPORTED / 復元";els.status.textContent="読み込みに成功しました";render();save();}
+   catch(e){els.status.textContent="読み込み失敗："+e.message;}
+   ev.target.value="";
+ });
+ els.print.addEventListener("click",function(){window.print();});
+ els.clear.addEventListener("click",function(){if(running)finish(false);last=null;render();save();els.status.textContent="結果を消去しました";});
+ setRunning(false);drawDots(current().meter,0,false);render();if(last)render();
+})();
+</script>
+</body>
+</html>
