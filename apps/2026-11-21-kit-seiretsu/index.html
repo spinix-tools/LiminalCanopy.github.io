@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+<title>キット整列 | 現場の備品、かぶらず揃える。</title>
+<meta name="description" content="小さなチームの備品・キット予約を、日別の不足確認と出庫チェックリストで管理。端末内だけで動作します。">
+<link rel="stylesheet" href="./style.css">
+<script defer src="./engine.js"></script><script defer src="./app.js"></script>
+</head>
+<body>
+<div class="site-shell">
+  <header class="topbar">
+    <a class="brand" href="#main" aria-label="キット整列 ホーム"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>キット整列 <small>KIT SEIRETSU</small></span></a>
+    <div class="head-actions"><span class="offline"><span class="pulse"></span> LOCAL FIRST</span><button class="btn btn-ghost small" type="button" id="downloadJson">JSONでバックアップ <span aria-hidden="true">↗</span></button></div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy"><p class="eyebrow"><span class="mini-square"></span> SHARED GEAR PLANNING / 01</p><h1>その備品、<br><em>同じ日に</em>足りますか。</h1><p class="hero-desc">チームごとの道具の持ち出しを、重複予定まで含めて可視化。<br>準備する人が、会場で困らないための小さな司令室。</p>
+      <div class="hero-bottom"><span>アカウント不要</span><span>外部通信なし</span><span>日本語・オフライン</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="orbit orbit-1"></div><div class="orbit orbit-2"></div><div class="crate crate-back"><b>01</b><span>GEAR</span></div><div class="crate crate-front"><b>02</b><span>READY?</span><div class="crate-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="art-label">CHECK<br>BEFORE<br>YOU GO.</div></div>
+    </section>
+
+    <section aria-label="概要" class="stats-strip">
+      <div class="stat"><span>予定数</span><strong id="statBookings">—</strong><small>BOOKINGS</small></div>
+      <div class="stat"><span>備品の種類</span><strong id="statItems">—</strong><small>ITEMS</small></div>
+      <div class="stat"><span>不足がある予定</span><strong class="risk-color" id="statBlocked">—</strong><small>CONFLICTS</small></div>
+      <div class="stat"><span>追加が必要な品目</span><strong id="statPurchases">—</strong><small>TO PREPARE</small></div>
+    </section>
+
+    <nav class="tabs" aria-label="機能切替" id="tabs">
+      <button id="tab-planning" class="tab active" data-tab="planning" aria-controls="panel-planning" aria-selected="true" role="tab">01 <span>予定と不足</span></button>
+      <button id="tab-gear" class="tab" data-tab="gear" aria-controls="panel-gear" aria-selected="false" role="tab">02 <span>備品・キット</span></button>
+      <button id="tab-pick" class="tab" data-tab="pick" aria-controls="panel-pick" aria-selected="false" role="tab">03 <span>出庫チェック</span></button>
+      <button id="tab-data" class="tab" data-tab="data" aria-controls="panel-data" aria-selected="false" role="tab">04 <span>出力・保存</span></button>
+    </nav>
+
+    <section id="panel-planning" class="tabpanel" role="tabpanel" aria-labelledby="tab-planning">
+      <div class="section-intro"><div><p class="eyebrow dark">SCHEDULE & CONFLICTS</p><h2>予定を重ねて、<br>不足を先に見つける。</h2></div><p>期間は開始日・終了日の両日を含めて集計します。<br>不足表示は予約の競合予測であり、貸出確定ではありません。</p></div>
+      <div class="content-grid">
+        <div class="stack">
+          <article class="paper"><div class="paper-head"><div><span class="section-number">01 / LIST</span><h3>持ち出し予定</h3></div><span class="subnote">予定を編集・削除できます</span></div><div id="bookingList" class="booking-list"></div></article>
+          <article class="paper"><div class="paper-head"><div><span class="section-number">02 / TIME</span><h3>不足する日と備品</h3></div><button id="exportShortage" class="text-btn" type="button">不足表 CSV ↓</button></div><div id="shortagePanel"></div></article>
+        </div>
+        <aside class="paper form-panel"><div class="paper-head"><div><span class="section-number">MAKE A PLAN</span><h3 id="bookingFormHeading">新しい予定を追加</h3></div><span class="circle-icon">＋</span></div>
+          <form id="bookingForm" autocomplete="off"><input type="hidden" id="bookingId">
+            <label>予定名 <input required maxlength="80" id="bookingTitle" placeholder="例：町内会の講演会"></label>
+            <label>使うキット <select id="bookingKit" required></select></label>
+            <div class="fields-2"><label>開始日 <input required type="date" id="bookingStart"></label><label>終了日 <input required type="date" id="bookingEnd"></label></div>
+            <label>キット数（同種を複数用意する場合） <input id="bookingCopies" required type="number" min="1" max="99" value="1" step="1"></label>
+            <label>準備メモ <textarea id="bookingNote" rows="3" maxlength="160" placeholder="任意。個人名・連絡先は入力しないでください。"></textarea></label>
+            <button class="btn btn-primary" type="submit" id="bookingSubmit">予定を保存する <span>↗</span></button><button class="btn btn-outline" id="bookingCancel" type="button" hidden>編集をキャンセル</button>
+          </form>
+          <div class="micro-note"><span>!</span> 氏名・連絡先は保存しない設計です。予定名にも個人情報を入力しないでください。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="panel-gear" class="tabpanel" role="tabpanel" aria-labelledby="tab-gear" hidden>
+      <div class="section-intro"><div><p class="eyebrow dark">INVENTORY & SETS</p><h2>備品を登録し、<br>キットにまとめる。</h2></div><p>同じ備品を複数キットで使う場合も、<br>総在庫から日別の必要数を一括計算します。</p></div>
+      <div class="content-grid reverse">
+        <div class="stack">
+          <article class="paper"><div class="paper-head"><div><span class="section-number">01 / INVENTORY</span><h3>備品の総在庫</h3></div><span class="subnote">在庫は全キット共通</span></div><div id="itemList"></div></article>
+          <article class="paper"><div class="paper-head"><div><span class="section-number">02 / KIT TEMPLATES</span><h3>キット一覧</h3></div></div><div id="kitList"></div></article>
+        </div>
+        <aside class="stack">
+          <article class="paper form-panel"><div class="paper-head"><div><span class="section-number">ADD INVENTORY</span><h3 id="itemFormHeading">備品を登録</h3></div></div>
+            <form id="itemForm" autocomplete="off"><input type="hidden" id="itemId"><label>備品名 <input required id="itemName" maxlength="80" placeholder="例：プロジェクター"></label>
+              <div class="fields-2"><label>総在庫 <input id="itemStock" type="number" min="0" max="9999" step="1" value="1" required></label><label>単位 <input id="itemUnit" maxlength="12" required value="個"></label></div>
+              <label>保管場所 <input id="itemPlace" maxlength="60" placeholder="例：倉庫 B / 棚 02"></label><button class="btn btn-primary" type="submit">備品を保存 <span>↗</span></button><button class="btn btn-outline" type="button" id="itemCancel" hidden>編集をキャンセル</button></form></article>
+          <article class="paper form-panel"><div class="paper-head"><div><span class="section-number">SET COMPOSITION</span><h3 id="kitFormHeading">キットを登録</h3></div></div><form id="kitForm" autocomplete="off"><input type="hidden" id="kitId"><label>キット名 <input required id="kitName" maxlength="80" placeholder="例：上映機材セット"></label><p class="field-caption">1キットあたりに必要な数を入力してください。0は含めません。</p><div id="kitLineInputs" class="kit-lines"></div><button class="btn btn-primary" type="submit">キットを保存 <span>↗</span></button><button class="btn btn-outline" type="button" id="kitCancel" hidden>編集をキャンセル</button></form></article>
+        </aside>
+      </div>
+    </section>
+
+    <section id="panel-pick" class="tabpanel" role="tabpanel" aria-labelledby="tab-pick" hidden>
+      <div class="section-intro"><div><p class="eyebrow dark">PACKING CHECKLIST</p><h2>搬出前に、<br>現物をひとつずつ確認。</h2></div><p>チェックは準備状況の記録です。<br>在庫の予約計算には影響しません。</p></div>
+      <div class="content-grid"><article class="paper"><div class="paper-head"><div><span class="section-number">PICK LIST</span><h3>現物確認シート</h3></div><button id="exportPick" class="text-btn" type="button">この予定を CSV ↓</button></div><div id="pickContent"></div></article>
+        <aside class="paper form-panel"><div class="paper-head"><div><span class="section-number">SELECT BOOKING</span><h3>確認する予定</h3></div></div><label>対象の予定 <select id="pickBooking"></select></label><div id="pickSidebar"></div><button id="printPick" class="btn btn-primary" type="button">このシートを印刷する <span>↗</span></button></aside></div>
+    </section>
+
+    <section id="panel-data" class="tabpanel" role="tabpanel" aria-labelledby="tab-data" hidden>
+      <div class="section-intro"><div><p class="eyebrow dark">EXPORT & BACKUP</p><h2>追加する数を決め、<br>データを持ち帰る。</h2></div><p>集計はこの端末のみ。実購入、実予約、<br>スタッフへの自動通知は行いません。</p></div>
+      <div class="content-grid"><article class="paper"><div class="paper-head"><div><span class="section-number">BUY / BORROW</span><h3>不足解消のための追加数</h3></div><button class="text-btn" id="exportPurchase" type="button">追加リスト CSV ↓</button></div><div id="purchasePanel"></div><p class="micro-note inside">計算は「全予定を満たすために、同時期に何個追加すればよいか」です。購入ではなく別所から借りる判断にも使えます。</p></article>
+        <aside class="paper form-panel"><div class="paper-head"><div><span class="section-number">YOUR DATA</span><h3>保存・復元</h3></div></div><p class="muted paragraph">このブラウザのローカルストレージに自動保存します。複数端末間の同期はありません。</p>
+        <div class="data-actions"><button id="exportData2" class="btn btn-primary" type="button">JSONをダウンロード <span>↓</span></button><label for="importData" class="btn btn-outline upload">JSONバックアップを読み込む <span>↑</span></label><input id="importData" type="file" accept=".json,application/json" hidden><button id="resetData" class="btn btn-quiet" type="button">サンプルデータに戻す</button></div><div class="micro-note"><span>i</span> 読み込み時は現在のデータを置換します。先にJSONをダウンロードしておくと安全です。</div>
+        </aside></div>
+    </section>
+  </main>
+  <footer><span>キット整列 <b>© 2026</b></span><p>数量と日付で、準備の不安を小さく。</p><span>NO LOGIN · NO CLOUD · NO API</span></footer>
+</div>
+<div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+</body></html>
