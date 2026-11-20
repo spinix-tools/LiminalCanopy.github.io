@@ -124,7 +124,7 @@
   function serialize(settings, taps) {
     var c = config(settings);
     if (!Array.isArray(taps) || taps.length > 10000 ||
-        taps.some(function (v) { return !Number.isFinite(v) || v < -5000 || v > 3600000; })) {
+        taps.some(function (v) { return !Number.isFinite(v) || v < 0 || v > 3600000; })) {
       throw new Error("保存できないタップデータ");
     }
     return JSON.stringify({app: "hakuma-gap", version: VERSION, config: c, taps: taps.map(function (n) { return fix(n, 3); })}, null, 2);
