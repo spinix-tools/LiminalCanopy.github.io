@@ -45,13 +45,25 @@ with sync_playwright() as p:
     page.locator('#kerf').fill('4')
     page.locator('#kerf').dispatch_event('change')
     check(page.locator('#kerf').input_value()=='4','edit kerf')
+    project_download=None
     for control,name in [('saveJson','project JSON'),('exportCsv','parts CSV'),('exportRemnants','remainders CSV'),('exportSvg','sheet SVG')]:
         with page.expect_download() as download:
             page.click('#'+control)
         item=download.value
         check(bool(item.suggested_filename),name+' export')
+        if name=='project JSON':
+            project_download=ROOT/'test-project.json'
+            item.save_as(str(project_download))
+            check('kerf' in project_download.read_text(), 'project JSON contents')
         if name=='parts CSV':
-            tmp=ROOT/'test-output.csv'; item.save_as(str(tmp)); check('材料' in tmp.read_text(encoding='utf-8-sig'), 'CSV headers'); tmp.unlink()
+            tmp=ROOT/'test-output.csv'; item.save_as(str(tmp)); check('材料' in tmp.read_text(encoding='utf-8-sig'), 'CSV headers')
+            check('ラワン合板' in tmp.read_text(encoding='utf-8-sig'), 'CSV material labels')
+            tmp.unlink()
+    page.locator('#kerf').fill('9')
+    page.locator('#kerf').dispatch_event('change')
+    page.locator('#filePick').set_input_files(str(project_download))
+    check(page.locator('#kerf').input_value()=='4', 'project JSON import round trip')
+    project_download.unlink()
     page.locator('#kerf').fill('-5')
     page.locator('#kerf').dispatch_event('change')
     check(page.locator('#error').is_visible(),'input validation')
