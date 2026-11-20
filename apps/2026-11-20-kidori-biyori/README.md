@@ -30,7 +30,7 @@
 ## 検証（この実行）
 
 - Node.js v22: **8/8 テスト合格**。320シナリオ × 2方針で、部品の欠落・重なり・材料外配置・数量整合性などを検証。
-- Chromium / Playwright: **23操作・検査合格**。編集、削除、A/B、エラー復帰、JSON/CSV/SVG出力、モバイル画面を確認。
+- Chromium / Playwright: **26操作・検査合格**。編集、削除、A/B、エラー復帰、JSON/CSV/SVG出力、モバイル画面を確認。
 - Chromiumから `file://` へのアクセスは管理環境により `ERR_BLOCKED_BY_ADMINISTRATOR`。代わりに**実ファイルと同一のHTML/CSS/JSをインライン展開**して動作確認。ファイル直起動、localStorageの長期永続性、実機切断精度、最適解の達成度は未検証。
 
 ## 限界・安全性
