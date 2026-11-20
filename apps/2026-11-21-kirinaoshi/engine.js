@@ -42,17 +42,17 @@ function pack(s,mode){
  return {boards,missing,newUsed,scrap,stored,kerfLoss,score,totalParts:pieces.length,planned:pieces.length-missing.length};
 }
 function plan(s){validate(s);let candidates=[0,1,2].map(m=>pack(s,m));candidates.sort((a,b)=>{for(let i=0;i<a.score.length;i++){if(a.score[i]!==b.score[i])return a.score[i]-b.score[i]}return 0});const best=candidates[0];return {...best,totalCompleted:s.parts.reduce((sum,p)=>sum+p.done,0),totalRequested:s.parts.reduce((sum,p)=>sum+p.qty,0),unusedStocks:s.stocks.filter(t=>!best.boards.some(b=>b.id===t.id)).length};}
-function cut(s,stockId,partId,actualRemaining){validate(s);const p=plan(s),b=p.boards.find(v=>v.id===stockId);if(!b||!b.cuts.length||b.cuts[0].id!==partId)throw Error('最新計画の各材料の先頭部材を選んでください');
+function cut(s,stockId,partId,actualRemaining,success=true){validate(s);const p=plan(s),b=p.boards.find(v=>v.id===stockId);if(!b||!b.cuts.length||b.cuts[0].id!==partId)throw Error('最新計画の各材料の先頭部材を選んでください');
  const stock=s.stocks.find(t=>t.id===stockId),part=s.parts.find(t=>t.id===partId);
  const expected=stock.length-part.length-s.kerf;
  const actual=(actualRemaining===null||actualRemaining===undefined||actualRemaining==='')?expected:Number(actualRemaining);
- if(!int(actual,0,expected))throw Error(`実測残りは0〜${expected} mmで指定してください`);
+ if(!int(actual,0,success?expected:stock.length-1))throw Error(`実測残りは0〜${success?expected:stock.length-1} mmで指定してください`);
  const next=copy(s);next.history=Array.isArray(s.history)?s.history.slice(-29):[];
  const snap=copy(s);snap.history=[];next.history.push(snap);
  next.stocks.find(t=>t.id===stockId).length=actual;
- next.parts.find(t=>t.id===partId).done++;
+ if(success)next.parts.find(t=>t.id===partId).done++;
  if(!Array.isArray(next.log))next.log=[];
- next.log.push({stock:stock.label,part:part.label,cutLength:part.length,expected,actual,loss:expected-actual,at:new Date().toISOString()});
+ next.log.push({stock:stock.label,part:part.label,cutLength:part.length,expected,actual,loss:Math.max(0,expected-actual),success,at:new Date().toISOString()});
  validate(next);return next;
 }
 function undo(s){if(!Array.isArray(s.history)||!s.history.length)throw Error('戻せる履歴がありません');const prev=copy(s.history[s.history.length-1]);prev.history=s.history.slice(0,-1);validate(prev);return prev;}
