@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="写真やイラストを２色リソグラフ印刷の版に分け、版ずれをプレビューして入稿用グレースケールPNGを作ります。画像は端末外へ送信しません。">
+<title>版ずれラボ | BANZURE LAB</title>
+<style>
+:root{--ink:#232b35;--muted:#6c727a;--line:#d9d6cc;--paper:#f7f5ed;--card:#fffcf4;--rose:#e94879;--navy:#152d4d;--good:#21775b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-sans-serif,system-ui,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.5}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fcaa52;outline-offset:2px}
+a{color:inherit}.wrap{max-width:1330px;margin:auto;padding:0 24px}.top{border-bottom:1px solid var(--line);background:var(--card)}.topin{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0}.brand{font-size:19px;font-weight:900;letter-spacing:.06em}.brand i{display:inline-block;width:17px;height:17px;background:var(--rose);border:3px solid var(--navy);border-radius:100%;box-shadow:6px 0 0 #ffc84e;margin-right:12px;vertical-align:baseline}.top small{color:var(--muted);font-size:12px}.eyebrow{font-weight:850;font-size:12px;letter-spacing:.13em;color:#dc4771;text-transform:uppercase}.intro{display:flex;justify-content:space-between;gap:28px;align-items:end;padding:36px 0 28px}.intro h1{font-size:clamp(27px,4vw,46px);line-height:1.17;letter-spacing:-.035em;margin:7px 0 12px}.intro p{color:#5d6269;margin:0;max-width:650px}.intro .tag{background:#e2eaf0;border:1px solid #c6d0d8;border-radius:30px;padding:9px 14px;white-space:nowrap;font-weight:700;font-size:12px}
+.layout{display:grid;grid-template-columns:minmax(305px,360px) minmax(0,1fr);align-items:start;gap:22px;padding-bottom:35px}.panel,.view{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:0 3px 0 #eeebe1}.panel{padding:21px}.stephead{display:flex;align-items:baseline;gap:9px;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:14px}.step{font-size:12px;font-weight:900;color:var(--rose)}.stephead h2{margin:0;font-size:16px}.field{display:block;margin-bottom:14px}.field strong,.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}.field .sub{font-size:11px;color:var(--muted);font-weight:400}.upload{display:block;border:2px dashed #b3bbc2;border-radius:12px;padding:18px 12px;text-align:center;background:#f6f8fa;cursor:pointer}.upload:hover{background:#eaf1f4}.upload .big{display:block;font-size:24px;margin-bottom:3px}.upload strong{font-size:14px}.upload small{display:block;color:var(--muted);font-size:11px}.upload input{position:absolute;opacity:0;width:1px;height:1px}.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stack{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #c3c9ce;background:white;padding:10px 13px;border-radius:10px;font-weight:800;font-size:13px;color:#26384c;transition:background .15s}.btn:hover{background:#edf3f6}.btn.primary{background:var(--navy);color:white;border-color:var(--navy)}.btn.primary:hover{background:#28466b}.btn.accent{background:var(--rose);border-color:var(--rose);color:white}.btn:disabled{opacity:.55;cursor:progress}.full{width:100%}.select{width:100%;border:1px solid #bdc3c5;border-radius:9px;background:white;padding:10px;font-weight:650}.swatch{display:inline-block;width:15px;height:15px;border-radius:100%;border:1px solid #3334;vertical-align:-3px;margin-right:5px}.sliderline{display:flex;justify-content:space-between;align-items:baseline}.sliderline output{font-variant-numeric:tabular-nums;font-size:13px;font-weight:900}.field input[type=range]{width:100%;accent-color:var(--rose)}.rule{border-top:1px solid var(--line);margin:21px 0}.notice{font-size:12px;color:#685c41;background:#fff2d4;border-radius:9px;padding:10px 12px}.view{overflow:hidden}.viewhead{padding:18px 21px 14px;display:flex;gap:12px;align-items:start;justify-content:space-between;border-bottom:1px solid var(--line)}.viewhead h2{font-size:17px;margin:0}.viewhead small{display:block;color:var(--muted);margin-top:4px}.status{color:var(--good);font-size:12px;font-weight:800}.viewbody{padding:20px}.previews{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.frame{background:#e8e4db;border:1px solid #d1ccc1;border-radius:10px;overflow:hidden;padding:11px}.frame .framehead{font-size:12px;font-weight:900;color:#49535b;margin-bottom:9px;display:flex;justify-content:space-between}.art{display:block;width:100%;height:auto;max-height:465px;object-fit:contain;background:white;box-shadow:0 3px 14px #2222}.modes{display:flex;gap:5px;flex-wrap:wrap;margin:15px 0 12px}.mode{border:1px solid #d0d6d8;border-radius:20px;background:transparent;color:#46545d;padding:6px 11px;font-size:12px;font-weight:850}.mode[aria-pressed=true]{background:var(--navy);color:white;border-color:var(--navy)}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-radius:10px;padding:12px 10px;background:#fbfaf4}.metric small{display:block;color:var(--muted);font-size:11px}.metric b{display:block;font-size:22px;font-variant-numeric:tabular-nums;white-space:nowrap}.details{border-top:1px solid var(--line);margin-top:19px;padding-top:15px}.details h3{margin:0 0 10px;font-size:14px}.details p,.details li{font-size:12px;color:#565c64}.details ol{padding-left:23px}.bottom{margin:10px 0 35px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.toast{position:fixed;bottom:20px;right:20px;background:#19344e;color:white;padding:11px 16px;border-radius:10px;box-shadow:0 5px 22px #1126;max-width:360px;z-index:5;font-size:13px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:870px){.layout{grid-template-columns:1fr}.intro{padding-top:24px}.viewhead{flex-wrap:wrap}}@media(max-width:550px){.wrap{padding:0 13px}.intro{display:block}.intro .tag{display:inline-block;margin-top:14px}.previews{gap:8px}.frame{padding:7px}.frame .framehead{font-size:11px}.viewbody{padding:10px}.metrics{grid-template-columns:repeat(2,1fr)}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap topin"><div class="brand"><i aria-hidden="true"></i>版ずれラボ <span style="font-size:11px;color:#84909b;font-weight:700">BANZURE LAB</span></div><small>2-COLOR PRINT STUDIO / NO UPLOAD</small></div></header>
+<div class="wrap"><section class="intro"><div><div class="eyebrow">ONE IMAGE, TWO INKS, MANY POSSIBILITIES.</div><h1>その絵、<br>２色の版にしてみよう。</h1><p>写真やイラストを2色のグレースケール版に分解。実際のインク色で重なりを見て、版ずれを試して、印刷用の各版をダウンロードできます。</p></div><span class="tag">🔒 画像はブラウザ内で処理</span></section>
+<main class="layout"><aside class="panel" aria-label="設定">
+<div class="stephead"><span class="step">01</span><h2>原稿を選ぶ</h2></div>
+<label class="upload" for="imageFile"><span class="big">✳</span><strong>画像を選択する</strong><small>PNG / JPEG / WebP · 端末からのみ</small><input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp"></label>
+<div class="stack" style="margin:10px 0 17px"><button class="btn" type="button" id="sampleBtn">サンプルに戻す</button><span id="fileLabel" style="align-self:center;font-size:11px;color:#687680">内蔵サンプル</span></div>
+<div class="field"><label for="resolution">出力の横幅</label><select class="select" id="resolution"><option value="640">640 px · 試作向け</option><option value="1200">1200 px · 詳細確認向け</option><option value="1800">1800 px · 高解像度（重い）</option></select><div class="sub">原稿の縦横比を維持。印刷所の指定サイズ・解像度とは異なる場合があります。</div></div>
+<div class="rule"></div><div class="stephead"><span class="step">02</span><h2>インク２色を決める</h2></div>
+<div class="split"><div class="field"><label for="inkA">第１版 <span id="swA" class="swatch"></span></label><select class="select" id="inkA"></select></div><div class="field"><label for="inkB">第２版 <span id="swB" class="swatch"></span></label><select class="select" id="inkB"></select></div></div>
+<div class="field"><div class="sliderline"><label for="contrast">濃度バランス</label><output id="contrastOut">100%</output></div><input type="range" id="contrast" min="60" max="160" value="100" step="5"><div class="sub">高くすると全体を濃く分版</div></div>
+<div class="split"><div class="field"><div class="sliderline"><label for="strengthA">第１版の強さ</label><output id="strengthAOut">100%</output></div><input type="range" id="strengthA" min="0" max="100" value="100" step="5"></div><div class="field"><div class="sliderline"><label for="strengthB">第２版の強さ</label><output id="strengthBOut">100%</output></div><input type="range" id="strengthB" min="0" max="100" value="100" step="5"></div></div>
+<div class="rule"></div><div class="stephead"><span class="step">03</span><h2>版ずれを試す</h2></div>
+<div class="split"><div class="field"><div class="sliderline"><label for="shiftX">左右</label><output id="shiftXOut">0 px</output></div><input type="range" id="shiftX" min="-14" max="14" value="0"></div><div class="field"><div class="sliderline"><label for="shiftY">上下</label><output id="shiftYOut">0 px</output></div><input type="range" id="shiftY" min="-14" max="14" value="0"></div></div><div class="sub" style="margin-bottom:13px">※版ずれは合成プレビューのみ。出力する２枚の原版はずらしません。</div>
+<button class="btn full" id="resetShift" type="button">版ずれを 0 に戻す</button>
+<div class="rule"></div><div class="stephead"><span class="step">04</span><h2>版を取り出す</h2></div>
+<div class="stack"><button class="btn primary" id="saveA" type="button">⬇ 第１版 PNG</button><button class="btn primary" id="saveB" type="button">⬇ 第２版 PNG</button><button class="btn" id="saveComposite" type="button">⬇ 合成 PNG</button></div>
+<div class="stack" style="margin-top:10px"><button class="btn" id="saveProject" type="button">設定＋画像 JSON保存</button><label class="btn" style="display:inline-block;cursor:pointer" for="projectFile">JSONを開く<input id="projectFile" type="file" accept="application/json,.json" class="sr-only"></label></div>
+<div class="notice" style="margin-top:17px">グレースケールの版画像を２枚書き出します。色は印刷所やインクの実測色を再現するものではありません。実入稿前に印刷所の仕様を確認してください。</div>
+</aside>
+<section class="view"><div class="viewhead"><div><h2>版の見え方を比較</h2><small>左が元画像、右が2色の印刷イメージ</small></div><span id="status" class="status" role="status">サンプル準備中</span></div><div class="viewbody"><div class="previews"><div class="frame"><div class="framehead">ORIGINAL <span>原稿</span></div><canvas class="art" id="originalCanvas" width="360" height="510" aria-label="原稿のプレビュー"></canvas></div><div class="frame"><div class="framehead">RISO PREVIEW <span id="modeLabel">合成</span></div><canvas class="art" id="previewCanvas" width="360" height="510" aria-label="二色合成のプレビュー"></canvas></div></div>
+<div class="modes" aria-label="表示モード"><button type="button" class="mode" data-mode="mixed" aria-pressed="true">２色合成</button><button type="button" class="mode" data-mode="a" aria-pressed="false">第１版のみ</button><button type="button" class="mode" data-mode="b" aria-pressed="false">第２版のみ</button><button type="button" class="mode" data-mode="overlap" aria-pressed="false">重なり検査</button></div>
+<div class="metrics"><div class="metric"><small>第１版の平均濃度</small><b id="statA">—</b></div><div class="metric"><small>第２版の平均濃度</small><b id="statB">—</b></div><div class="metric"><small>版の重なり（加重）</small><b id="statOverlap">—</b></div><div class="metric"><small>元画像との平均RGB差</small><b id="statError">—</b></div></div>
+<div class="details"><h3>印刷までの３ステップ</h3><ol><li>画像を選びインク２色・濃度を調整します。</li><li>各版のPNGを保存。<strong>黒い部分がインクが濃く乗る部分</strong>です。</li><li>印刷所へ別々のグレースケール版として渡します。用紙・余白・推奨解像度・網点設定は入稿先に確認してください。</li></ol><p>推定モデル：sRGBから光学濃度への簡易変換、2インク非負最小二乗で分版、透過率の積で合成。紙色・インクの蛍光・網点・色ずれの実機特性は再現しません。平均RGB差は理想的な位置合わせ時の1画素あたり0～255の概算指標です。</p></div></div></section></main>
+<footer class="bottom">BANZURE LAB / 版ずれラボ — 登録不要 · 画像送信なし · 外部ライブラリなし · 試作用ツール。印刷会社の製版データとしての採否は各社基準に従ってください。</footer></div>
+<div class="toast" id="toast" role="alert" hidden></div>
+<script src="engine.js"></script>
+<script>
+(() => { 'use strict';
+  const E = window.BanzureEngine, $ = id => document.getElementById(id);
+  const fields = ['inkA','inkB','contrast','strengthA','strengthB','shiftX','shiftY','resolution'];
+  let source = document.createElement('canvas'), fileName = 'sample', result = null, viewMode = 'mixed', timer = null, requestId = 0;
+  const opts = Object.entries(E.PALETTE);
+  for (const id of ['inkA','inkB']) for (const [key, obj] of opts) {
+    const opt = document.createElement('option'); opt.value = key; opt.textContent = obj.name; $(id).append(opt);
+  }
+  $('inkA').value = 'pink'; $('inkB').value = 'blue';
+  try { const raw = localStorage.getItem('banzure-lab-settings-v1'); if (raw) { const data = JSON.parse(raw); for (const id of fields) if (data[id] != null && Array.from($(id).options || []).some(o => o.value === String(data[id])) || (data[id] != null && $(id).type === 'range')) $(id).value = String(data[id]); } } catch (_) { /* storage unavailable */ }
+  function settings() { return Object.fromEntries(fields.map(id => [id, $(id).value])); }
+  function syncLabels() {
+    for (const id of ['contrast','strengthA','strengthB']) $(id+'Out').textContent = $(id).value + '%';
+    for (const id of ['shiftX','shiftY']) $(id+'Out').textContent = $(id).value + ' px';
+    for (const [id, sw] of [['inkA','swA'],['inkB','swB']]) $(sw).style.background = E.hex(E.PALETTE[$(id).value].rgb);
+    try { localStorage.setItem('banzure-lab-settings-v1', JSON.stringify(settings())); } catch (_) { /* private mode */ }
+  }
+  function notify(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; clearTimeout(el._timer); el._timer = setTimeout(() => el.hidden = true, 3500); }
+  function status(s) { $('status').textContent = s; }
+  function demo() {
+    source.width = 600; source.height = 848;
+    const c = source.getContext('2d');
+    c.fillStyle = '#f2ece1'; c.fillRect(0,0,600,848);
+    c.fillStyle = '#f6bc56'; c.beginPath(); c.arc(310,338,265,0,Math.PI*2); c.fill();
+    c.fillStyle = '#206f8e'; c.fillRect(70,105,460,84); c.fillRect(90,612,420,15);
+    c.fillStyle = '#e64a72'; c.save(); c.translate(287,414); c.rotate(-.24); c.fillRect(-160,-170,320,340); c.restore();
+    c.fillStyle = '#183654'; c.beginPath(); c.arc(260,410,115,0,Math.PI*2); c.fill();
+    c.fillStyle = '#fff7ec'; c.beginPath(); c.arc(296,380,38,0,Math.PI*2); c.fill();
+    c.fillStyle = '#f7eee0'; c.font = '900 62px sans-serif'; c.textAlign = 'center'; c.fillText('RISO / 02',300,171);
+    c.fillStyle = '#253b52'; c.font = '900 73px sans-serif'; c.fillText('MAKE',300,700); c.fillText('YOUR OWN',300,775);
+    c.fillStyle = '#ae4361'; for(let i=0;i<18;i++){c.beginPath();c.arc(45+i*30,49,2.3,0,Math.PI*2);c.fill();}
+    fileName = 'sample'; $('fileLabel').textContent = '内蔵サンプル'; schedule(true);
+  }
+  function readSource(img, name) {
+    if (!img.naturalWidth || !img.naturalHeight) throw new Error('画像を読み込めません');
+    if (img.naturalWidth * img.naturalHeight > 60000000) throw new Error('画像が大きすぎます（最大6000万画素）');
+    source.width = img.naturalWidth; source.height = img.naturalHeight;
+    source.getContext('2d', {willReadFrequently:true}).drawImage(img,0,0);
+    fileName = name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40) || 'artwork';
+    $('fileLabel').textContent = name.length > 28 ? name.slice(0,25)+'…' : name;
+    schedule(true);
+  }
+  function loadBlob(blob, name) {
+    if (blob.size > 25*1024*1024) { notify('25MB以下の画像にしてください'); return; }
+    const url = URL.createObjectURL(blob), img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); try { readSource(img,name); } catch(e) { notify(e.message); } };
+    img.onerror = () => { URL.revokeObjectURL(url); notify('対応する画像を選んでください'); };
+    img.src = url;
+  }
+  function sizedCanvas(w,h) { const c=document.createElement('canvas'); c.width=w;c.height=h;return c; }
+  function render() {
+    if (!source.width || !source.height) return;
+    status('分版計算中…');
+    const cap = Number($('resolution').value), width = Math.max(1, Math.min(cap,source.width)), height = Math.max(1,Math.round(width*source.height/source.width));
+    if (height > 3500) { status('縦長画像のため縮小してください'); notify('画像の縦横比が極端です'); return; }
+    const o=$('originalCanvas'); o.width=width; o.height=height; o.getContext('2d',{willReadFrequently:true}).drawImage(source,0,0,width,height);
+    const pixels=o.getContext('2d').getImageData(0,0,width,height);
+    const inkA=E.PALETTE[$('inkA').value].rgb, inkB=E.PALETTE[$('inkB').value].rgb;
+    try {
+      result = { ...E.separateImage(pixels.data,width,height,inkA,inkB,Number($('contrast').value)/100,Number($('strengthA').value)/100,Number($('strengthB').value)/100),width,height,inkA,inkB };
+      renderPreview();
+      for(const [id,value] of [['statA',result.stats.a],['statB',result.stats.b],['statOverlap',result.stats.overlap]]) $(id).textContent=(value*100).toFixed(1)+'%';
+      $('statError').textContent=result.stats.error.toFixed(1);
+      status(width+' × '+height+' px・処理完了');
+    } catch(e) { status('処理に失敗'); notify(e.message); }
+  }
+  function renderPreview() {
+    if(!result) return;
+    const {a,b,width:w,height:h,inkA,inkB}=result;
+    const pix=E.renderComposite(a,b,w,h,inkA,inkB,Number($('shiftX').value),Number($('shiftY').value),viewMode);
+    const c=$('previewCanvas'); c.width=w;c.height=h;
+    c.getContext('2d').putImageData(new ImageData(pix,w,h),0,0);
+    $('modeLabel').textContent={mixed:'合成',a:'第１版',b:'第２版',overlap:'重なり'}[viewMode];
+  }
+  function schedule(immediate=false) { clearTimeout(timer); if(immediate){render();return;} status('更新準備中…'); timer=setTimeout(render,120); }
+  function downloadCanvas(canvas,name) { canvas.toBlob(blob => { if(!blob){ notify('画像の書き出しに失敗');return;} const a=document.createElement('a');const u=URL.createObjectURL(blob); a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000); },'image/png'); }
+  function exportPlate(which) {
+    if(!result) return;
+    const mask=which==='a'?result.a:result.b, c=sizedCanvas(result.width,result.height);
+    c.getContext('2d').putImageData(new ImageData(E.plateGrayscale(mask),result.width,result.height),0,0);
+    downloadCanvas(c,fileName+'_'+(which==='a'?'plate-1':'plate-2')+'.png');
+  }
+  $('saveA').addEventListener('click',()=>exportPlate('a'));
+  $('saveB').addEventListener('click',()=>exportPlate('b'));
+  $('saveComposite').addEventListener('click',()=>{if(result)downloadCanvas($('previewCanvas'),fileName+'_'+viewMode+'.png');});
+  $('sampleBtn').addEventListener('click',demo);
+  $('imageFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)loadBlob(f,f.name);e.target.value='';});
+  $('resetShift').addEventListener('click',()=>{$('shiftX').value=0;$('shiftY').value=0;syncLabels();renderPreview();});
+  for(const el of document.querySelectorAll('.mode')) el.addEventListener('click',()=>{viewMode=el.dataset.mode; for(const b of document.querySelectorAll('.mode'))b.setAttribute('aria-pressed',String(b===el)); renderPreview();});
+  for(const id of fields) $(id).addEventListener('input',()=>{syncLabels(); if(id==='shiftX'||id==='shiftY') renderPreview(); else schedule();});
+  $('saveProject').addEventListener('click',()=>{try{
+    const data={version:1,app:'banzure-lab',settings:settings(),image:source.toDataURL('image/png'),name:fileName};
+    const blob=new Blob([JSON.stringify(data)],{type:'application/json'}); const link=document.createElement('a'); const u=URL.createObjectURL(blob);
+    link.href=u;link.download=fileName+'_banzure.json';link.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
+  }catch(e){notify('プロジェクト保存に失敗しました');}});
+  $('projectFile').addEventListener('change',e=>{const file=e.target.files[0];e.target.value='';if(!file)return;
+    if(file.size>32*1024*1024){notify('JSONファイルが大きすぎます');return;}
+    file.text().then(text=>{const data=JSON.parse(text); if(data.version!==1||data.app!=='banzure-lab'||!/^data:image\/png;base64,/.test(data.image)||!data.settings)throw new Error('対応しないプロジェクトです');
+      for(const id of fields){const value=String(data.settings[id]??'');if($(id).type==='range'){const n=Number(value);if(Number.isFinite(n))$(id).value=n;}else if(Array.from($(id).options).some(o=>o.value===value))$(id).value=value;}
+      syncLabels(); const img=new Image(); img.onload=()=>{try{readSource(img,String(data.name||'project')+'.png');notify('プロジェクトを復元しました');}catch(e){notify(e.message);}};img.onerror=()=>notify('画像が壊れています');img.src=data.image;
+    }).catch(e=>notify(e.message||'JSONを読み込めません'));});
+  syncLabels(); demo();
+})();
+</script>
+</body></html>
