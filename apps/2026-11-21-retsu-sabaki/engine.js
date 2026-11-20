@@ -12,9 +12,9 @@
   function defaults() {
     return {
       title: '週末の体験ブース', start: '10:00',
-      arrivals: [24, 42, 64, 48, 30, 16],
-      base: [2, 2, 2, 2, 2, 2],
-      plan: [2, 3, 4, 3, 2, 2],
+      arrivals: [17, 27, 36, 33, 23, 12],
+      base: [4, 4, 4, 4, 4, 4],
+      plan: [4, 5, 6, 5, 4, 4],
       minutes: 4.5, variation: 30, surge: 20,
       capacity: 18, runs: 80, seed: 4021
     };
