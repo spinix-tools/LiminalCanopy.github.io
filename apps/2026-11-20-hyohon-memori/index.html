@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>標本メモリ | アンケートの偏りを見える化</title><meta name="description" content="匿名のクロス集計だけでアンケートの属性偏りを診断。レーキングによる重みづけと実効サンプル数を可視化。完全ローカルで無料。"><link rel="stylesheet" href="style.css"><script defer src="engine.js"></script><script defer src="app.js"></script></head>
+<body>
+<a class="skip" href="#editor">編集へ移動</a>
+<header class="topbar"><div class="logo">◆ <span>標本<span class="teal">メモリ</span></span></div><div class="header-right"><span class="pill"><span class="dot"></span> Local / No account</span><button id="demo" class="outline">サンプルに戻す</button></div></header>
+<main class="layout">
+  <section class="hero"><div class="eyebrow">SURVEY BALANCE LAB · 2026</div><h1>その「50%」は、<br><em>誰の50%ですか。</em></h1><p>回収したアンケートの属性構成と目標の違いを、グループ別の人数だけで点検。<br>1軸補正と2軸補正を比べて、結果の動きと重みの副作用を見渡します。</p><div class="hero-tip">匿名のクロス集計だけを扱います。個人別回答や氏名の入力は不要です。</div></section>
+  <section class="results" aria-label="分析結果"><div class="section-row"><div><div class="eyebrow dark">01 / WHAT CHANGES</div><h2>数字の変化を見る</h2></div><div id="status" class="status" role="status" aria-live="polite">計算中</div></div>
+    <div class="kpis"><article class="kpi"><span>補正前の「はい」</span><strong id="raw-value">—</strong><small>集計した全回答</small></article><article class="kpi"><span>1軸で補正</span><strong id="row-value">—</strong><small>例：年代のみ</small></article><article class="kpi main-kpi"><span>2軸で補正</span><strong id="both-value">—</strong><small id="shift">集計待ち</small></article><article class="kpi"><span>実効サンプルサイズ（目安）</span><strong id="ess-value">—</strong><small id="ess-note">回答人数に対する情報量</small></article></div>
+    <div class="panels"><article class="panel"><h3>補正の前後と目標構成</h3><div id="chart" class="chart" aria-label="属性構成の比較図"></div></article><article class="panel"><h3>診断メモ <span class="subtle">WEIGHT CHECK</span></h3><div class="metricstrip"><div><label>最大ウェイト</label><b id="max-weight">—</b></div><div><label>計算残差</label><b id="residual">—</b></div><div><label>反復回数</label><b id="iterations">—</b></div></div><ul id="warnings" class="warnings"></ul></article></div>
+  </section>
+  <section class="editor" id="editor"><div class="section-row"><div><div class="eyebrow dark">02 / CONTROL THE ASSUMPTIONS</div><h2>集計と目標を入力</h2></div><div class="actions"><button id="add-row" class="outline">＋ 行を追加</button><button id="add-col" class="outline">＋ 列を追加</button></div></div>
+    <div class="intro">人数は回答者数、「はい」はそのうち肯定した人数です。目標割合は、信頼できる母集団の外部統計等に合わせて入力してください。サンプルの割合は架空です。</div>
+    <div class="meta-fields"><label>調査名<input id="title" maxlength="100" type="text"></label><label>設問名<input id="question" maxlength="100" type="text"></label></div>
+    <div class="tables"><article class="panel"><div class="table-title"><h3>属性の割付目標</h3><small>各軸の合計が100%</small></div><div id="targets"></div></article><article class="panel cells-card"><div class="table-title"><h3>クロス集計表</h3><small>各セル：回答人数 / はい人数</small></div><div class="table-scroll" id="matrix"></div></article></div>
+    <div id="error" class="error" role="alert" hidden></div>
+  </section>
+  <section class="export"><div><div class="eyebrow">03 / TAKE IT WITH YOU</div><h2>数値と前提を持ち帰る</h2><p>外部送信なし。入力内容はブラウザ内だけに保存されます。</p></div><div class="export-buttons"><button id="csv" class="primary">集計CSV</button><button id="json" class="light">設定JSON</button><label class="light file-btn">JSONを読み込む<input id="import" type="file" accept=".json,application/json" hidden></label><button id="print" class="light">印刷</button></div></section>
+  <footer><p><b>読み方の注意：</b>これは属性別の人数を目標構成へ合わせる反復比例補正（IPF）の可視化です。推計の正確性、母集団の代表性、無作為抽出であること、信頼区間を保証しません。未観測層・非回答バイアス・誤った母集団比率は補正できません。実効サンプル数は Kish の重み分散に基づく近似であり、推測統計の標準誤差ではありません。</p><span>標本メモリ v1.0 — MIT License · Browser only</span></footer>
+</main></body></html>
