@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>曲がりPASS｜家具の搬入経路を2Dで試す</title>
+<meta name="description" content="家具がL字廊下を通れるか、寸法と角度を変えて経路候補を比較する無料のオフラインツール。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="mark">↪</span><span>曲がり<span class="brand-highlight">PASS</span><small>MAGARI PASS / 搬入経路ラボ</small></span></div><div class="topactions"><span class="privacy">● ローカル計算・通信なし</span><button id="exportJson" class="ghost small">JSON保存</button><label class="ghost small filebtn">JSON読込<input id="importJson" type="file" accept=".json,application/json" hidden></label></div></header>
+<main>
+<section class="intro"><div><div class="eyebrow">引越し・家具購入の前に</div><h1>その家具、<span>角を曲がれる？</span></h1><p>家具の寸法とL字廊下の実測値を入れるだけ。向きを変えながら通れる<strong>経路候補</strong>を探し、図面で確認できます。</p></div><div class="alert"><strong>2Dの事前スクリーニング</strong><span>天井・ドア枠・階段・運搬者・立体的な傾け方を再現しません。「経路あり」は実搬入の保証ではありません。</span></div></section>
+<div class="layout">
+<aside class="sidebar">
+<section class="panel"><div class="section-head"><span class="number">01</span><h2>家具を測る</h2><div class="smallnote">単位 cm</div></div>
+<div class="presets" role="group" aria-label="家具プリセット"><button data-preset="sofa" class="chip active">ソファ</button><button data-preset="fridge" class="chip">冷蔵庫</button><button data-preset="shelf" class="chip">収納棚</button><button data-preset="box" class="chip">荷箱</button></div>
+<div class="inputgrid"><label>長さ <input id="itemLength" type="number" min="20" max="400" step="1"></label><label>奥行 <input id="itemDepth" type="number" min="10" max="300" step="1"></label><label>高さ <input id="itemHeight" type="number" min="10" max="300" step="1"></label><label>四周の余裕 <input id="clearance" type="number" min="0" max="25" step="1"></label></div>
+<div class="subtle">家具は回転できる長方形として扱います。実測では脚・取っ手・梱包材も含めてください。</div>
+</section>
+<section class="panel"><div class="section-head"><span class="number">02</span><h2>L字通路を測る</h2><div class="smallnote">平面</div></div>
+<div class="inputgrid"><label>横廊下の長さ <input id="hallLength" type="number" min="240" max="1200"></label><label>横廊下の幅 <input id="hallWidth" type="number" min="40" max="350"></label><label>縦廊下の長さ <input id="riseLength" type="number" min="240" max="1200"></label><label>縦廊下の幅 <input id="turnWidth" type="number" min="40" max="350"></label><label>天井の高さ <input id="ceiling" type="number" min="160" max="400"></label><label>計算格子 <select id="grid"><option value="10">10cm（標準）</option><option value="5">5cm（細かい）</option><option value="15">15cm（高速）</option></select></label></div>
+<details class="extra"><summary>柱・棚などの突起を追加 <span class="hint">任意</span></summary><label class="checkline"><input id="obstacleEnabled" type="checkbox">図面に突起を配置する</label><div class="inputgrid"><label>左から X<input id="obsX" type="number" min="0"></label><label>下から Y<input id="obsY" type="number" min="0"></label><label>横幅<input id="obsW" type="number" min="1"></label><label>奥行<input id="obsH" type="number" min="1"></label></div></details>
+<button id="calculate" class="primary">↗ 搬入経路を再計算</button><p id="feedback" class="validation" role="status"></p>
+</section>
+<section class="panel compact"><div class="section-head"><span class="number">03</span><h2>保存・共有</h2></div><div class="buttonrow"><button id="downloadSvg" class="ghost">図面 SVG</button><button id="print" class="ghost">印刷する</button><button id="reset" class="ghost">初期状態</button></div><div class="subtle">ブラウザ内だけに保存され、外部へ送信しません。寸法を共有する際は個人情報を書き込まないでください。</div></section>
+</aside>
+<div class="workspace">
+<div class="section-label">COMPARISON / 搬送姿勢の比較</div>
+<div id="comparison" class="compare" role="group" aria-label="姿勢の比較"></div>
+<section class="panel diagram-panel"><div class="diagram-head"><div><div class="eyebrow">ROUTE VISUALIZER</div><h2 id="diagramTitle">通路と搬入経路</h2></div><span class="diagram-legend"><i class="sq route"></i>候補経路 <i class="sq item"></i>家具位置 <i class="sq wall"></i>通れない空間</span></div>
+<div id="diagram" class="diagram" role="img" aria-label="家具の移動経路とL字廊下の平面図"></div>
+<div class="playbar"><div class="play-header"><span id="poseLabel">表示位置：—</span><span id="poseDetail">—</span></div><input id="stepRange" type="range" min="0" max="0" value="0" aria-label="経路上の表示位置"><div class="buttonrow align-right"><button id="prevPose" class="ghost small">◀ 前へ</button><button id="play" class="ghost small">▶ 再生</button><button id="nextPose" class="ghost small">次へ ▶</button></div></div>
+</section>
+<section class="panel narrative"><div class="section-head"><span class="number">04</span><h2>結果の読みかた</h2></div><div id="explanation" class="explanation"></div><div class="rule"><b>「通れない」と断定しない理由</b><p>格子状の位置と15°単位の向きから近似探索します。経路が見つからない場合も、格子を細かくする・家具を別の姿勢にする・搬入方法を変更すると結果が変わる可能性があります。</p></div></section>
+</div></div>
+<footer>曲がりPASS v1.0 — オフラインで動く2D搬入検討ツール。実作業の前に搬入業者・販売店に実測確認を依頼してください。</footer>
+</main>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
