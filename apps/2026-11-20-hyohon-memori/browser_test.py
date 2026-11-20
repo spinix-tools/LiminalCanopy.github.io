@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""Smoke/E2E tests for HYOHON MEMORI. Reports exact checked assertions."""
+from pathlib import Path
+import json
+from playwright.sync_api import sync_playwright
+
+ROOT=Path(__file__).parent
+checks=[]
+def ck(test,label):
+    assert test,label
+    checks.append(label)
+
+def run():
+    with sync_playwright() as p:
+        browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
+        context=browser.new_context(viewport={'width':1440,'height':1000},accept_downloads=True)
+        page=context.new_page(); errors=[];page.on('pageerror',lambda exc:errors.append(str(exc)))
+        mode='direct-file';url=(ROOT/'index.html').as_uri()
+        try:
+            page.goto(url,wait_until='load',timeout=8000)
+            page.wait_for_selector('#both-value',timeout=2000)
+            if page.locator('#both-value').inner_text()=='—':raise RuntimeError('no app results')
+        except Exception:
+            mode='inline-fallback'
+            page.close()
+            page=context.new_page()
+            page.on('pageerror',lambda exc:errors.append(str(exc)))
+            html=(ROOT/'index.html').read_text()
+            html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+ (ROOT/'style.css').read_text()+'</style>')
+            html=html.replace('<script defer src="engine.js"></script>','').replace('<script defer src="app.js"></script>','')
+            html=html.replace('</body>', '<script>'+ (ROOT/'engine.js').read_text()+'</script><script>'+ (ROOT/'app.js').read_text()+'</script></body>')
+            page.set_content(html,wait_until='load')
+        page.wait_for_timeout(150)
+        ck(page.locator('h1').is_visible(),'hero visible')
+        ck(page.locator('#raw-value').inner_text()=='53.0%','raw sample share 53%')
+        ck(page.locator('#both-value').inner_text()=='51.5%','weighted two-axis share')
+        ck(page.locator('#row-value').inner_text()!='—','one-axis share')
+        ck(page.locator('#ess-value').inner_text()!='—','ESS present')
+        ck('400' in page.locator('#status').inner_text(),'respondent count')
+        ck(page.locator('#chart .axis-block').count()==2,'two axis charts')
+        ck(page.locator('#matrix tbody tr').count()==3,'three cross-tab rows')
+        ck(page.locator('#matrix input[data-kind="cell"]').count()==12,'editable six cells')
+        ck(page.locator('#warnings li').count()>=1,'diagnostic message')
+        page.screenshot(path=str(ROOT/'desktop.png'),full_page=True)
+        original=page.locator('#both-value').inner_text()
+        first=page.locator('input[data-kind="cell"][data-i="0"][data-j="0"][data-key="yes"]')
+        first.fill('80');first.press('Tab')
+        ck(page.locator('#both-value').inner_text()!=original,'editing yes changes estimate')
+        ck(page.locator('#raw-value').inner_text()=='62.3%','raw updates after input')
+        first=page.locator('input[data-kind="cell"][data-i="0"][data-j="0"][data-key="yes"]')
+        first.fill('81');first.press('Tab')
+        ck(page.locator('#error').is_visible(),'invalid yes count warning')
+        ck(page.locator('#csv').is_disabled(),'CSV disabled for invalid input')
+        first=page.locator('input[data-kind="cell"][data-i="0"][data-j="0"][data-key="yes"]')
+        first.fill('43');first.press('Tab')
+        ck(not page.locator('#error').is_visible(),'validation recovers')
+        page.locator('input[data-kind="target"][data-axis="col"][data-i="0"]').fill('70')
+        page.locator('input[data-kind="target"][data-axis="col"][data-i="0"]').press('Tab')
+        ck('合計' in page.locator('#error').inner_text(),'target percentage validation')
+        page.locator('input[data-kind="target"][data-axis="col"][data-i="0"]').fill('60')
+        page.locator('input[data-kind="target"][data-axis="col"][data-i="0"]').press('Tab')
+        ck(not page.locator('#error').is_visible(),'target correction')
+        page.locator('#add-row').click()
+        ck(page.locator('#matrix tbody tr').count()==4,'add row')
+        ck(page.locator('#matrix input[data-kind="cell"]').count()==16,'row adds two cells')
+        page.locator('button[data-remove="row"]').click()
+        ck(page.locator('#matrix tbody tr').count()==3,'delete last row')
+        page.locator('#add-col').click()
+        ck(page.locator('#matrix thead th').count()==4,'add column')
+        page.locator('button[data-remove="col"]').click()
+        ck(page.locator('#matrix thead th').count()==3,'delete last column')
+        page.locator('#title').fill('テスト用調査')
+        ck(page.locator('#title').input_value()=='テスト用調査','title editing')
+        with page.expect_download() as d:page.locator('#csv').click()
+        csv=d.value.path().read_text(encoding='utf-8-sig')
+        ck('加重人数' in csv,'CSV file contains weighted counts')
+        with page.expect_download() as d:page.locator('#json').click()
+        json_content=d.value.path().read_text(encoding='utf-8')
+        ck(json.loads(json_content)['title']=='テスト用調査','JSON download contains edits')
+        page.locator('#demo').click()
+        ck(page.locator('#title').input_value()!='テスト用調査','demo reset')
+        # Import earlier downloaded JSON via file input
+        tmp=ROOT/'test-import.json';tmp.write_text(json_content,encoding='utf-8')
+        page.locator('#import').set_input_files(str(tmp))
+        ck(page.locator('#title').input_value()=='テスト用調査','JSON import restores edits')
+        tmp.unlink()
+        page.locator('#title').fill('<img src=x onerror=alert(1)>')
+        # Can be printed only as text, never execute as HTML.
+        ck(page.locator('#matrix img').count()==0,'user content cannot become HTML')
+        page.locator('#demo').click()
+        ck(len(errors)==0,'no JS page errors')
+        # Verify the app works at phone width, no horizontal overflow except the intentionally scrolling matrix.
+        phone=context.new_page();phone.set_viewport_size({'width':390,'height':844})
+        if mode=='direct-file': phone.goto(url,wait_until='load',timeout=8000)
+        else: phone.set_content(html,wait_until='load')
+        phone.screenshot(path=str(ROOT/'mobile.png'),full_page=True)
+        ck(phone.locator('#both-value').is_visible(),'mobile estimate visible')
+        ck(phone.locator('#add-row').is_visible(),'mobile controls visible')
+        overflow=phone.evaluate('document.documentElement.scrollWidth>window.innerWidth+2')
+        ck(not overflow,'mobile document without horizontal overflow')
+        browser.close()
+        print('Chromium mode:',mode)
+        print(f'{len(checks)}/{len(checks)} checks passed')
+        print('\n'.join('  ✓ '+x for x in checks))
+
+if __name__=='__main__':run()
