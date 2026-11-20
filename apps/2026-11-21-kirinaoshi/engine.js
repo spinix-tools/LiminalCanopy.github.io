@@ -25,6 +25,7 @@ function pack(s,mode){
  let boards=s.stocks.map((t,i)=>({...t,initial:t.length,remaining:t.length,cuts:[],order:i}));let missing=[];
  for(const p of items){let eligible=boards.filter(b=>b.remaining>=p.length+s.kerf);
  if(!eligible.length){missing.push(p);continue;}
+ // Mode 0 minimizes unused remainder; mode 1 prefers offcuts; mode 2 protects long bars.
  eligible.sort((a,b)=>{
   if(mode===1){const aa=a.kind==='offcut'?0:1, bb=b.kind==='offcut'?0:1;if(aa!==bb)return aa-bb;}
   if(mode===2){const aa=a.cuts.length?0:1, bb=b.cuts.length?0:1;if(aa!==bb)return aa-bb;}
