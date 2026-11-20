@@ -21,6 +21,7 @@ SRT/VTT読込・貼り付け、日本語文字数/行数/秒数・間隔/重複�
 ## 検証（この実行のローカル版）
 - `node --test engine.test.cjs`：**32/32合格**、擬似乱数500条件で開始時刻/文字の保存・固定・非重複を確認。
 - `python browser_test.py`：**19主要画面操作のシナリオに合格**、ChromiumのJS例外なし、スマホ幅の横スクロールなし。
+- `python browser_extra_test.py`：SRTファイル読込、SRT/JSONダウンロード、JSONプロジェクト復元の追加シナリオ合格。
 - `node --check engine.js` と `node --check app.js`：合格。
 - 環境制約によりfile://へのChromium直接遷移が拒否され、同一のHTML/CSS/JSをインライン展開して画面検証。端末保存の持続性、実ファイルダウンロード、実利用者の視認性・音声同期は未検証。
 - 使い方：`index.html`を通常ブラウザで開く。
