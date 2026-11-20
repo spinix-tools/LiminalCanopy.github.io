@@ -1,0 +1,17 @@
+const test=require('node:test');const assert=require('node:assert/strict');const E=require('./engine.js');
+const base=E.defaults();
+test('defaults/normalize are structurally safe',()=>{let c=E.normalize({arrivals:[-3,999],base:[0,12],plan:[0,88],minutes:-4,runs:999});assert.equal(c.arrivals[0],0);assert.equal(c.arrivals[1],150);assert.equal(c.base[0],1);assert.equal(c.base[1],8);assert.equal(c.minutes,.5);assert.equal(c.runs,300);assert.equal(c.arrivals.length,6)});
+test('same seed yields identical visitors',()=>assert.deepEqual(E.visitorsFor(base,77),E.visitorsFor(base,77)));
+test('different seed changes visitors',()=>assert.notDeepEqual(E.visitorsFor(base,77),E.visitorsFor(base,78)));
+test('no arrivals means no queue',()=>{const c=E.normalize({...base,arrivals:[0,0,0,0,0,0]});const v=E.compare(c);assert.equal(v.baseline.p90,0);assert.equal(v.proposal.closing,0);assert.equal(v.baseline.visitors,0)});
+test('single staff serial service deterministic',()=>{const g=[{t:0,service:5},{t:0,service:5},{t:0,service:5}];const r=E.runOnce(g,[1,1,1,1,1,1],10);assert.deepEqual(r.waits,[0,5,10]);assert.equal(r.peak,2);assert.equal(r.closedOpen,0)});
+test('two staff parallel service deterministic',()=>{const g=[{t:0,service:5},{t:0,service:5},{t:0,service:5}];const r=E.runOnce(g,[2,2,2,2,2,2],10);assert.deepEqual(r.waits,[0,0,5]);assert.equal(r.peak,1)});
+test('staff increase at boundary starts waiting guests',()=>{const g=[{t:0,service:35},{t:0,service:35},{t:0,service:35}];const r=E.runOnce(g,[1,3,3,3,3,3],4);assert.deepEqual(r.waits,[0,30,30]);});
+test('90th percentile interpolation',()=>{assert.equal(E.percentile([0,10,20],.9),18);assert.equal(E.percentile([],0.9),0);});
+test('adding ample staff cannot increase waits with same arrivals',()=>{const c=E.normalize({...base,base:[1,1,1,1,1,1],plan:[8,8,8,8,8,8],runs:20});const r=E.compare(c);assert.ok(r.baseline.mean>=r.proposal.mean);assert.ok(r.baseline.p90>=r.proposal.p90)});
+test('same config and seed produces identical aggregate',()=>assert.deepEqual(E.compare(base),E.compare(base)));
+test('one-person hours comparison',()=>{const c=E.normalize({...base,base:[1,1,1,1,1,1],plan:[2,1,1,1,1,1],runs:10});assert.equal(E.compare(c).extraHours,.5)});
+test('suggestion cannot exceed max desks',()=>{const c=E.normalize({...base,base:[8,8,8,8,8,8]});assert.equal(E.suggest(c),null)});
+test('overloaded queue yields warnings metrics',()=>{const c=E.normalize({...base,arrivals:[100,100,100,100,100,100],base:[1,1,1,1,1,1],plan:[1,1,1,1,1,1],capacity:3,runs:10});const r=E.compare(c);assert.equal(r.baseline.overflow,100);assert.ok(r.baseline.closing>0);assert.ok(r.baseline.p90>15)});
+test('random schedules keep finite metrics, identical scenario results',()=>{const rand=E.rng32(5566);for(let i=0;i<150;i++){const arrivals=Array.from({length:6},()=>Math.floor(rand()*70)),staff=Array.from({length:6},()=>1+Math.floor(rand()*5));const c=E.normalize({...base,arrivals,base:staff,plan:staff,runs:10,seed:i+1});const r=E.compare(c);assert.deepEqual(r.baseline,r.proposal);for(const k of ['mean','p90','over15','peak','closing','overtime','visitors'])assert.ok(Number.isFinite(r.baseline[k]),k)}});
+test('every generated visit has positive service and time bounds',()=>{const rnd=E.rng32(789);for(let i=0;i<100;i++){const c=E.normalize({...base,seed:i+1,arrivals:Array.from({length:6},()=>Math.floor(rnd()*151))});const g=E.visitorsFor(c,i+1);assert.ok(g.every((v,j)=>v.service>0&&v.t>=0&&v.t<180&&(j===0||v.t>=g[j-1].t)))}});
