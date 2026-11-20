@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="字幕ものさし - 日本語字幕の読みやすさをローカルで点検・修正するWebアプリ">
+  <title>字幕ものさし | Japanese Subtitle QA Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="identity"><div class="logomark" aria-hidden="true"><span>字</span><i></i></div><div><div class="brand-name">字幕ものさし <small>/ JIMAKU MONOSASHI</small></div><div class="brand-sub">読みやすさを、見える形に。</div></div></div>
+      <div class="top-meta"><span class="privacy-pill"><span class="dot"></span> LOCAL ONLY</span><span class="version">BETA 01 · 2026</span></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="hero-copy"><div class="eyebrow"><span class="corner"></span> SUBTITLE QUALITY CONTROL</div><h1>字幕の「読める」を、<br><em>感覚だけにしない。</em></h1><p>日本語の全角・半角を考慮し、字幅・読速・時間の重なりをチェック。直すべき箇所を見つけて、字幕ファイルとして持ち帰れます。</p><div class="hero-badges"><span>✓ SRT / WebVTT</span><span>✓ サーバー送信なし</span><span>✓ 無料・登録不要</span></div></div>
+        <div class="hero-visual" aria-hidden="true"><div class="video-frame"><div class="frame-line line-1"></div><div class="frame-line line-2"></div><div class="frame-caption">ひとつの言葉が、<br>ちゃんと届くように。</div><div class="video-time">00:00:08 <span>● REC</span></div></div><div class="visual-ruler"><span>00</span><i></i><span>13</span><i></i><span>26</span></div></div>
+      </section>
+      <section class="workbench" aria-label="字幕チェック作業台">
+        <div class="section-heading"><div><div class="eyebrow">01 / IMPORT</div><h2>字幕ファイルを開く</h2></div><span class="section-note">すべての処理はこのブラウザ内で完結</span></div>
+        <div class="import-bar"><label class="file-drop" for="fileInput"><span class="file-icon">↥</span><span><strong>字幕を選ぶ</strong><small>.srt / .vtt · UTF-8</small></span><input type="file" id="fileInput" accept=".srt,.vtt,text/plain"></label><button class="btn secondary" id="pasteToggle">テキストから読込</button><button class="btn ghost" id="demoBtn">サンプルを復元 ↺</button><div class="file-state"><span class="file-state-dot"></span><span id="fileName">sample_japanese.srt</span></div></div>
+        <div class="paste-panel hidden" id="pastePanel"><label for="pasteText">SRTまたはVTTの本文</label><textarea id="pasteText" rows="6" spellcheck="false" placeholder="1&#10;00:00:01,000 --> 00:00:03,000&#10;字幕テキスト"></textarea><div class="paste-actions"><button class="btn primary" id="pasteLoad">この内容を読み込む</button><button class="btn ghost" id="pasteCancel">閉じる</button></div></div>
+        <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+        <div class="section-heading qa-heading"><div><div class="eyebrow">02 / ANALYZE</div><h2>品質を点検する</h2></div><div class="rules-control"><label for="preset">チェック基準</label><select id="preset"><option value="jp">日本語・標準</option><option value="strict">日本語・厳しめ</option><option value="en">英語・一般</option></select></div></div>
+        <div class="dashboard" aria-label="チェック集計"><div class="stat stat-total"><span>字幕の数</span><strong id="statTotal">—</strong><small>total cues</small></div><div class="stat stat-error"><span>時間・構造の問題</span><strong id="statErrors">—</strong><small>critical issues</small></div><div class="stat stat-warn"><span>読みやすさの注意</span><strong id="statWarnings">—</strong><small>readability flags</small></div><div class="stat stat-clean"><span>問題なしの字幕</span><strong id="statClean">—</strong><small>ready to review</small></div></div>
+        <div class="rules-strip"><div class="rules-label">CHECK SETTINGS <span>独自の目安値・規格適合を保証しません</span></div><div class="rules-inputs"><label>1行の字幅 <input id="ruleLine" type="number" min="5" max="100" step="1" value="15"></label><label>字幅/秒 <input id="ruleCps" type="number" min="1" max="50" step="0.5" value="6"></label><label>最低表示秒 <input id="ruleMin" type="number" min="0.1" max="5" step="0.1" value="0.7"></label></div></div>
+        <div class="timeline-head"><div><strong>タイムライン</strong><span>クリックで該当字幕を選択</span></div><span id="timelineLength" class="mono">—</span></div><div class="timeline" id="timeline" role="group" aria-label="字幕タイムライン"></div>
+        <div class="section-heading list-heading"><div><div class="eyebrow">03 / REVIEW & REFINE</div><h2>問題のある箇所を整える</h2></div><div class="bulk-actions"><button id="wrapBtn" class="btn secondary">↳ 改行を整える</button><button id="overlapBtn" class="btn secondary">◷ 重なりを修正</button><button id="undoBtn" class="btn ghost" disabled>↶ 元に戻す</button></div></div>
+        <div class="content-columns"><section class="cue-panel"><div class="cue-toolbar"><div class="cue-tabs" role="group" aria-label="字幕の表示条件"><button class="tab active" id="tabAll" aria-pressed="true">すべて <span id="allCount"></span></button><button class="tab" id="tabProblem" aria-pressed="false">要確認 <span id="problemCount"></span></button></div><span class="cue-hint">字幕を選択して編集 →</span></div><div id="cueList" class="cue-list"></div></section>
+          <aside class="inspector"><div class="inspector-header"><span>DETAIL EDITOR</span><strong id="editIndex">#01</strong></div><div class="inspector-preview"><div class="preview-tag">VIEWER PREVIEW</div><div id="previewText" class="preview-text">字幕を選択してください</div><div class="preview-foot">字幕の表示イメージ（動画映像はありません）</div></div><form id="editorForm"><div class="editor-grid"><label>開始時刻<input id="editStart" aria-label="字幕開始時刻" placeholder="00:00:01.000" required></label><label>終了時刻<input id="editEnd" aria-label="字幕終了時刻" placeholder="00:00:03.000" required></label></div><label class="editor-text-label">字幕テキスト<textarea id="editText" rows="4" required></textarea></label><div class="editor-stats"><span id="editWidth">—</span><span id="editCps">—</span></div><div id="editIssues" class="edit-issues"></div><button class="btn primary save-btn" id="saveCue" type="submit">変更を保存 ↗</button></form><div class="inspector-note"><strong>自動修正の方針</strong><p>改行だけの調整は文字を削除しません。重なり修正は前の字幕の終了だけを短縮し、最低表示時間を守れない場合は修正しません。音声との同期は必ず目視・聴取で確認してください。</p></div></aside></div>
+        <div class="activity"><div><strong>変更の記録</strong><span id="logCount">編集履歴 0件</span></div><ul id="logList"><li>まだ変更はありません。</li></ul></div>
+        <div class="export-row"><div><div class="eyebrow">04 / EXPORT</div><h2>チェック後の字幕を持ち帰る</h2><p>時刻に不正がある場合は、字幕を出力する前に修正してください。</p></div><div class="export-actions"><button class="btn primary" id="srtBtn">SRTを保存 ↓</button><button class="btn secondary" id="vttBtn">VTTを保存 ↓</button><button class="btn secondary" id="csvBtn">診断CSV ↓</button></div></div>
+      </section>
+    </main>
+    <footer><span>字幕ものさし <b>© 2026</b> · An offline-first subtitle workspace</span><span>人によるチェックが最終工程です。 <span class="footer-asterisk">✳</span></span></footer>
+  </div>
+  <script src="engine.js"></script><script src="app.js"></script>
+</body>
+</html>
