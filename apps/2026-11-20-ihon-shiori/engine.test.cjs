@@ -1,0 +1,36 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const E = require('./engine.js');
+
+test('demo is well-formed and contains clear variants',()=>{const p=E.demo();assert.equal(p.version,1);assert.ok(E.summary(E.align(p.textA,p.textB)).variants>=3);});
+test('identity has only same lines',()=>{const rows=E.align('甲\n乙','甲\n乙');assert.deepEqual(rows.map(r=>r.kind),['same','same']);});
+test('punctuation changes are flagged not silently normalized',()=>{assert.equal(E.align('雨が、降る。','雨が降る。')[0].kind,'surface');});
+test('width normalization is candidate only',()=>{assert.equal(E.align('ＡＢＣ','ABC')[0].kind,'surface');});
+test('real substitution is changed',()=>{assert.equal(E.align('橋を渡る','橋を戻る')[0].kind,'changed');});
+test('insert at beginning is recognized',()=>{const r=E.align('A\nB','新\nA\nB');assert.deepEqual(r.map(x=>x.kind),['added','same','same']);});
+test('delete from middle is recognized',()=>{const r=E.align('A\n失\nB','A\nB');assert.deepEqual(r.map(x=>x.kind),['same','removed','same']);});
+test('trailing empty line remains a distinguishable line',()=>{const r=E.align('A\n','A');assert.deepEqual(r.map(x=>x.kind),['same','removed']);});
+test('CRLF and CR inputs compare normally',()=>{assert.deepEqual(E.align('A\r\nB','A\rB').map(x=>x.kind),['same','same']);});
+test('charParts reconstructs both originals including emoji',()=>{let p=E.charParts('✨a日本z','✨b日本z');assert.equal(p.a.join(''),'✨a日本z');assert.equal(p.b.join(''),'✨b日本z');});
+test('summary counts review status only on variant',()=>{const r=E.align('X\nA','Y\nA');const notes={[r[0].key]:{status:'保留'},[r[1].key]:{status:'保留'}};assert.equal(E.summary(r,notes).reviewed,1);});
+test('CSV protects leading spreadsheet formula',()=>{assert.match(E.toCsv(E.align('=HYPERLINK(1)','A'),{}),/"'=HYPERLINK\(1\)"/);});
+test('CSV escapes embedded quotes and starts with BOM',()=>{const csv=E.toCsv(E.align('a"b','a,c'),{});assert.ok(csv.charCodeAt(0)===65279);assert.ok(csv.includes('"a""b"'));});
+test('Markdown contains independent labels and explicit evidence caveat',()=>{const p=E.demo();const md=E.toMarkdown(p,E.align(p.textA,p.textB));assert.match(md,/資料/);assert.match(md,/原本の同一性/);assert.match(md,/初稿/);});
+test('Markdown escapes malicious formatting',()=>{const p=E.demo();p.metaA.label='**bold**';assert.ok(E.toMarkdown(p,E.align(p.textA,p.textB)).includes('\\*\\*bold\\*\\*'));});
+test('rejects more than 160 lines',()=>{assert.throws(()=>E.align(Array(161).fill('x').join('\n'),'x'),/160/);});
+test('rejects more than 25000 chars',()=>{assert.throws(()=>E.align('x'.repeat(25001),'x'),/25,000/);});
+test('rejects invalid JSON project version',()=>{const p=E.demo();p.version=100;assert.throws(()=>E.validateProject(p),/形式/);});
+test('notes are dropped if target line changes',()=>{const p=E.demo();const old=E.align(p.textA,p.textB).find(r=>r.kind!=='same');p.notes[old.key]={status:'保留',note:'X'};p.textB='別物';const q=E.validateProject(p);assert.equal(Object.keys(q.notes).length,0);});
+test('unrecognized status cannot be imported',()=>{const p=E.demo();const r=E.align(p.textA,p.textB).find(r=>r.kind!=='same');p.notes[r.key]={status:'自動確定',note:'査読なし'};assert.equal(E.validateProject(p).notes[r.key].status,'未確認');});
+test('key structure distinguishes repeated identical lines',()=>{const r=E.align('同\n同','同\n異');assert.notEqual(r[0].key,r[1].key);});
+test('empty documents are stable',()=>{const r=E.align('','');assert.equal(r.length,1);assert.equal(r[0].kind,'same');});
+test('negative test for invalid text type',()=>{assert.throws(()=>E.validateText(42),/文字/);});
+test('all random alignments preserve both inputs and order',()=>{let seed=197;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};const words=['橋','、','午後','猫','Ａ','B','雪','⚑',''];
+  for(let t=0;t<450;t++){let a=Array.from({length:1+Math.floor(rnd()*20)},()=>Array.from({length:1+Math.floor(rnd()*5)},()=>words[Math.floor(rnd()*words.length)]).join(''));
+  let b=Array.from({length:1+Math.floor(rnd()*20)},()=>Array.from({length:1+Math.floor(rnd()*5)},()=>words[Math.floor(rnd()*words.length)]).join(''));
+  const rows=E.align(a.join('\n'),b.join('\n'));
+  assert.deepEqual(rows.filter(x=>x.a!==null).map(x=>x.a),a);assert.deepEqual(rows.filter(x=>x.b!==null).map(x=>x.b),b);
+  assert.ok(rows.every(r=>r.kind===E.align(r.a??'',r.b??'')[0].kind || r.a===null||r.b===null));
+  }});
+
+test('near-identical revisions align without losing inserted/deleted context',()=>{const p=E.demo();const r=E.align(p.textA,p.textB);assert.deepEqual(r.map(x=>x.kind),['surface','changed','removed','same','changed','added']);});
