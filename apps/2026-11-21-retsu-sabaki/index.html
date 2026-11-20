@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="イベントの行列を事前に試算。30分刻みの来場・窓口人数を比較するオフラインMVP。">
+<title>列さばき｜待ち時間の段取りラボ</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="shell"><header class="top"><div class="brand"><span class="brandmark">〰</span><div><strong>列さばき</strong><small>RETSU SABAKI / QUEUE PLANNER</small></div></div><span class="privacy">● ローカル計算・登録不要</span></header>
+<main><section class="hero"><div><p class="eyebrow">EVENT OPERATIONS / 01</p><h1>列が伸びる前に、<br><em>人の配置</em>を決める。</h1><p>来場ピーク × 対応時間 × スタッフ配置。数字を変えて、どこで待ちが生まれるかを試算できます。</p></div><div class="hero-stamp"><span>3H</span><small>30分 × 6枠<br>比較シミュレーター</small></div></section>
+<div class="workspace"><section class="panel inputs"><div class="panel-heading"><div><p class="eyebrow">SETUP / 02</p><h2>計画を入力</h2></div><button class="text-button" id="reset">初期値に戻す ↺</button></div>
+<div class="twocol"><label>イベント名<input id="title" maxlength="70" autocomplete="off"></label><label>開始時刻<input id="start" type="time"></label></div>
+<div class="tablewrap"><table class="inputtable"><thead><tr><th>30分枠</th><th>予想来場<small>人</small></th><th>現在の窓口<small>人</small></th><th>改善案<small>人</small></th></tr></thead><tbody id="slots"></tbody></table></div>
+<div class="panel-heading settings-heading"><div><p class="eyebrow">ASSUMPTIONS / 03</p><h2>ばらつきと許容量</h2></div></div>
+<div class="settings-grid"><label>平均対応時間 <small>分/人</small><input type="number" id="minutes" min="0.5" max="30" step="0.5"></label><label>対応時間の変動 <small>±%</small><input type="number" id="variation" min="0" max="90" step="5"></label><label>来場人数の変動 <small>±%</small><input type="number" id="surge" min="0" max="90" step="5"></label><label>並べる人数の上限 <small>人</small><input type="number" id="capacity" min="1" max="200"></label></div>
+<div class="utility"><label>試行回数<select id="runs"><option value="20">20回 / 軽量</option><option value="80">80回 / 標準</option><option value="160">160回 / 詳細</option><option value="300">300回 / 精細</option></select></label><label>乱数シード<input id="seed" type="number" min="1" max="2147483646" step="1"></label></div>
+<div class="actionrow"><button class="primary" id="calculate">この条件で比較する <span>↗</span></button><button class="secondary" id="suggest">改善枠を探す ✦</button></div><p id="hint" role="status" class="hint">数値は仮定です。実地の安全判断には使用しないでください。</p>
+</section><section class="panel results"><div class="panel-heading"><div><p class="eyebrow">RESULT / 04</p><h2>比較ダッシュボード</h2></div><span class="run-tag" id="runTag">—</span></div>
+<div class="headline"><div><span>90%の人がこの時間以内に案内開始</span><div class="big-number"><strong id="p90-base">—</strong><small>→</small><strong id="p90-plan">—</strong><em>分</em></div><p id="delta">比較する条件を入力してください。</p></div></div>
+<div class="metric-grid"><div><span>平均待ち時間</span><strong id="mean">—</strong></div><div><span>15分超の割合</span><strong id="over">—</strong></div><div><span>行列あふれリスク</span><strong id="risk">—</strong></div><div><span>追加スタッフ時間</span><strong id="hours">—</strong></div></div>
+<div class="graph-heading"><h3>時間ごとの予想行列人数</h3><small>各時点の試行平均</small></div><div id="chart" class="chart" role="img" aria-label="予定の30分枠ごとの平均待機人数を示す折れ線図"></div><div class="legend"><span class="base-dot">現在</span><span class="plan-dot">改善案</span><i>破線は待機可能人数</i></div>
+<div id="warning" class="warning" aria-live="polite"></div>
+<div class="compare-table"><table><thead><tr><th>指標</th><th>現在</th><th>改善案</th></tr></thead><tbody id="comparison"></tbody></table></div>
+<div class="exports"><button id="exportCSV">結果CSVを保存 ↓</button><button id="exportJSON">設定JSONを保存 ↓</button><label class="import-button">設定JSONを読み込む<input type="file" id="importJSON" accept="application/json,.json"></label><button id="print">印刷</button></div>
+</section></div><footer><span>RETSU SABAKI · 2026</span><span>モデル: 単一FIFO列・複数窓口・来場/対応時間の簡易乱数</span></footer></main></div>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
