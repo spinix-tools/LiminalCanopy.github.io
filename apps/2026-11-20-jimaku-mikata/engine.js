@@ -90,7 +90,7 @@ function diagnostics(cues,r0){
  return {items:result,issueCount:sum,cueCount:cues.length,cleanCues:result.filter(x=>!x.warnings.length).length};
 }
 function breakLines(text,maxLine,maxLines=2){
- const str=String(text||"").replace(/\s*\n\s*/g,"").trim();
+ const str=String(text||"").replace(/\r?\n/g,"");
  const arr=graphemes(str),N=arr.length;
  if(N<=maxLine)return str;
  const K=Math.max(1,Math.floor(maxLines)); const dp=Array.from({length:K+1},()=>new Map());dp[0].set(0,{cost:0,path:[]});
