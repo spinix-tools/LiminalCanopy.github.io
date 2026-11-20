@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091d2a"><meta name="description" content="小規模イベント受付の待ち時間・混雑をオフラインで試算。A/B比較と増員提案。">
+<title>列予報 | RETSU YOHO</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="shell">
+  <header class="header"><div class="branding"><div class="mark" aria-hidden="true">≋</div><div><div class="eyebrow">SMALL EVENT OPERATIONS</div><div class="brand">列予報 <span>RETSU YOHŌ</span></div></div></div><div class="head-right"><span class="local"><b></b> ローカル完結</span><button class="ghost" id="resetBtn">サンプルへ戻す</button></div></header>
+  <main>
+    <section class="hero"><div><div class="kicker"><span class="pulse"></span> 受付の人員配置シミュレーター</div><h1>その行列、<br><em>開場前</em>にほどこう。</h1><p>15分ごとの来場予測と受付スタッフ数を入力。<br>待ち時間のピークを先読みし、増員案を比較します。</p></div><div class="hero-note"><div class="wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><strong>「足りない時間」を見える化。</strong><span>個人情報・顧客名は不要。試算はこの端末の中だけで実行。</span></div></section>
+    <section class="panel config" aria-labelledby="settings-heading"><div class="section-title"><div><span class="num">01</span><h2 id="settings-heading">イベントの条件</h2></div><span class="dim">受付1か所・先着順</span></div>
+      <div class="config-grid"><label>イベント名 <input id="titleInput" maxlength="80" type="text" autocomplete="off"></label><label>受付開始 <input id="startInput" type="time"></label><label>1人あたりの受付 <span class="hint">平均分</span><input id="serviceInput" type="number" min="0.5" max="15" step="0.1"></label><label>目標P95待ち時間 <span class="hint">分</span><input id="targetInput" type="number" min="1" max="90" step="1"></label></div>
+      <div class="help">P95 = 受付完了者の95%がその時間以内に受付を開始できた、という目安。未処理者がいる場合は必ず別途表示します。</div>
+    </section>
+    <section class="panel planner" aria-labelledby="planner-heading"><div class="section-title"><div><span class="num">02</span><h2 id="planner-heading">15分ごとの予測と配置</h2></div><div class="toolbar"><button class="ghost" id="copyBtn">A → B をコピー</button><button class="primary" id="suggestBtn"><span aria-hidden="true">✦</span> Bに増員案を作成</button></div></div>
+      <div class="legend"><span><i class="dot-amber"></i> 来場予定人数</span><span><i class="dot-mint"></i> A：現状の受付人数</span><span><i class="dot-blue"></i> B：比較案の受付人数</span><span class="legend-help">数値を直接編集できます</span></div>
+      <div class="table-wrap"><table class="edit-table"><thead><tr><th>時間帯</th><th>来場者 / 15分</th><th>配置 A / 人</th><th>配置 B / 人</th><th>来場傾向</th></tr></thead><tbody id="slotRows"></tbody></table></div>
+      <div class="table-foot"><span id="totalArrivals">合計来場: —</span><span id="totalA">A: — 人時</span><span id="totalB">B: — 人時</span></div>
+      <div id="planNotice" class="notice" role="status" aria-live="polite" hidden></div>
+    </section>
+    <section class="results" aria-labelledby="result-heading"><div class="section-title results-title"><div><span class="num">03</span><h2 id="result-heading">待ち時間の予報</h2></div><span class="dim">同じ来場パターンでA/B比較</span></div>
+      <div class="summary-grid"><article class="result-card a"><div class="result-head"><span class="chip a">PLAN A</span><span>現状の配置</span></div><div class="main-metric"><strong id="p95A">—</strong><span>分</span></div><div class="metric-caption">95%待ち時間（P95）</div><div class="minigrid"><div>最大待機人数<strong id="peakA">—</strong></div><div>未処理人数<strong id="leftA">—</strong></div><div>配置延べ時間<strong id="hoursA">—</strong></div></div></article>
+        <article class="result-card b"><div class="result-head"><span class="chip b">PLAN B</span><span>比較・増員案</span></div><div class="main-metric"><strong id="p95B">—</strong><span>分</span></div><div class="metric-caption">95%待ち時間（P95）</div><div class="minigrid"><div>最大待機人数<strong id="peakB">—</strong></div><div>未処理人数<strong id="leftB">—</strong></div><div>配置延べ時間<strong id="hoursB">—</strong></div></div></article></div>
+      <div class="comparison" id="comparison" aria-live="polite"></div>
+      <article class="panel chart-panel"><div class="chart-head"><div><h3>時間帯別の待機人数</h3><p>各15分の終わりに受付待ちとなった人数。点線は比較案B。</p></div><span class="chart-badge">15 MIN INTERVAL</span></div><div id="queueChart" class="chart-frame" role="img" aria-label="時間帯別のA/B待機人数グラフ"></div><div class="chart-foot"><span><i class="line-a"></i> 現状 A</span><span><i class="line-b"></i> 比較 B</span></div></article>
+      <div class="warnings" id="warnings" role="status"></div>
+    </section>
+    <section class="panel export-panel"><div><h2>計画を持ち帰る</h2><p>設定をJSONで保存・復元。比較結果をCSVで共有できます。</p></div><div class="actions"><button id="downloadJson" class="ghost">JSONを書き出す</button><button id="downloadCsv" class="ghost">CSVを書き出す</button><button id="importBtn" class="ghost">JSONを読み込む</button><input type="file" id="importFile" accept=".json,application/json" hidden><button id="printBtn" class="ghost">印刷</button></div></section>
+    <footer><div>列予報 / RETSU YOHŌ <span>© 2026 — offline first tool</span></div><p>現実の到着分布、受付速度、スタッフ交替、避難動線等は異なります。安全管理や法令上の収容判断を代替しません。</p></footer>
+  </main>
+</div>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
