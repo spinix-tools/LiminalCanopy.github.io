@@ -48,3 +48,4 @@ test("ランダムな非重複字幕500件で修正案が安全",()=>{
   }
  }
 });
+test("改行調整は空白を落とさない",()=>{const s="This is a text with spaces and\n punctuation.",v=E.breakLines(s,12,4);assert.equal(v.replace(/\n/g,""),s.replace(/\n/g,""));});
