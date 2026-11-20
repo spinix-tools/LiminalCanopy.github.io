@@ -201,7 +201,7 @@ footer{color:#75939c;font-size:12px;display:flex;justify-content:space-between;f
    var ns="http://www.w3.org/2000/svg", svg=document.createElementNS(ns,"svg");
    svg.setAttribute("viewBox","0 0 740 185");svg.setAttribute("role","img");
    svg.setAttribute("aria-label","タップ済み拍の予定からの誤差。上は遅れ、下は早まり。");
-   var list=result.rows, maxY=Math.max(80,Math.min(300,Math.ceil(Math.max(0,...list.filter(function(x){return x.errorMs!==null;}).map(function(x){return Math.abs(x.errorMs);}))/50)*50)));
+   var list=result.rows, maxY=Math.max(80,Math.min(300,Math.ceil(Math.max(0,...list.filter(function(x){return x.errorMs!==null;}).map(function(x){return Math.abs(x.errorMs);}))/50)*50));
    function element(name,attrs,text){
      var e=document.createElementNS(ns,name);Object.keys(attrs).forEach(function(k){e.setAttribute(k,String(attrs[k]));});if(text!==undefined)e.textContent=text;svg.appendChild(e);return e;
    }
