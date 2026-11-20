@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>刷り分けグラフ | SURIWAKE GRAPH</title>
+  <meta name="description" content="白黒印刷でも区別できる棒グラフを、模様と数値ラベル付きでローカル作成。SVGとCSVを持ち帰れます。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-head">
+    <div class="head-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">▨</span><div><strong>刷り分け<span class="brand-suffix">グラフ</span></strong><small>SURIWAKE GRAPH · PRINT-FIRST CHARTS</small></div></div>
+      <div class="head-badge">登録不要 <span>·</span> オフライン <span>·</span> 外部送信なし</div>
+    </div>
+  </header>
+  <main class="container">
+    <section class="intro">
+      <div><p class="eyebrow">MAKE IT READABLE ON PAPER</p><h1>そのグラフ、<br><em>白黒でも</em>伝わりますか。</h1>
+        <p class="intro-copy">色だけに頼らない、模様と数値付きの棒グラフ。<br>町内会の配布資料から授業のプリントまで。データを入力して、そのまま印刷用SVGに。</p></div>
+      <div class="hero-mini" aria-hidden="true"><div class="mini-title">MONOCHROME / READY</div><div class="mini-row"><b>徒歩</b><i class="hatch diagonal" style="width:79%"></i></div><div class="mini-row"><b>自転車</b><i class="hatch dots" style="width:52%"></i></div><div class="mini-row"><b>公共交通</b><i class="hatch cross" style="width:91%"></i></div><span>01 — PRINT WITH CONFIDENCE</span></div>
+    </section>
+    <div class="workspace">
+      <section class="panel editor" aria-labelledby="editor-title">
+        <div class="panel-header"><div><p class="section-kicker">01 / EDIT</p><h2 id="editor-title">データを整える</h2></div><button id="reset" type="button" class="text-button" title="サンプルに戻します">サンプルに戻す</button></div>
+        <label class="field"><span>グラフのタイトル</span><input id="title" maxlength="60" autocomplete="off"></label>
+        <label class="field"><span>出典・注記 <small>（任意）</small></span><input id="note" maxlength="180" autocomplete="off" placeholder="例：2026年4月 集計 / 架空データ"></label>
+        <div class="field"><span>棒グラフの種類</span><div class="segmented" role="group" aria-label="グラフ形式"><button type="button" data-mode="grouped">並列</button><button type="button" data-mode="stacked">積上げ</button></div></div>
+        <div class="field"><span>印刷時の表示</span><div class="segmented" role="group" aria-label="色の表示"><button type="button" data-mono="true">白黒・模様</button><button type="button" data-mono="false">カラー＋模様</button></div></div>
+        <div class="table-heading"><strong>数値テーブル</strong><span>0〜10億 · 小数4桁まで</span></div>
+        <div class="editor-table-scroll"><table id="editTable" aria-label="グラフデータ編集テーブル"><thead></thead><tbody></tbody></table></div>
+        <div class="editing-actions"><button type="button" id="addCategory" class="secondary">＋ 項目を追加</button><button type="button" id="addSeries" class="secondary">＋ 系列を追加</button><button type="button" id="removeSeries" class="subtle">－ 末尾の系列を削除</button></div>
+        <p class="hint">項目は最大16件、系列は最大6件。入力はこの端末内だけで処理します。</p>
+      </section>
+      <section class="panel preview" aria-labelledby="preview-title">
+        <div class="panel-header"><div><p class="section-kicker">02 / CHECK</p><h2 id="preview-title">印刷プレビュー</h2></div><span class="live-pill"><span class="live-dot"></span> LIVE PREVIEW</span></div>
+        <div class="preview-summary"><div class="stat"><small>項目数</small><strong id="statCategories">—</strong></div><div class="stat"><small>系列数</small><strong id="statSeries">—</strong></div><div class="stat"><small>識別方法</small><strong>模様 ＋ 数値</strong></div></div>
+        <div id="alerts" class="alerts" role="status" aria-live="polite"></div>
+        <div class="chart-container" id="chartContainer"><div id="chartHost" class="chart-host" aria-label="プレビュー"></div></div>
+        <div class="chart-notes"><strong>確認ポイント</strong><p>系列は色だけでなく模様でも区別。並列棒は値を直接表示し、積上げ棒は幅のある区間に数値を表示します。小さい区間は下の一覧で確認してください。</p></div>
+        <div class="export-head"><strong>持ち帰る</strong><span>ファイルはすべて端末内で生成</span></div>
+        <div class="export-grid"><button id="exportSvg" type="button" class="primary">↓ SVG画像を保存</button><button id="exportCsv" type="button" class="secondary">↓ CSVを書き出す</button><button id="exportJson" type="button" class="secondary">↓ JSON保存</button><button id="print" type="button" class="secondary">▤ 印刷 / PDF</button></div>
+        <div class="import-row"><label class="file-button">↑ CSVを読み込む<input id="importCsv" type="file" accept=".csv,text/csv"></label><label class="file-button">↑ JSONを復元<input id="importJson" type="file" accept=".json,application/json"></label></div>
+        <p class="hint">CSV形式: 1列目「項目」、2列目以降「系列名」。行ごとに0以上の数値を入力してください。</p>
+      </section>
+    </div>
+    <section class="panel data-panel" aria-labelledby="table-heading"><div class="panel-header"><div><p class="section-kicker">03 / VERIFY</p><h2 id="table-heading">数値を文章でも確認</h2></div><span class="inline-note">模様だけに頼らない併記</span></div><div class="table-scroll"><table id="readTable" aria-label="グラフの数値一覧"></table></div></section>
+    <footer class="footer"><span>▨ SURIWAKE GRAPH</span><span>制作補助ツール。WCAG・JISへの適合認証や印刷結果の保証ではありません。実寸で試し刷りしてください。</span><span id="saveStatus" aria-live="polite">端末内保存</span></footer>
+  </main>
+  <script src="engine.js"></script><script src="app.js"></script>
+</body>
+</html>
