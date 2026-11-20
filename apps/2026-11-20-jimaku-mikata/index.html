@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111326"><meta name="description" content="日本語SRT/VTTの表示速度・改行・時間を端末内でチェックし、比較して書き出す無料Webアプリ">
+<title>字幕みかた — 日本語字幕の読みやすさを比べる</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="top"><div class="logo">字<span>幕</span>みかた<small>JIMAKU MIKATA</small></div><div class="pill">● LOCAL ONLY / サーバー送信なし</div></header>
+<main>
+<section class="hero"><div><p class="eyebrow">日本語字幕 / QUALITY DESK</p><h1>読みやすさを、<br><em>数字と画面</em>で確かめる。</h1><p class="lead">SRT・VTTをその場で検査。4文字/秒と6文字/秒の目安を比較し、文章を勝手に削らずに修正案を作成します。</p></div><div class="hero-art" aria-hidden="true"><div class="fake-screen"><div class="cinema">◉ <span>ON AIR · 00:03</span></div><div class="fake-lines">参加した方々がどんな本を持ち寄り、<br>どんな話を聞かせてくれたのか。</div><div class="art-progress"><span></span></div></div></div></section>
+<section class="workspace">
+ <div class="section-title"><div><p class="eyebrow">01 / LOAD</p><h2>字幕を読み込む</h2></div><div class="actions"><button id="sample" class="subtle">サンプルに戻す</button><button id="importProject" class="subtle">プロジェクト復元</button><input type="file" id="projectFile" accept=".json,application/json" hidden></div></div>
+ <div class="import-row"><label class="upload" for="file"><span class="upload-icon">↥</span><strong>SRT / VTT を選択</strong><small>ファイルはアップロードされません（5MB以下）</small><input type="file" id="file" accept=".srt,.vtt,text/plain" hidden></label><div class="paste"><label for="raw">または字幕テキストを貼り付け</label><textarea id="raw" rows="3" placeholder="1&#10;00:00:01,000 --> 00:00:03,000&#10;ここに字幕..."></textarea><button id="load" class="secondary">貼り付けを解析 →</button></div></div>
+ <p class="status" id="status" role="status" aria-live="polite"></p>
+</section>
+<section class="workspace">
+ <div class="section-title"><div><p class="eyebrow">02 / RULES</p><h2>比較のものさし</h2></div><span class="subtext">数値は規格認証値ではなく編集用の仮設定です</span></div>
+ <div class="rules-grid"><div><label for="preset">検査プリセット</label><select id="preset"><option value="film">日本語映画の目安 · 4字/秒</option><option value="research">比較用 · 6字/秒</option><option value="social">短尺向け仮設定 · 8字/秒</option></select></div><div><label for="cps">上限（字 / 秒）</label><input type="number" id="cps" value="4" min="1" max="30" step=".5"></div><div><label for="maxLine">1行の最大文字数</label><input type="number" id="maxLine" value="16" min="2" max="80"></div><div><label for="minDur">最低表示（ミリ秒）</label><input type="number" id="minDur" value="1000" min="0" max="20000" step="50"></div><div><label for="gap">字幕間の空き（ミリ秒）</label><input type="number" id="gap" value="100" min="0" max="2000" step="10"></div></div>
+ <div class="compare-grid" id="metrics"><div class="metric"><span>字幕数</span><strong id="mCount">—</strong></div><div class="metric"><span>問題のある字幕</span><strong id="mBad">—</strong></div><div class="metric"><span>指摘事項数</span><strong id="mIssues">—</strong></div><div class="metric"><span>検査を通過した割合</span><strong id="mRate">—</strong></div></div>
+ <div class="topwarn">検査は視認性のヒューリスティクスです。実際の読解速度・字幕の同期・画面上の見切れ・読者のアクセシビリティを保証しません。</div>
+</section>
+<section class="workspace">
+ <div class="section-title"><div><p class="eyebrow">03 / WORKBENCH</p><h2>編集 &amp; プレビュー</h2></div><div class="actions"><button id="undo" class="subtle" disabled>↶ 元に戻す</button><button id="draft" class="primary">✦ 修正案を作る</button></div></div>
+ <div class="editor-grid">
+ <div class="cue-pane"><div class="pane-head"><strong>字幕一覧 <span id="cueTotal"></span></strong><select id="filter" aria-label="一覧の絞り込み"><option value="all">すべて</option><option value="bad">要確認だけ</option><option value="good">問題なし</option></select></div><div class="cue-list" id="cueList" role="listbox" aria-label="字幕一覧"></div></div>
+ <div class="detail-pane"><div class="detail-header"><span id="selectedNum">字幕を選択</span><span id="selectedBadge"></span></div>
+ <div id="editorFields"><div class="time-row"><label>開始<input id="editStart" placeholder="00:00:01,000"></label><label>終了<input id="editEnd" placeholder="00:00:03,000"></label></div><label for="editText">字幕本文</label><textarea id="editText" rows="4"></textarea><div class="edit-buttons"><label class="checkbox"><input id="lock" type="checkbox"> 時刻・本文を固定（自動修正対象外）</label><button id="apply" class="secondary">変更を反映</button></div><p class="hint" id="editHint"></p></div>
+ <div class="preview-head"><strong>表示イメージ</strong><select id="aspect" aria-label="プレビュー比率"><option value="wide">横動画 16:9</option><option value="vertical">縦動画 9:16</option></select></div>
+ <div class="preview-area"><div id="preview" class="preview wide"><span class="screen-label">SUBTITLE PREVIEW</span><div class="subtitle" id="previewText"></div><span class="safe">SAFE AREA · 参考表示</span></div></div>
+ <div class="detail-foot" id="detailFoot">字幕を選んでください</div></div>
+ </div>
+</section>
+<section class="workspace" id="results">
+ <div class="section-title"><div><p class="eyebrow">04 / REVIEW</p><h2>修正前と比較する</h2></div><div class="actions"><button id="revert" class="subtle">元データに戻す</button><button id="saveProject" class="subtle">状態を保存（JSON）</button></div></div>
+ <div class="comparison" id="comparison"><div class="empty">「修正案を作る」で、修正前後を比較できます。元テキストは削除しません。</div></div>
+ <div class="export-row"><button id="exportSrt" class="primary">SRT ダウンロード</button><button id="exportVtt" class="secondary">VTT ダウンロード</button><button id="exportCsv" class="subtle">検査レポート CSV</button></div>
+</section>
+<footer><strong>字幕みかた</strong> — 字幕の判断を、制作者の手元に。<span>個人情報収集なし / 外部APIなし / 端末内で動作</span></footer>
+</main><script src="engine.js"></script><script src="app.js"></script></body></html>
