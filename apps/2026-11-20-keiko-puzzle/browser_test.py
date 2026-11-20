@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parent
 checks=[]
 def inline_html():
     html=(ROOT/'index.html').read_text()
-    engine=(ROOT/'engine.js').read_text().replace('</script>', '<\/script>')
+    engine=(ROOT/'engine.js').read_text().replace('</script>', r'<\/script>')
     return html.replace('<script src="./engine.js"></script>', f'<script>{engine}</script>')
 def check(label,func):
     func();checks.append(label)
