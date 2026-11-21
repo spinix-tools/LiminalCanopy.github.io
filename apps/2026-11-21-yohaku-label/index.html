@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>余白ラベル — 端数を、ちょうどよく。</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark">▦</span><span>余白ラベル <small>YOHAKU LABEL</small></span></div><span class="header-note">無料 · ローカル完結 · 登録不要</span></header>
+<main>
+  <section class="hero"><div><div class="eyebrow">LABEL SHEET STUDIO <span class="tinyline"></span> HANDMADE & SMALL BATCH</div><h1>端数を、<em>ちょうどよく。</em></h1><p>必要なラベルを必要な枚数だけ。余ったシートの空き位置も活かして、品目ごとの枚数から印刷配置を自動作成します。</p></div><div class="hero-stamp"><strong>1<br><span>SHEET</span></strong><p>使いかけの紙も、<br>無駄にしない。</p></div></section>
+  <section class="layout"><div class="settings">
+    <div class="panel"><div class="panel-heading"><span class="step">01</span><div><h2>用紙とラベル</h2><p>寸法はすべてミリメートル</p></div></div>
+      <div class="fields"><label>用紙<select id="paper"><option value="A4">A4（210 × 297）</option><option value="letter">US Letter（215.9 × 279.4）</option></select></label><label>向き<select id="orientation"><option value="portrait">縦向き</option><option value="landscape">横向き</option></select></label>
+        <label>ラベル幅 <span>mm</span><input id="labelW" type="number" min="12" max="200" step="0.1" value="50"></label><label>ラベル高さ <span>mm</span><input id="labelH" type="number" min="12" max="200" step="0.1" value="30"></label>
+        <label>左右余白 <span>mm</span><input id="marginX" type="number" min="0" max="50" step="0.1" value="10"></label><label>上下余白 <span>mm</span><input id="marginY" type="number" min="0" max="50" step="0.1" value="10"></label>
+        <label>横のすき間 <span>mm</span><input id="gapX" type="number" min="0" max="30" step="0.1" value="4"></label><label>縦のすき間 <span>mm</span><input id="gapY" type="number" min="0" max="30" step="0.1" value="4"></label></div>
+    </div>
+    <div class="panel"><div class="panel-heading"><span class="step">02</span><div><h2>品目と必要枚数</h2><p>異なる商品も一緒のシートに</p></div></div><div id="items" class="items"></div><button id="addItem" class="ghost full" type="button">＋ 品目を追加</button><label class="field-bottom">並べ方<select id="mode"><option value="group">品目ごとにまとめる</option><option value="round">品目を順番に交ぜる</option></select></label></div>
+    <div class="panel"><div class="panel-heading"><span class="step">03</span><div><h2>使いかけのシート</h2><p>1枚目で既に使った位置を除外</p></div></div><label class="block-label">使用済み位置（左上から横順）<input id="skip" placeholder="例: 1-3,7" value="1-3"><small>下のマス目を押しても指定できます。</small></label><div id="slotPicker" class="slot-picker" aria-label="1枚目の使用済み位置"></div></div>
+    <div class="mini-footer"><button id="saveJson" class="ghost" type="button">設定を保存 (.json)</button><button id="loadJson" class="ghost" type="button">設定を読み込む</button><input id="jsonFile" type="file" accept=".json,application/json" hidden><button id="reset" class="text-button" type="button">サンプルに戻す</button></div>
+  </div>
+  <div class="preview-area"><div class="preview-sticky">
+    <div class="summary"><div class="summary-heading"><div><span class="small-cap">PRINT PLAN / 印刷計画</span><h2>配置プレビュー</h2></div><span id="layoutBadge" class="summary-badge">計算中</span></div>
+      <div class="stat-row"><div><strong id="statTotal">—</strong><small>必要枚数</small></div><div><strong id="statSheets">—</strong><small>必要シート</small></div><div><strong id="statUnused">—</strong><small>最終空き位置</small></div></div><div id="errors" class="errors" role="alert" hidden></div>
+    </div>
+    <div class="paper-stage"><div class="page-controls"><span id="pageInfo">1 / 1 枚目</span><div><button id="prevPage" class="icon-button" type="button" aria-label="前のページ">←</button><button id="nextPage" class="icon-button" type="button" aria-label="次のページ">→</button></div></div><div id="svgWrap" class="paper-wrap"></div><p class="preview-note">青枠は裁断ガイドです。使用済み位置は印刷しません。用紙に合わせて寸法をご確認ください。</p></div>
+    <div class="actions"><button id="printBtn" class="primary" type="button">▤　全シートを印刷</button><button id="svgBtn" class="secondary" type="button">↓ 表示ページをSVG保存</button><button id="csvBtn" class="secondary" type="button">↓ 配置一覧CSV</button></div><p class="print-hint"><strong>印刷のコツ：</strong>ブラウザの印刷設定は「倍率100% / 実際のサイズ」「余白なし」「ヘッダー・フッターなし」を選択。初回は普通紙で位置合わせをしてください。</p>
+  </div></div></section>
+  <footer>YOHAKU LABEL <span>•</span> 端末上だけで動作します。画像・商品情報の送信なし。<span>•</span> © 2026 MIT</footer>
+</main><div id="printArea" aria-hidden="true"></div><div id="toast" role="status" aria-live="polite"></div><script src="engine.js"></script><script src="app.js"></script></body></html>
