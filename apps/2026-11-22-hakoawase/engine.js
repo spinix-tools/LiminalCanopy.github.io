@@ -7,7 +7,7 @@
   'use strict';
   const EPS = 1e-7;
   const volume = a => a.w * a.d * a.h;
-  const validSize = x => Number.isFinite(x) && x > 0 && x <= 200;
+  const validSize = x => Number.isFinite(x) && x >= 0.1 && x <= 200;
   const cmToMm = x => Math.round(Number(x) * 10);
   function rotations(item) {
     const [w,d,h] = [item.w,item.d,item.h];
@@ -43,7 +43,7 @@
     items.forEach((item,index)=>{
       const qty=Number(item.qty);
       if(!Number.isInteger(qty)||qty<1||qty>24||![item.w,item.d,item.h].every(validSize))
-        throw new Error('商品寸法・数量を確認してください（寸法 0超〜200cm、数量 1〜24）。');
+        throw new Error('商品寸法・数量を確認してください（寸法 0.1〜200cm、数量 1〜24）。');
       const dims = [item.w,item.d,item.h].map(v=>cmToMm(v)+p*2);
       for(let i=0;i<qty;i++) units.push({id:String(item.id||index)+'-'+(i+1),name:String(item.name||'商品'),sourceIndex:index,w:dims[0],d:dims[1],h:dims[2],upright:!!item.upright,baseCm:[item.w,item.d,item.h]});
     });
@@ -76,7 +76,7 @@
     return {placed,rejected,usedVolume:placed.reduce((v,p)=>v+volume(p),0),carton:C,order};
   }
   function pack(units, carton) {
-    if(![carton.w,carton.d,carton.h].every(validSize)) throw new Error('箱の内寸は0超〜200cmで入力してください。');
+    if(![carton.w,carton.d,carton.h].every(validSize)) throw new Error('箱の内寸は0.1〜200cmで入力してください。');
     const choices=['volume','footprint','longest','height'].map(order=>packOnce(units,carton,order));
     choices.sort((a,b)=>a.rejected.length-b.rejected.length || b.usedVolume-a.usedVolume ||
       Math.max(...a.placed.map(p=>p.z+p.h),0)-Math.max(...b.placed.map(p=>p.z+p.h),0));
