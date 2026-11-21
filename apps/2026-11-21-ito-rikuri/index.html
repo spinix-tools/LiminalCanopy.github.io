@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>糸りくり — 残り糸でつくるクロスステッチ図案</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="engine.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<header class="topbar">
+ <div class="brand"><div class="brand-icon" aria-hidden="true">✳</div><div><b>糸りくり</b><small>ITO RIKURI / STITCH STUDIO</small></div></div>
+ <div class="top-actions"><span class="offline"><span class="dot"></span> 端末内で完結</span><button type="button" id="save-json" class="subtle">JSON保存</button><label for="load-json" class="button subtle file-label">読み込み</label><input id="load-json" type="file" accept="application/json,.json" hidden></div>
+</header>
+<main class="shell">
+ <section class="intro"><div><p class="eyebrow">CRAFT LAB · #011</p><h1>ある糸から、<em>描いていく。</em></h1><p class="lede">図案に色を置くたび、必要な糸と残量を再計算。足りない色は、<strong>手元の別の糸に置き換え</strong>て、買い足し前に試せます。</p></div><div class="intro-meta"><span>刺す前に、考えられる。</span><b>□ × □</b><span>手持ち糸で小さな作品を。</span></div></section>
+ <div class="workspace">
+  <section class="editor-panel" aria-label="図案エディター">
+   <div class="section-top"><div><p class="kicker">01 / DESIGN</p><h2>図案をつくる</h2></div><span id="canvas-summary" class="count-pill">28 × 22 マス</span></div>
+   <div class="title-row"><label for="project-title">作品名</label><input id="project-title" maxlength="120" value="二輪の花" aria-label="作品名"></div>
+   <div class="toolbar" role="group" aria-label="描画ツール">
+    <button id="tool-pen" type="button" data-tool="pen" class="tool selected" aria-pressed="true">✎ 描く</button>
+    <button id="tool-erase" type="button" data-tool="erase" class="tool" aria-pressed="false">⌫ 消す</button>
+    <button id="tool-fill" type="button" data-tool="fill" class="tool" aria-pressed="false">▧ 塗りつぶし</button>
+    <span class="toolbar-spacer"></span><button type="button" id="undo" class="iconbutton" title="元に戻す" aria-label="元に戻す">↶</button><button type="button" id="redo" class="iconbutton" title="やり直す" aria-label="やり直す">↷</button>
+   </div>
+   <div class="canvas-wrap"><div id="chart" class="chart" aria-label="塗るマスを選択してください" role="group"></div></div>
+   <div class="chart-under"><span>5目ごとに太いガイド線</span><span>クリック／ドラッグで編集</span></div>
+   <div class="palette-head"><b>使う糸を選ぶ</b><span>パレットの色をクリック</span></div><div id="swatches" class="swatches" role="group" aria-label="糸の色"></div>
+   <details class="options"><summary>図案・布の設定 <span id="size-preview">変更できます</span></summary><div class="settings-grid">
+    <label>横の目数<input type="number" id="set-width" min="4" max="64" step="1"></label>
+    <label>縦の目数<input type="number" id="set-height" min="4" max="64" step="1"></label>
+    <label>布のカウント / inch<select id="set-count"><option>11</option><option selected>14</option><option>16</option><option>18</option><option>22</option><option>28</option></select></label>
+    <label>使用する糸の本数<select id="set-strands"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+    <label>糸のロス率 %<input id="set-waste" type="number" min="0" max="150" step="5"></label>
+    <div class="settings-apply"><button id="apply-settings" type="button" class="action secondary">設定を反映</button></div>
+   </div><p class="hint">残量・必要量は「6本束の刺しゅう糸を何cm持っているか」で入力。図案サイズ変更時は左上を基準に保持します。</p></details>
+  </section>
+  <aside class="side-panel">
+   <section class="card totals"><div class="section-top"><div><p class="kicker">02 / ESTIMATE</p><h2>糸は足りる？</h2></div><span class="tiny-badge">概算</span></div>
+    <div class="metric-grid"><div class="metric"><span>必要ステッチ</span><strong id="total-stitches">—</strong><small>目</small></div><div class="metric"><span>不足する色</span><strong id="total-missing">—</strong><small>色</small></div></div>
+    <div id="project-status" class="status"></div><p id="physical-size" class="fine-print"></p>
+   </section>
+   <section class="card stash"><div class="section-top"><div><p class="kicker">03 / STASH</p><h2>残り糸の棚</h2></div><button type="button" id="add-color" class="text-button">＋ 色を追加</button></div>
+     <p class="side-caption">残りcmは「6本束のままの長さ」。色名・在庫を直接編集できます。</p><div class="stash-head"><span>色／名前</span><span>手持ち cm</span><span>必要 cm</span></div><div id="stash-rows"></div>
+   </section>
+   <section class="card swap"><div class="section-top"><div><p class="kicker">04 / REUSE</p><h2>買い足さずに作る</h2></div></div><div id="suggestions"></div><p class="fine-print">代替色は近似RGB距離で候補を表示。実際の刺しゅう糸の色味・染色差は確認してください。</p></section>
+  </aside>
+ </div>
+ <section class="bottom-panel"><div><p class="kicker">05 / EXPORT</p><h2>作品を持ち出す</h2><p>色記号つきの図案はモノクロ印刷にも対応。図案データを端末に保存できます。</p></div><div class="export-actions"><button id="save-svg" class="action" type="button">SVG図案</button><button id="save-csv" class="action secondary" type="button">糸リストCSV</button><button id="print" class="action secondary" type="button">印刷</button><button id="reset" class="subtle" type="button">サンプルに戻す</button></div></section>
+ <section class="print-only" id="print-area" aria-label="印刷用図案"></section>
+ <footer>ITO RIKURI © 2026 · ネット接続不要・登録不要 · 消費量は針運びや裏糸によって変わります。</footer>
+ <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+</main>
+</body>
+</html>
