@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>かえり箱 | 再利用容器の循環・欠品予測</title>
+<meta name="description" content="使い捨てない物流箱、何個あれば回る？ 配送・回収・洗浄・紛失の時間差を試算する、登録不要のローカルWebアプリ。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">↪</span><span>かえり箱 <small>KAERIBAKO</small></span></div><div class="topright"><span class="privacy"><i></i> オフライン / データは端末内</span><a href="#guide">使い方</a></div></header>
+<main class="shell">
+ <section class="hero" aria-labelledby="hero-title">
+  <div class="hero-text"><p class="eyebrow">RETURNABLE CONTAINER LAB <span class="eyebrow-line"></span> 01 / PLAN</p><h1 id="hero-title">箱は、<em>何日後</em>に<br>戻ってくる？</h1><p class="intro">配送に出た通い箱が、回収・洗浄を経て何個戻るか。<br>欠品する日と、必要な箱の総数を先回りして見積もります。</p><div class="hero-actions"><button class="btn btn-bright" id="fitStock" type="button">改善案を欠品ゼロにする <span aria-hidden="true">↗</span></button><button class="btn btn-ghost" id="resetSample" type="button">サンプルに戻す</button></div></div>
+  <div class="hero-art" aria-hidden="true"><div class="orbit orbit-outer"></div><div class="orbit orbit-mid"></div><div class="orbit orbit-inner"></div><div class="art-center">↻<span>RETURN<br>FLOW</span></div><div class="art-node node-1">発送</div><div class="art-node node-2">回収</div><div class="art-node node-3">洗浄</div><div class="art-tag">LOOP PLANNING / LOCAL ONLY</div></div>
+ </section>
+ <div id="message" class="status" role="status" aria-live="polite"></div>
+ <section class="summary-section" aria-labelledby="result-title"><div class="section-heading"><div><p class="eyebrow dark">02 / RESULT</p><h2 id="result-title">まず、欠品の見通し</h2></div><span class="section-note">設定を変更すると自動で再計算</span></div>
+  <div class="metrics" id="metrics" aria-live="polite"></div>
+  <div class="insight" id="insight" aria-live="polite"></div>
+ </section>
+ <div class="layout">
+  <div class="workspace">
+   <section class="card chart-card" aria-labelledby="chart-title"><div class="card-head"><div><p class="eyebrow dark">03 / FLOW CHART</p><h2 id="chart-title">手元に残る箱の推移</h2></div><div class="legend"><span><i class="legend-dot base"></i>現状</span><span><i class="legend-dot alternate"></i>改善案</span><span><i class="legend-dot shortage"></i>現状の欠品数</span></div></div><div class="chart-frame" id="chart" role="img" aria-label="現状と改善案の在庫推移を示す折れ線グラフ"></div><p class="muted chart-note">各日の「返却分を受け取った後、出荷を終えた時点」の在庫。下部の赤い棒は現状の欠品個数。</p></section>
+   <section class="card table-card" aria-labelledby="table-title"><div class="card-head"><div><p class="eyebrow dark">04 / DAILY LOG</p><h2 id="table-title">日別の計算明細</h2></div><button type="button" class="btn btn-small btn-outline" id="exportCSV">CSV出力 <span aria-hidden="true">↓</span></button></div><div class="table-scroll"><table><thead><tr><th scope="col">日付</th><th scope="col">発送予定</th><th scope="col">現状: 出荷</th><th scope="col">現状: 欠品</th><th scope="col">現状: 手元</th><th scope="col">改善: 欠品</th><th scope="col">改善: 手元</th></tr></thead><tbody id="dayRows"></tbody></table></div><p class="muted" id="tableHint"></p></section>
+   <section class="card assumptions" id="guide"><p class="eyebrow dark">HOW IT WORKS</p><h2>この計算の前提</h2><div class="assumption-grid"><p><strong>01｜朝に受取り、同日に出荷</strong><br>回収・洗浄が完了した箱は、その日の出荷前に利用可能とします。</p><p><strong>02｜配送先の順番が優先度</strong><br>手元が不足する日は、上に表示された配送先から順に箱を割り当てます。</p><p><strong>03｜回収率は計画上の見込み</strong><br>出荷ロットごとに回収数量を四捨五入。実際の遅延・破損・紛失には変動があります。</p><p><strong>04｜公休日・洗浄能力の制限は未考慮</strong><br>曜日別需要は毎週同じです。日別追加で繁忙日を表現できます。</p></div><div class="footnote">自動算出する必要在庫は、予定数量をすべて出荷できる最小の初期箱数です。将来の不確実性に備えた安全在庫は別途加算してください。法令適合・環境負荷削減を保証するものではありません。</div></section>
+  </div>
+  <aside class="controls" aria-label="シミュレーション設定">
+   <section class="card config-card"><div class="card-head"><div><p class="eyebrow dark">01 / SETUP</p><h2>計算条件</h2></div><span class="chip">編集可</span></div><div class="form-grid"><label>開始日<input id="startDate" type="date" min="2020-01-01" max="2099-12-31"></label><label>計算期間（日）<input id="days" type="number" min="7" max="120" step="1"></label><label class="full">いま手元にある箱数<input id="initialStock" type="number" min="0" max="1000000" step="1"></label></div></section>
+   <section class="card config-card"><div class="card-head"><div><p class="eyebrow dark">SCENARIO B</p><h2>改善したら？</h2></div></div><p class="muted">現状の配送予定は変えずに、調達や回収の工夫を比較します。</p><div class="form-grid"><label class="full">箱を追加調達（個）<input id="extraStock" type="number" min="0" max="1000000" step="1"></label><label>回収を早める（日）<input id="returnDaysCut" type="number" min="0" max="30" step="1"></label><label>洗浄を短縮（日）<input id="washDaysCut" type="number" min="0" max="30" step="1"></label></div><button type="button" class="btn btn-light wide" id="fitStockSmall">必要な追加箱数を反映 ↗</button></section>
+   <section class="card config-card"><div class="card-head"><div><p class="eyebrow dark">ROUTES</p><h2>配送先と回収条件</h2></div><button class="btn btn-small btn-outline" id="addRoute" type="button">＋ 追加</button></div><p class="muted">上の配送先ほど欠品時に優先されます。曜日は <strong>毎週発送する日</strong> です。</p><div class="routes" id="routes"></div></section>
+   <section class="card config-card"><div class="card-head"><div><p class="eyebrow dark">EXTRA LOAD</p><h2>繁忙日の追加便</h2></div><button class="btn btn-small btn-outline" id="addExtra" type="button">＋ 追加</button></div><div id="extras" class="extras"></div></section>
+   <section class="card config-card export-card"><p class="eyebrow dark">YOUR DATA</p><h2>保存と持ち出し</h2><div class="export-actions"><button class="btn btn-outline" id="exportJSON" type="button">JSON保存 ↓</button><button class="btn btn-outline" id="importJSON" type="button">JSON読込 ↑</button><button class="btn btn-outline" id="printPage" type="button">印刷 ↗</button></div><input id="fileInput" class="sr-only" type="file" accept="application/json,.json"><p class="muted">入力値はこのブラウザ内だけに保存。APIへの送信やアカウント登録はありません。</p></section>
+  </aside>
+ </div>
+</main>
+<footer><div class="brand brand-footer"><span class="brand-mark" aria-hidden="true">↪</span><span>かえり箱 <small>KAERIBAKO</small></span></div><span>つながる容器の、見えない待ち時間を可視化する。</span><span>Offline MVP / 2026</span></footer>
+<script src="engine.js"></script><script src="app.js" defer></script>
+</body>
+</html>
