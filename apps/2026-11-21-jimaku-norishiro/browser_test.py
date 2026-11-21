@@ -1,0 +1,113 @@
+"""Offline browser integration test. Run: python browser_test.py"""
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+HERE=Path(__file__).resolve().parent
+count=0
+
+def check(condition,label):
+    global count
+    assert condition,label
+    count+=1
+
+with sync_playwright() as pw:
+    browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-dev-shm-usage'])
+    page=browser.new_page(viewport={"width":1440,"height":1080},device_scale_factor=1,accept_downloads=True)
+    errors=[];reqs=[]
+    page.on('pageerror',lambda e: errors.append(str(e)))
+    page.on('request',lambda r: reqs.append(r.url) if r.url.startswith('https:') or r.url.startswith('http:') else None)
+    # This runner cannot navigate file:// or localhost (administrator policy).
+    # Instead embed the exact same local source files, with no external resources.
+    html=(HERE/'index.html').read_text(encoding='utf-8')
+    css=(HERE/'style.css').read_text(encoding='utf-8')
+    engine=(HERE/'engine.js').read_text(encoding='utf-8')
+    app=(HERE/'app.js').read_text(encoding='utf-8')
+    html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</style>')
+    html=html.replace('<script src="engine.js" defer></script><script src="app.js" defer></script>','')
+    html=html.replace('</body>','<script>'+engine+'</script><script>'+app+'</script></body>')
+    page.set_content(html,wait_until='load')
+    check(page.title().startswith('字幕のりしろ'),'title')
+    check(page.locator('#total').inner_text()=='5','sample loaded')
+    check(int(page.locator('#flagged').inner_text())>=3,'sample issues')
+    check(page.locator('.cue-row').count()==5,'cue list')
+    check(page.locator('#editor').is_visible(),'selected editor')
+    check(page.locator('#docType').inner_text()=='SRT','format')
+    check(page.locator('.timeline .block').count()==5,'timeline')
+    page.locator('#wrapOne').click()
+    check('\n' in page.locator('#editText').input_value(),'wrap single')
+    check(not page.locator('#undo').is_disabled(),'undo enabled')
+    page.locator('#undo').click()
+    check('\n' not in page.locator('#editText').input_value(),'undo wrap')
+    page.locator('#editText').fill('原稿を編集しました。')
+    page.locator('#editStart').fill('00:00:00,400')
+    page.locator('#editEnd').fill('00:00:02,900')
+    page.locator('#saveCue').click()
+    check('原稿を編集しました。' in page.locator('.cue-row').first.inner_text(),'manual text save')
+    check('00:00:00,400' in page.locator('.cue-row').first.inner_text(),'time save')
+    page.locator('#undo').click()
+    check('朝の駅前で' in page.locator('.cue-row').first.inner_text(),'manual undo')
+    page.locator('#extendAll').click()
+    check(not page.locator('#undo').is_disabled(),'extend action')
+    page.locator('#undo').click()
+    page.locator('#shiftMs').fill('-600')
+    page.locator('#shift').click()
+    check('0秒' in page.locator('#toast').inner_text(),'negative prevention')
+    page.locator('#shiftMs').fill('500')
+    page.locator('#shift').click()
+    check('00:00:01,000' in page.locator('.cue-row').first.inner_text(),'shift action')
+    page.locator('#undo').click()
+    check('00:00:00,500' in page.locator('.cue-row').first.inner_text(),'shift undo')
+    page.locator('#filterProblems').click()
+    check(page.locator('.cue-row').count()<=5,'filter issues')
+    check(page.locator('#filterProblems').get_attribute('class').find('active')>=0,'active filter')
+    page.locator('#filterAll').click()
+    check(page.locator('.cue-row').count()==5,'filter all')
+    page.locator('#maxWidth').fill('6')
+    page.locator('#maxWidth').dispatch_event('change')
+    check(page.locator('#preset').input_value()=='custom','custom preset')
+    page.locator('#preset').select_option('horizontal')
+    check(page.locator('#maxWidth').input_value()=='13','preset restore')
+    # A safe preview has functional playback & scrub controls.
+    page.locator('#play').click()
+    page.wait_for_timeout(220)
+    check(page.locator('#play').inner_text()=='Ⅱ','playback engaged')
+    page.locator('#play').click()
+    check(page.locator('#play').inner_text()=='▶','paused')
+    page.locator('#scrub').fill('500')
+    check(page.locator('#currentTime').inner_text()!='00:00.0','scrub changed')
+    with page.expect_download() as event: page.locator('#exportSrt').click()
+    download=event.value
+    check(download.suggested_filename.endswith('.srt'),'SRT download')
+    with page.expect_download() as event: page.locator('#exportVtt').click()
+    check(event.value.suggested_filename.endswith('.vtt'),'VTT download')
+    with page.expect_download() as event: page.locator('#exportCsv').click()
+    check(event.value.suggested_filename.endswith('.csv'),'report download')
+    # Replace with VTT and validate format switching, cue identifier, import warnings.
+    page.locator('.pastebox summary').click()
+    page.locator('#source').fill('WEBVTT\n\nNOTE draft\nunused\n\nintro\n00:01.000 --> 00:02.500 align:start\n新しい字幕です\n\n00:02.700 --> 00:04.000\n続きです')
+    page.locator('#loadText').click()
+    check(page.locator('#total').inner_text()=='2','VTT paste import')
+    check(page.locator('#docType').inner_text()=='VTT','VTT format')
+    check('除外' in page.locator('#importWarnings').inner_text(),'metadata warning')
+    with page.expect_download() as event: page.locator('#exportVtt').click()
+    export=event.value
+    file_path=HERE/'browser-export.vtt'
+    export.save_as(file_path)
+    text=file_path.read_text(encoding='utf-8')
+    check(text.startswith('WEBVTT'),'download valid VTT')
+    check('align:start' in text,'VTT cue settings retained')
+    file_path.unlink()
+    page.locator('#demo').click()
+    page.locator('#source').fill('')
+    page.locator('.pastebox summary').click()
+    check(page.locator('#total').inner_text()=='5','reset demo')
+    check(len(errors)==0,'no uncaught browser errors: '+str(errors))
+    check(len(reqs)==0,'no network requests')
+    page.screenshot(path=str(HERE/'desktop.png'),full_page=True)
+    mobile=browser.new_page(viewport={"width":390,"height":844},device_scale_factor=1)
+    mobile.set_content(html,wait_until='load')
+    check(mobile.locator('#total').inner_text()=='5','mobile loads')
+    check(mobile.evaluate('document.documentElement.scrollWidth<=window.innerWidth+2'),'mobile no horizontal overflow')
+    mobile.screenshot(path=str(HERE/'mobile.png'),full_page=True)
+    browser.close()
+print(f'PASS browser checks: {count}/{count} (Chromium with exact sources embedded; no external requests)')
