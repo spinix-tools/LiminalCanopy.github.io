@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132a37">
+  <meta name="description" content="イベント出店の電気使用計画を15分刻みで重ね合わせ、超過時間帯を発見する無料のオフライン計算ツール。">
+  <title>電源かさね — 出店の電源使用を、時間で整える</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">≋</span><div><strong>電源かさね</strong><small>DENGEN KASANE / BETA 01</small></div></div>
+      <div class="topactions"><span class="local-tag">● データはこの端末だけ</span><button id="saveJson" class="btn secondary">JSONを保存</button><button id="exportCsv" class="btn secondary">CSV出力</button><button id="printBtn" class="btn primary">印刷する ↗</button></div>
+    </header>
+    <section class="hero">
+      <div class="hero-copy"><p class="eyebrow"><span class="dot"></span> FIELD OPERATIONS / POWER LOAD PLANNER</p><h1>ワット数だけでなく、<br><em>「いつ重なるか」</em>を見よう。</h1><p class="hero-desc">屋台・マルシェ・展示ブースの電気機器を時間帯で重ね、容量超過を先回りして発見。作業時刻をずらす候補まで作れます。</p><div class="hero-chips"><span>15分刻み</span><span>2つ以上の系統に対応</span><span>完全オフライン</span></div></div>
+      <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 440 225" preserveAspectRatio="xMidYMid meet"><g fill="none" stroke="#547486" stroke-width="1"><path d="M20 34H420 M20 75H420 M20 116H420 M20 157H420 M20 198H420" opacity=".3"/></g><path d="M22 190 L22 132 L79 132 L79 86 L139 86 L139 124 L198 124 L198 52 L255 52 L255 105 L315 105 L315 150 L376 150 L376 181 L418 181" fill="none" stroke="#ffa45b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 190 L22 132 L79 132 L79 86 L139 86 L139 124 L198 124 L198 52 L255 52 L255 105 L315 105 L315 150 L376 150 L376 181 L418 181 L418 210 L22 210Z" fill="#ffaf66" opacity=".11"/><rect x="195" y="33" width="62" height="19" rx="8" fill="#ffb77a"/><text x="226" y="46" text-anchor="middle" fill="#193344" font-size="10" font-family="sans-serif" font-weight="bold">OVER</text><path d="M20 115 H418" stroke="#90e0cb" stroke-width="1.5" stroke-dasharray="5 5"/><text x="417" y="110" text-anchor="end" font-size="9" fill="#90e0cb">LIMIT</text><circle cx="198" cy="52" r="5" fill="#fff" stroke="#ffac67" stroke-width="3"/></svg><div class="art-caption"><span>SIMULATED LOAD</span><span>09:00 — 17:00</span></div></div>
+    </section>
+    <div class="notice" role="note"><span class="notice-icon">!</span><span><strong>事前計画用の概算です。</strong> 実際の電気使用・配線の安全確認や会場の電源申請は、主催者・電気工事の専門家に確認してください。起動ピークは入力値で15分間続く保守的な仮定です。</span></div>
+    <main class="workspace">
+      <section class="left-stack">
+        <div class="panel" id="setupPanel"><div class="panel-heading"><div><div class="overline">01 / EVENT SETUP</div><h2>会場の条件</h2></div><button class="text-action" id="resetBtn">サンプルに戻す ↺</button></div>
+          <div class="inputs-grid"><label class="field wide">計画名<input id="eventTitle" maxlength="100" placeholder="例: 日曜マルシェ" /></label><label class="field">開始時刻<input type="time" id="eventFrom" step="900" /></label><label class="field">終了時刻<input type="time" id="eventTo" step="900" /></label><label class="field">会場全体の上限 W<input type="number" id="venueLimit" min="100" max="100000" step="50" /></label><label class="field">予備率 %（計算上の余裕）<input type="number" id="reservePct" min="0" max="50" step="5" /></label></div>
+          <div class="line-header"><strong>系統別の上限</strong><button id="addCircuit" class="tiny-action">＋ 系統を追加</button></div><div id="circuitList" class="circuit-list"></div><p class="micro">系統上限は入力上の独立した上限です。コンセント数を増やしても供給容量が増えるとは限りません。</p>
+        </div>
+        <div class="panel devices-panel"><div class="panel-heading"><div><div class="overline">02 / EQUIPMENT</div><h2>使う機器と時間</h2></div><span class="count" id="deviceCount">0件</span></div><p class="subtle">使用時間、通常電力、起動ピークの見積りを入力。時刻調整できる機器には「移動可」を設定します。</p><div id="deviceList" class="device-list"></div><button id="addDevice" class="btn dashed">＋ 機器を追加する</button></div>
+      </section>
+      <section class="right-stack">
+        <div class="panel result-panel"><div class="panel-heading"><div><div class="overline">03 / LOAD REPORT</div><h2>重なり診断</h2></div><span id="stateBadge" class="state-badge"></span></div><div class="metrics"><div class="metric"><span>最大同時電力</span><strong id="maxTotal">–</strong><small>W / 計画上のピーク</small></div><div class="metric"><span>超過のある時間帯</span><strong id="overCount">–</strong><small>15分枠の数</small></div><div class="metric"><span>計算上の電力量</span><strong id="energy">–</strong><small>kWh / 稼働率一定の仮定</small></div></div>
+          <div class="chart-top"><div><strong>電力の時間推移</strong><small>橙：合計 ｜ 青緑：予備率を反映した上限</small></div><span id="chartRange"></span></div><div id="chartArea" class="chart-area" role="img" aria-label="時間帯別の電力グラフ"></div><div class="legend" id="legend"></div>
+          <div class="risk-head"><h3>要確認の時間帯</h3><span id="riskSummary"></span></div><div id="riskList" class="risk-list" aria-live="polite"></div>
+        </div>
+        <div class="panel optimize-panel"><div class="panel-heading"><div><div class="overline">04 / WHAT IF?</div><h2>時刻をずらす案</h2></div><span class="beta">BETA</span></div><p class="subtle">「移動可」にした作業を許容範囲で動かし、超過枠を減らす候補を探します。最適解や電気的安全を保証するものではありません。</p><button id="optimizeBtn" class="btn optimize-btn">時刻の調整案を探す <span>↗</span></button><div id="optimizerResult" class="optimizer-result" aria-live="polite">診断が終わったら、ここに調整案が表示されます。</div></div>
+        <div class="panel utilities-panel"><div class="overline">05 / FILES & HANDOFF</div><h2>保存と持ち出し</h2><div class="utility-grid"><button id="importBtn" class="utility"><span>↙</span><strong>JSONを読み込む</strong><small>以前の計画を復元</small></button><button id="copySummary" class="utility"><span>▤</span><strong>相談メモをコピー</strong><small>主催者への確認用</small></button></div><input id="fileInput" type="file" accept="application/json,.json" hidden><p class="micro">機器情報は自動的にブラウザ内に保存されます。通信やアカウント登録はありません。</p></div>
+      </section>
+    </main>
+    <footer><div><strong>電源かさね</strong><span>Plan first. Confirm on site.</span></div><p>電気的な安全認証・工事設計ではありません。機器の銘板と会場規則を必ず照合してください。</p></footer>
+  </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body></html>
