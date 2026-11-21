@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="釣銭リハはマルシェや小さなお店のための、金種在庫とお釣り切れを取引順で試す無料の会計リハーサルツールです。">
+  <title>釣銭リハ — 会計が止まる前に、練習しよう。</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="engine.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<header class="masthead"><div class="shell">
+  <div class="brandline"><div class="mark" aria-hidden="true">¥<span>↗</span></div><div><strong>釣銭リハ</strong><small>TSURISEN REHEARSAL</small></div></div>
+  <div class="mast-right"><span class="tiny-pill"><i></i> ブラウザ内だけで計算</span><span class="edition">Edition 01 / 2026</span></div>
+</div></header>
+<div class="shell"><section class="hero">
+ <div class="hero-text"><div class="eyebrow"><span>FOR POP-UP SHOPS & MARKETS</span><span class="rule"></span> 出店準備の小さな道具</div>
+ <h1>釣銭の不安を、<br><em>開店前のリハーサルに。</em></h1>
+ <p>手元の紙幣・硬貨で会計を順番に試し、何人目でお釣りが足りなくなるか発見。準備金の中身を変えて、もう一度試せます。</p></div>
+ <div class="hero-deco" aria-hidden="true"><div class="money-circ circ-a">500</div><div class="money-circ circ-b">100</div><div class="money-circ circ-c">50</div><div class="trace"></div></div>
+</section>
+<main class="app-layout">
+ <div class="work-column">
+  <section class="panel" aria-labelledby="float-head"><div class="section-head"><div class="section-number">01</div><div><div class="kicker">OPENING FLOAT</div><h2 id="float-head">用意するお釣り</h2></div><span class="head-note">9金種を設定</span></div>
+   <p class="helper">開店時に持っている枚数を入力。受け取ったお金も次の会計で使う想定です。</p>
+   <div id="float-grid" class="float-grid" aria-label="金種別の初期枚数"></div>
+   <div class="float-footer"><span>開店時の準備金</span><strong id="float-total">—</strong></div>
+  </section>
+  <section class="panel" aria-labelledby="queue-head"><div class="section-head"><div class="section-number">02</div><div><div class="kicker">TRANSACTION QUEUE</div><h2 id="queue-head">会計を順に試す</h2></div><span class="head-note">上から順に実行</span></div>
+   <p class="helper">お会計額と、お客さんが出す紙幣・硬貨1枚を指定。<b>ちょうど</b>は最少枚数で支払う想定です。</p>
+   <div class="queue-wrap"><table class="queue-table"><thead><tr><th>番号</th><th>品名・メモ</th><th>会計金額</th><th>預かり方</th><th></th></tr></thead><tbody id="queue-body"></tbody></table></div>
+   <div class="row-buttons"><button type="button" class="btn btn-outline" id="add-row">＋ 会計を追加</button><button type="button" class="btn btn-quiet" id="sample-reset">サンプルを復元</button></div>
+  </section>
+  <section class="panel" aria-labelledby="stress-head"><div class="section-head"><div class="section-number">03</div><div><div class="kicker">WHAT-IF TEST</div><h2 id="stress-head">不規則な客列でも試す</h2></div></div>
+   <p class="helper">お客さんの順番が変わると結果も変わります。次の条件で疑似的な客列を複数生成します。実際の来場者を予測するものではありません。</p>
+   <div class="field"><label for="menu">商品の価格（円、カンマ区切り）</label><input id="menu" type="text" inputmode="text" value="350,450,800" autocomplete="off"><small>各価格は同じ確率で選ばれます。</small></div>
+   <div class="field-grid"><div class="field"><label for="customers">1回あたりの現金客数</label><input id="customers" type="number" min="1" max="100" value="24"></div><div class="field"><label for="trials">試行回数</label><input id="trials" type="number" min="1" max="300" value="80"></div></div>
+   <div class="weights-title"><span>想定する支払金種の比重</span><small>合計は自動で比率化</small></div>
+   <div class="weights-grid"><div class="field"><label for="weight-0">ちょうど</label><input id="weight-0" type="number" min="0" max="100" value="30"></div><div class="field"><label for="weight-1">千円札</label><input id="weight-1" type="number" min="0" max="100" value="45"></div><div class="field"><label for="weight-2">五千円札</label><input id="weight-2" type="number" min="0" max="100" value="15"></div><div class="field"><label for="weight-3">一万円札</label><input id="weight-3" type="number" min="0" max="100" value="10"></div></div>
+   <div class="row-buttons"><div class="field seed"><label for="seed">再現用シード</label><input id="seed" type="number" min="0" max="4294967295" value="20261122"></div><button type="button" class="btn btn-dark" id="run-stress">客列テストを実行 <span aria-hidden="true">↗</span></button></div>
+  </section>
+ </div>
+ <div class="results-column" aria-label="計算結果">
+  <section class="results-overview" id="overview" aria-live="polite"></section>
+  <section class="results-panel"><div class="results-head"><div><div class="kicker">TRANSACTION PLAYBACK</div><h2>会計の履歴</h2></div><span class="legend"><b></b> 完了　<i></i> 停止</span></div><div id="playback"></div></section>
+  <section class="results-panel"><div class="results-head"><div><div class="kicker">INVENTORY AFTER REHEARSAL</div><h2>残りの金種</h2></div></div><div id="leftover"></div></section>
+  <section class="results-panel" id="stress-result-panel"><div class="results-head"><div><div class="kicker">MONTE CARLO / SCENARIOS</div><h2>客列テストの結果</h2></div></div><div id="stress-results" class="muted-placeholder">「客列テストを実行」を押すと、ここに結果が表示されます。</div></section>
+  <section class="results-panel exports"><div class="results-head"><div><div class="kicker">EXPORT & REUSE</div><h2>持ち出す・保存する</h2></div></div>
+   <p class="helper">計算はオフラインで完結します。入力はこの端末に自動保存します（ブラウザ設定によっては保存不可）。</p>
+   <div class="export-buttons"><button class="btn btn-outline" id="export-csv">CSVの会計票</button><button class="btn btn-outline" id="export-json">JSONで保存</button><button class="btn btn-outline" id="import-json">JSONを復元</button><button class="btn btn-outline" id="print-page">印刷する</button></div>
+   <input type="file" id="file-input" accept=".json,application/json" hidden>
+   <div class="small-note" id="message" role="status" aria-live="polite"></div>
+  </section>
+ </div>
+</main>
+<footer><div class="foot-main"><strong>釣銭リハ</strong><span>ちょうど良い準備は、数える前に試せる。</span></div><p>参考用の簡易シミュレーターです。需要・決済方法・出店条件を保証するものではありません。2,000円札は対象外。現金客だけをモデル化し、クレジット等の取引は含めません。個人情報は入力しないでください。</p><span>© 2026 TSURISEN REHEARSAL · Made for independent sellers</span></footer>
+</div>
+</body></html>
