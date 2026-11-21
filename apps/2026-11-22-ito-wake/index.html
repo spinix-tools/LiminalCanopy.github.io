@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#174c49">
+<title>糸わけ手帖 | 一目刺しの糸取り計画</title>
+<style>
+:root{font:15px system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#1a4944;background:#f5f4ed}*{box-sizing:border-box}body{margin:0}header{background:#174c49;color:#fff;padding:18px max(4vw,16px);font-size:21px;font-weight:850;border-bottom:4px solid #cda65b}header span{font-size:11px;color:#c8dfd4;margin-left:12px}.wrap{max-width:1230px;padding:25px 20px 50px;margin:auto}.intro{margin-bottom:24px}.intro small{font-size:10px;letter-spacing:.14em;font-weight:900;color:#a3683c}.intro h1{font:750 clamp(29px,4vw,44px) serif;margin:6px 0;color:#234c47}.intro h1 em{font-style:normal;color:#b1544b}.intro p{color:#738078;font-size:13px}.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}.panel,.metric{background:#fffefa;border:1px solid #e3e2d8;border-radius:15px;box-shadow:0 8px 28px #174c4908;padding:18px}.panel h2{font-size:18px;margin:2px 0 17px}.label{font-size:10px;letter-spacing:.12em;font-weight:900;color:#9b7146}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fields label{font-size:11px;font-weight:750;color:#4c6964;display:flex;flex-direction:column;gap:6px}.fields input{width:100%;padding:10px;border-radius:8px;border:1px solid #d6ddd6;background:#f7f8f3;font:inherit;color:#204945;min-width:0}input[type=range]{width:100%;accent-color:#a6514c}button,.button{border:0;border-radius:9px;padding:10px 12px;font:700 12px system-ui;cursor:pointer;background:#e7f0eb;color:#28544c}button:hover,.button:hover{background:#d8e8e0}button:focus-visible,input:focus-visible{outline:3px solid #cba457;outline-offset:2px}.action{background:#174c49;color:#fff}.action:hover{background:#29645c}.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.phasegroup{margin-top:16px;padding:12px;border-radius:11px;background:#f5f6f1}.phasegroup strong{display:block;font-size:12px;margin-bottom:8px}.phasegroup>div{display:flex;flex-wrap:wrap;gap:5px;max-height:138px;overflow:auto}.phasegroup button{padding:7px 8px;font-size:10px;background:#e1e9e5;min-width:42px}.phasegroup button.on{background:#205a54;color:white}.phasegroup.v button.on{background:#397da6}.main{min-width:0;display:grid;gap:15px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.metric{padding:16px 13px}.metric b{display:block;font-size:24px;white-space:nowrap;font-variant-numeric:tabular-nums}.metric span{font-size:10px;color:#73847b;font-weight:800}.metric.err b{color:#b0524c}.design{background:#f9faf5;border:1px solid #e9ebe1;border-radius:12px;padding:16px;text-align:center;overflow:auto}.design svg{max-width:100%;max-height:430px;width:auto;height:auto;display:inline-block;background:#fffdf7;box-shadow:0 7px 15px #2333}.note{font-size:11px;line-height:1.8;color:#74827a}.stats{font-size:12px;font-weight:750;color:#3e6760}.status{padding:10px 12px;border-radius:9px;background:#edf5ef;color:#39664e;font-size:12px}.status.warn{background:#fff0e8;color:#99483f}.cutlist{max-height:315px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}thead{position:sticky;top:0;background:#edf3ef}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #ebeee8}td:last-child{text-align:right;color:#b0534b;font-weight:850}td input{accent-color:#276c65;width:16px;height:16px}.bar{height:8px;border-radius:5px;background:#e8ece8;overflow:hidden}.bar>div{height:100%;width:0;background:#4f9a81}.files{display:flex;gap:8px;flex-wrap:wrap}.files .button{position:relative;overflow:hidden;cursor:pointer}.files input[type=file]{position:absolute;opacity:0;width:1px;height:1px}.foot{font-size:11px;color:#849087;margin-top:18px}#toast{position:fixed;right:20px;bottom:20px;display:none;background:#174c49;color:white;padding:12px;border-radius:10px;z-index:5;font-size:12px}@media(max-width:900px){.layout{grid-template-columns:280px minmax(0,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:710px){.layout{grid-template-columns:1fr}.wrap{padding:20px 12px}.panel{padding:15px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}header span{display:none}.design{padding:8px}.metric b{font-size:21px}}@media print{header,.controls,.files,#toast,.foot{display:none!important}.layout{display:block}.wrap{max-width:none}.panel{box-shadow:none;margin:15px 0}.cutlist{max-height:none;overflow:visible}.metrics{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body><header>糸 ◇ 糸わけ手帖 <span>ITO WAKE / SASHIKO WORKSHOP</span></header>
+<main class="wrap"><div class="intro"><small>ONE STITCH PLAN · 登録不要・オフライン</small><h1>図案から、<em>切る糸</em>まで。</h1><p>一目刺しの目を並べ、糸の切り分け・必要量・準備の進み具合を一画面で確認。</p></div>
+<div class="layout"><section class="panel controls"><div class="label">01 / SETTINGS</div><h2>布と糸を決める</h2>
+<div class="fields" id="fields">
+<label>縦の点数<input type="number" data-key="rows" min="2" max="48" step="1"></label>
+<label>横の点数<input type="number" data-key="cols" min="2" max="48" step="1"></label>
+<label>点の間隔 mm<input type="number" data-key="pitch" min="2" max="20" step=".5"></label>
+<label>端の余裕 片側mm<input type="number" data-key="tail" min="10" max="100" step="5"></label>
+<label>糸1本の上限 cm<input type="number" data-key="maxCut" min="10" max="200" step="5"></label>
+<label>手持ちの糸 m<input type="number" data-key="stock" min="0" max="999" step=".5"></label>
+</div><p class="note">予備率 <b id="reserveText">10%</b><input type="range" data-key="reserve" id="reserve" min="0" max="50" step="5"></p>
+<div class="toolbar"><button id="alternating">交互パターン</button><button id="aligned">全列そろえる</button><button id="reset">初期化</button></div>
+<p class="note">下の H（横の行）と V（縦の列）をタップすると、表目開始と空き開始が切り替わります。</p>
+<div id="phases"></div></section>
+<div class="main"><div class="metrics" id="metrics"></div>
+<section class="panel"><div class="label">02 / PATTERN</div><h2>刺し上がり図案</h2><div class="design" id="design" aria-label="一目刺し図案"></div><p class="stats" id="dimensions"></p><p class="note">赤は横・青は縦の表目。間は布の裏側を渡ると概算します。実寸SVGは必ず50mm確認線を測ってください。</p></section>
+<section class="panel"><div class="label">03 / CUT PLAN</div><h2>糸取りリスト</h2><p id="status" class="status"></p><div class="bar"><div id="bar"></div></div><p class="note" id="progress"></p><div class="toolbar"><button id="all">すべて</button><button id="todo">未完了だけ</button></div>
+<div class="cutlist"><table><thead><tr><th>✓</th><th>区間</th><th>目数</th><th>切る糸</th></tr></thead><tbody id="cuts"></tbody></table></div></section>
+<section class="panel"><div class="label">04 / EXPORT</div><h2>持ち出し・保存</h2><div class="files"><button class="action" id="svg">図案SVG</button><button id="csv">糸取りCSV</button><button id="json">計画JSON</button><label class="button">JSON読込<input id="import" type="file" accept=".json,application/json"></label><button id="print">印刷</button></div><p class="note">作業情報はブラウザ内だけに保存。通信・アカウント・課金なし。</p></section></div></div>
+<p class="foot">糸の消費量は概算です。布の厚み、伸縮、端糸処理、縫い直しは含みません。</p></main><div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+var limits={rows:[2,48],cols:[2,48],pitch:[2,20],tail:[10,100],maxCut:[10,200],stock:[0,999],reserve:[0,50]};
+var seed={rows:18,cols:24,pitch:5,tail:45,maxCut:80,stock:20,reserve:10,h:[],v:[],done:{}};
+var s=JSON.parse(JSON.stringify(seed)),filter="all";
+var $=function(id){return document.getElementById(id)};
+function norm(x){x=x||{};var t={};Object.keys(limits).forEach(function(k){var v=Number(x[k]);t[k]=isFinite(v)?Math.max(limits[k][0],Math.min(limits[k][1],v)):seed[k]});t.rows=Math.floor(t.rows);t.cols=Math.floor(t.cols);
+t.h=Array.from({length:t.rows},function(_,i){return x.h&&[0,1].includes(x.h[i])?x.h[i]:i%2});
+t.v=Array.from({length:t.cols},function(_,i){return x.v&&[0,1].includes(x.v[i])?x.v[i]:i%2});
+t.done=x.done&&typeof x.done==="object"&&!Array.isArray(x.done)?x.done:{};return t}
+function save(){try{localStorage.setItem("itowake-standalone-v1",JSON.stringify(s))}catch(e){}}
+function sync(){document.querySelectorAll("[data-key]").forEach(function(el){el.value=s[el.dataset.key]});$("reserveText").textContent=s.reserve+"%"}
+function format(x,d){return Number(x).toLocaleString("ja-JP",{maximumFractionDigits:d===undefined?2:d,minimumFractionDigits:d===undefined?2:d})}
+function compute(){var routes=[],pieces=[],bad=false;
+[["H",s.rows,s.cols,s.h],["V",s.cols,s.rows,s.v]].forEach(function(conf){var dir=conf[0],lines=conf[1],points=conf[2],phase=conf[3];
+for(var r=0;r<lines;r++){var marks=[];for(var j=0;j<points-1;j++)if((j+phase[r])%2===0)marks.push(j);if(!marks.length)continue;
+if(s.pitch+2*s.tail>s.maxCut*10){bad=true;continue}
+var groups=[],start=marks[0],end=marks[0]+1,count=1;
+function flush(){groups.push({start:start,end:end,eyes:count})}
+for(var z=1;z<marks.length;z++){var n=marks[z];if((n+1-start)*s.pitch+2*s.tail<=s.maxCut*10){end=n+1;count++}else{flush();start=n;end=n+1;count=1}}
+flush();
+groups.forEach(function(g){var id=dir+":"+r+":"+g.start+":"+g.end;pieces.push({id:id,dir:dir,row:r,start:g.start,end:g.end,eyes:g.eyes,mm:(g.end-g.start)*s.pitch+2*s.tail,done:s.done[id]===true})});
+routes.push({dir:dir,row:r,marks:marks})}}
+);
+var total=pieces.reduce(function(a,c){return a+c.mm},0),stitches=pieces.reduce(function(a,c){return a+c.eyes},0),done=pieces.filter(function(c){return c.done}).length;
+return {pieces:pieces,routes:routes,total:total,stitches:stitches,done:done,bad:bad,need:total*(1+s.reserve/100),shortage:Math.max(0,total*(1+s.reserve/100)-s.stock*1000)}}
+function svg(p,exported){var pad=exported?12:9,w=Math.max((s.cols-1)*s.pitch+2*pad,exported?74:0),h=(s.rows-1)*s.pitch+2*pad;
+var shapes=['<rect width="'+w+'" height="'+h+'" fill="#fffdf7"/>'];
+for(var y=0;y<s.rows;y++)for(var x=0;x<s.cols;x++)shapes.push('<circle cx="'+(pad+x*s.pitch)+'" cy="'+(pad+y*s.pitch)+'" r=".3" fill="#bbc5c1"/>');
+p.routes.forEach(function(r){r.marks.forEach(function(j){var hor=r.dir==="H",x1=pad+(hor?j:r.row)*s.pitch,y1=pad+(hor?r.row:j)*s.pitch,x2=x1+(hor?s.pitch:0),y2=y1+(hor?0:s.pitch);
+shapes.push('<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(hor?'#b34c47':'#386e9a')+'" stroke-width="'+(hor?'.85':'.7')+'" stroke-linecap="round"/>')})});
+if(exported){shapes.push('<line x1="'+pad+'" y1="'+(h-5)+'" x2="'+(pad+50)+'" y2="'+(h-5)+'" stroke="#111" stroke-width=".3"/>');shapes.push('<text x="'+(pad+25)+'" y="'+(h-7)+'" text-anchor="middle" font-size="2.5">50 mm</text>')}
+return '<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="横の糸は赤、縦の糸は青" width="'+w+'mm" height="'+h+'mm" viewBox="0 0 '+w+' '+h+'">'+shapes.join('')+'</svg>'}
+function phaseUI(){var root=$("phases");root.replaceChildren();[["H","横糸 H — 行",s.h],["V","縦糸 V — 列",s.v]].forEach(function(e){var box=document.createElement("div");box.className="phasegroup"+(e[0]==="V"?" v":"");var title=document.createElement("strong");title.textContent=e[1];box.append(title);var btns=document.createElement("div");e[2].forEach(function(phase,i){var b=document.createElement("button");b.textContent=e[0]+String(i+1).padStart(2,"0");b.dataset.dir=e[0];b.dataset.i=i;b.className=phase===0?"on":"";b.setAttribute("aria-pressed",phase===0?"true":"false");b.title=phase===0?"表目から":"空きから";btns.append(b)});box.append(btns);root.append(box)})}
+function metrics(p){var arr=[["必要な糸",format(p.need/1000)+" m","予備込み"],["切り分け本数",p.pieces.length+" 本","一目の途中では切らない"],["表目の数",p.stitches+" 目","横・縦の合計"],["手持ちの糸",p.shortage>0?"不足 "+format(p.shortage/1000)+" m":"足ります","在庫 "+format(s.stock,1)+" m",p.shortage>0]];
+var root=$("metrics");root.replaceChildren();arr.forEach(function(a){var d=document.createElement("div");d.className="metric"+(a[3]?" err":"");var label=document.createElement("span"),v=document.createElement("b"),sub=document.createElement("span");label.textContent=a[0];v.textContent=a[1];sub.textContent=a[2];d.append(label,v,sub);root.append(d)})}
+function render(){s=norm(s);var p=compute();metrics(p);$("design").innerHTML=svg(p,false);$("dimensions").textContent="図案実寸 "+format((s.cols-1)*s.pitch,0)+" × "+format((s.rows-1)*s.pitch,0)+" mm";$("status").textContent=p.bad?"糸の上限が一目＋両端の余裕より短く、作れない区間があります":p.shortage>0?"手持ち糸が予備込みで "+format(p.shortage/1000)+" m 不足します":"全区間は糸の上限内です。必要量は概算です。";
+$("status").className="status"+(p.bad||p.shortage>0?" warn":"");$("bar").style.width=(p.pieces.length?100*p.done/p.pieces.length:0)+"%";$("progress").textContent="準備済み "+p.done+" / "+p.pieces.length+" 本";
+var tbody=$("cuts");tbody.replaceChildren();p.pieces.forEach(function(c){if(filter==="todo"&&c.done)return;var tr=document.createElement("tr"),a=document.createElement("td"),check=document.createElement("input");check.type="checkbox";check.checked=c.done;check.dataset.cut=c.id;check.setAttribute("aria-label",c.id+" 完了");a.append(check);tr.append(a);
+[c.dir==="H"?"横":"縦",c.row+1,c.start+1+"–"+c.end+1,c.eyes,format(c.mm/10,1)+" cm"].forEach(function(t,i){if(i===0)return;var td=document.createElement("td");td.textContent=(i===1?(c.dir==="H"?"横 ":"縦 "):"")+t;tr.append(td)});tbody.append(tr)});
+if(!tbody.children.length){var row=document.createElement("tr"),td=document.createElement("td");td.colSpan=4;td.textContent=p.pieces.length?"すべて準備済みです":"この設定では作成できません";row.append(td);tbody.append(row)}
+phaseUI();save();return p}
+function toast(msg){var e=$("toast");e.textContent=msg;e.style.display="block";clearTimeout(toast.timer);toast.timer=setTimeout(function(){e.style.display="none"},2700)}
+function download(name,data,type){var b=new Blob([data],{type:type}),url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast(name+" を書き出しました")}
+try{var prev=JSON.parse(localStorage.getItem("itowake-standalone-v1"));if(prev&&typeof prev==="object")s=norm(prev)}catch(e){}
+sync();render();
+$("fields").addEventListener("input",function(e){if(!e.target.dataset.key)return;var k=e.target.dataset.key,n=Number(e.target.value);if(e.target.value.trim()===""||!isFinite(n))return;s[k]=Math.max(limits[k][0],Math.min(limits[k][1],n));render()});
+$("reserve").addEventListener("input",function(e){s.reserve=Number(e.target.value);$("reserveText").textContent=s.reserve+"%";render()});
+$("phases").addEventListener("click",function(e){var b=e.target.closest("button[data-dir]");if(!b)return;var list=b.dataset.dir==="H"?s.h:s.v;list[Number(b.dataset.i)]=1-list[Number(b.dataset.i)];render()});
+$("aligned").addEventListener("click",function(){s.h.fill(0);s.v.fill(0);render()});
+$("alternating").addEventListener("click",function(){s.h=s.h.map(function(_,i){return i%2});s.v=s.v.map(function(_,i){return i%2});render()});
+$("reset").addEventListener("click",function(){if(!confirm("設定と準備の進捗を初期化しますか？"))return;s=norm(seed);filter="all";sync();render()});
+$("cuts").addEventListener("change",function(e){if(!e.target.dataset.cut)return;s.done[e.target.dataset.cut]=e.target.checked;render()});
+$("all").addEventListener("click",function(){filter="all";render()});$("todo").addEventListener("click",function(){filter="todo";render()});
+$("svg").addEventListener("click",function(){download("itowake-pattern.svg",svg(compute(),true),"image/svg+xml;charset=utf-8")});
+$("csv").addEventListener("click",function(){var a=[["方向","行列","開始点","終了点","表目","糸長cm","完了"]];compute().pieces.forEach(function(c){a.push([c.dir,c.row+1,c.start+1,c.end+1,c.eyes,format(c.mm/10,1),c.done?"済":"未"])});download("itowake-cutlist.csv","\ufeff"+a.map(function(x){return x.join(",")}).join("\r\n")+"\r\n","text/csv;charset=utf-8")});
+$("json").addEventListener("click",function(){download("itowake-plan.json",JSON.stringify({format:"itowake-lite-v1",settings:s},null,2),"application/json;charset=utf-8")});
+$("import").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;f.text().then(function(t){if(f.size>200000)throw Error("サイズ超過");var obj=JSON.parse(t),v=obj.settings||obj;if(!v||!Number.isFinite(Number(v.rows))||!Number.isFinite(Number(v.cols)))throw Error("形式違い");s=norm(v);sync();render();toast("読み込みました")}).catch(function(err){toast("JSONエラー: "+err.message)}).finally(function(){e.target.value=""})});
+$("print").addEventListener("click",function(){window.print()});
+})();
+</script></body></html>
