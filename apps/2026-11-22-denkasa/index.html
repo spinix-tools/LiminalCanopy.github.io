@@ -1,0 +1,13 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>電かさなり｜起動中</title></head><body style="font:16px system-ui;padding:35px;background:#f4f6f0;color:#18302e"><h1>電かさなり</h1><p id="state">アプリを展開しています…</p><script src="payload-01.js"></script><script src="payload-02.js"></script><script src="payload-03.js"></script><script src="payload-04.js"></script><script src="payload-05.js"></script><script>
+(function(){try{
+var b64=(window.DK_DATA||[]).join('');if(!b64)throw Error('データファイルが見つかりません');
+var input=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),out=[],pos=0;
+while(pos<input.length){var flags=input[pos++];for(var bit=0;bit<8&&pos<input.length;bit++){
+if(flags&(1<<bit)){var a=input[pos++],b=input[pos++],len=3+(a>>4),off=1+((a&15)<<8)+b;
+for(var j=0;j<len;j++)out.push(out[out.length-off]);}
+else out.push(input[pos++]);}}
+var text=new TextDecoder('utf-8',{fatal:true}).decode(new Uint8Array(out));
+if(!text.startsWith('<!doctype html>'))throw Error('データ形式が不正です');
+document.open();document.write(text);document.close();
+}catch(e){document.getElementById('state').textContent='起動失敗: '+e.message+'。index.htmlとpayload-*.jsを同じフォルダに保存してください。';}})();
+</script></body></html>
