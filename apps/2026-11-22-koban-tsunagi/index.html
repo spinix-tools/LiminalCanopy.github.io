@@ -46,7 +46,7 @@ $("actors").addEventListener("click",function(e){var i=e.target.dataset.removeA;
 $("scenes").addEventListener("click",function(e){var i=e.target.dataset.removeS;if(i!==undefined){data.scenes.splice(Number(i),1)}else{var up=e.target.dataset.up,down=e.target.dataset.down,j=up!==undefined?Number(up):down!==undefined?Number(down):-1,k=up!==undefined?j-1:j+1;if(j<0||k<0||k>=data.scenes.length)return;var tmp=data.scenes[j];data.scenes[j]=data.scenes[k];data.scenes[k]=tmp}result=null;previous=null;render()});
 $("addactor").onclick=function(){if(data.actors.length>=20)return alert("上限20名です");data.actors.push({id:"X"+(data.actors.length+1),name:"出演"+(data.actors.length+1),from:"09:00",to:"18:00"});result=null;previous=null;render()};
 $("addscene").onclick=function(){if(data.scenes.length>=40)return alert("上限40件です");data.scenes.push({id:"S"+Date.now(),name:"新しいシーン",loc:"スタジオ",minutes:30,roles:""});result=null;previous=null;render()};
-$("optimize").onclick=function(){result=improve();if(result.after.score<result.before.score){previous=JSON.stringify(data.scenes);data.scenes=result.order;}redrawPlan()};
+$("optimize").onclick=function(){result=improve();if(result.after.score<result.before.score){previous=JSON.stringify(data.scenes);data.scenes=result.order;}render()};
 $("undo").onclick=function(){if(!previous)return;data.scenes=JSON.parse(previous);previous=null;result=null;render()};
 function exportFile(n,content,mime){var blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000)}
 $("save").onclick=function(){exportFile("koban-tsunagi.json",JSON.stringify(data,null,2),"application/json")};
