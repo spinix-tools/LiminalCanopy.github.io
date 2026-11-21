@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><meta name="description" content="TRPG・ボードゲームの連続失敗リスクを、厳密な確率で事前に比較するローカルWebアプリ。">
+<title>ころび予報 | KOROBI YOHOU</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+ <div class="brand"><div class="brand-mark" aria-hidden="true">⚄</div><div><div class="eyebrow">KOROBI YOHOU / RULE DESIGN LAB</div><strong>ころび予報</strong></div></div>
+ <div class="header-actions"><span class="offline-label"><span class="online-dot"></span> OFFLINE · DATA STAYS HERE</span><button id="printBtn" class="quiet-btn" type="button">⎙ 印刷</button></div>
+</header>
+<main>
+<section class="hero">
+ <div class="hero-text"><span class="hero-tag">🎲 テーブルトップゲーム・バランス調整室</span><h1>「3回も失敗した！」を<br><em>確率で先読み。</em></h1><p>単発の成功率だけでは見えない、連続失敗の起こりやすさ。判定列を入力して、サポート補正でどう変わるかを比較します。</p></div>
+ <div class="hero-stamp" aria-hidden="true"><div class="dice-icon">6</div><span>Fairness is<br>a design choice.</span></div>
+</section>
+<div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+<div class="layout">
+ <section class="left-column">
+  <section class="panel setup" aria-labelledby="setupTitle">
+   <div class="panel-heading"><div><span class="section-num">01 / SETUP</span><h2 id="setupTitle">判定ルール</h2></div><span class="subtle">同一ダイス設定を全判定に適用</span></div>
+   <label class="field full">シナリオ名 <input id="titleInput" type="text" maxlength="70" autocomplete="off"></label>
+   <div class="field-grid three">
+    <label class="field">ダイスの個数 <input id="countInput" type="number" min="1" max="6" step="1"></label>
+    <label class="field">面数 <input id="sidesInput" type="number" min="2" max="100" step="1"></label>
+    <label class="field">基本修正値 <input id="modifierInput" type="number" min="-100" max="100" step="1"></label>
+   </div>
+   <div class="field-grid three">
+    <label class="field">連続失敗の基準 <input id="streakInput" type="number" min="1" max="10" step="1"></label>
+    <label class="field">比較する追加補正 <input id="assistInput" type="number" min="0" max="12" step="1"></label>
+    <label class="field">許容リスク (%) <input id="goalInput" type="number" min="1" max="99" step="1"></label>
+   </div>
+   <p class="help">「有利」は独立した判定を2回振って高い合計値を採用。「不利」は低い方を採用。すべての判定が独立と仮定します。</p>
+  </section>
+  <section class="panel" aria-labelledby="stagesTitle">
+   <div class="panel-heading"><div><span class="section-num">02 / ENCOUNTER</span><h2 id="stagesTitle">判定の並び</h2></div><button id="addStep" class="secondary" type="button">＋ 判定を追加</button></div>
+   <p class="mini-help">上から実施順です。回数は同じ目標値での連続判定を表します。</p>
+   <div id="stepList" class="step-list"></div>
+   <div class="step-footer"><span id="stepTotal" class="subtle"></span><button id="resetBtn" class="text-button" type="button">サンプルに戻す</button></div>
+  </section>
+  <section class="panel tools" aria-labelledby="toolsTitle"><div class="panel-heading"><div><span class="section-num">04 / WORKSPACE</span><h2 id="toolsTitle">試す・保存する</h2></div></div>
+   <button id="rollBtn" class="primary" type="button">⚄ 今すぐ1回プレイ</button><div id="rollResult" class="roll-result" aria-live="polite">上のボタンで、サンプル出目を生成します。</div>
+   <div class="tool-grid"><button id="downloadCsv" class="secondary" type="button">↓ CSVレポート</button><button id="downloadJson" class="secondary" type="button">↓ 設定JSON</button><button id="importJson" class="secondary" type="button">↑ JSON読込</button><button id="clearSave" class="secondary" type="button">⌫ 端末内保存を消去</button></div>
+   <input id="fileInput" type="file" accept=".json,application/json" hidden>
+   <p class="help">変更はこの端末のブラウザ内に保存。外部への送信・アカウント作成はありません。</p>
+  </section>
+ </section>
+ <section class="right-column">
+  <section class="panel result" aria-labelledby="resultTitle">
+   <div class="panel-heading"><div><span class="section-num">03 / FORECAST</span><h2 id="resultTitle">つまずきの見通し</h2></div><span class="pill">EXACT PROBABILITY</span></div>
+   <div id="resultView"></div>
+  </section>
+  <section class="panel chart-panel" aria-labelledby="chartTitle"><div class="panel-heading"><div><span class="section-num">STEP BY STEP</span><h2 id="chartTitle">判定ごとの成功率</h2></div></div><div id="probabilityList" class="prob-list"></div></section>
+  <section class="panel chart-panel" aria-labelledby="histTitle"><div class="panel-heading"><div><span class="section-num">DISTRIBUTION</span><h2 id="histTitle">成功回数の分布</h2></div></div><div id="histogram" class="histogram" role="img" aria-label="成功回数の確率分布"></div><div class="legend"><span><i class="dot-a"></i>通常</span><span><i class="dot-b"></i>追加補正あり</span></div></section>
+ </section>
+</div>
+<section class="bottom-note"><div class="alert-symbol">!</div><div><strong>この計算はゲーム設計用の目安です。</strong><p>独立・公平なダイスと固定ルールを仮定した数学的確率です。プレイヤーの心理、ゲーム進行による修正、特殊なクリティカル／ファンブル、リロール等は含めません。連続失敗の確率が低くても個々のプレイで起こり得ます。</p></div></section>
+</main>
+<footer>© 2026 KOROBI YOHOU · No account · No network · MIT License <span>Made for the moment between “もう1回” and “なんで!?”</span></footer>
+</div>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
