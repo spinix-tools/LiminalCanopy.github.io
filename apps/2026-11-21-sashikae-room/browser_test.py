@@ -5,6 +5,8 @@ Browser localStorage is mocked; persistence on normal file:// hosts remains unve
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import json
+import os
+import tempfile
 
 ROOT = Path(__file__).parent
 checks = []
@@ -21,7 +23,8 @@ def inline_source():
     return html
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(executable_path='/usr/bin/chromium', headless=True, args=['--no-sandbox', '--disable-dev-shm-usage'])
+    browser_path = os.getenv('CHROMIUM_PATH') or ('/usr/bin/chromium' if Path('/usr/bin/chromium').is_file() else None)
+    browser = p.chromium.launch(executable_path=browser_path, headless=True, args=['--no-sandbox', '--disable-dev-shm-usage'])
     context = browser.new_context(viewport={'width':1440,'height':1000},accept_downloads=True)
     page = context.new_page()
     errors=[]; requests=[]
@@ -41,7 +44,7 @@ with sync_playwright() as p:
     check('役フィルタで絞込', '渚 担当' not in page.locator('#reportDesc').inner_text())
     with page.expect_download() as download:
         page.locator('#csvBtn').click()
-    content=Path('/mnt/data/sashikae-test-download.csv')
+    content=Path(tempfile.gettempdir())/'sashikae-test-download.csv'
     download.value.save_as(content)
     check('CSVダウンロード',content.read_text(encoding='utf-8-sig').startswith('"種別"'))
     check('CSV役別', '葵' in content.read_text(encoding='utf-8-sig'))
@@ -63,7 +66,7 @@ with sync_playwright() as p:
     check('JSON入力後比較',page.locator('#mChange').inner_text()=='1')
     with page.expect_download() as download:
         page.locator('#jsonBtn').click()
-    jpath=Path('/mnt/data/sashikae-test-project.json')
+    jpath=Path(tempfile.gettempdir())/'sashikae-test-project.json'
     download.value.save_as(jpath)
     check('JSON出力内容',json.loads(jpath.read_text())['new']=='葵：夜です')
     page.locator('#saveBtn').click()
@@ -85,4 +88,5 @@ with sync_playwright() as p:
     check('外部送信なし',len(requests)==0)
     check('JavaScript例外なし',not errors)
     print(json.dumps({'passed':len(checks),'failed':0,'checks':checks,'script_errors':errors,'requests':requests[:8]},ensure_ascii=False,indent=2))
+    content.unlink(missing_ok=True);jpath.unlink(missing_ok=True)
     mobile.close();context.close();browser.close()
