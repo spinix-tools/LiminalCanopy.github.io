@@ -1,4 +1,4 @@
-"""Browser acceptance tests for the exact four-file app, opened from file://."""
+"""Chromium acceptance tests: inline identical source; file:// is administrator-blocked."""
 import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -80,6 +80,7 @@ def run():
     ck(page.locator('.element').count()==6,'JSON読込')
     page.locator('#fileInput').set_input_files(str(cp))
     ck(page.locator('.element').count()==6,'CSV読込')
+    page.wait_for_function("document.getElementById('projectTitle').value === 'test-strings'")
     ck(page.locator('#projectTitle').input_value()=='test-strings','CSV読込はファイル名を反映')
     page.locator('#fileInput').set_input_files({'name':'broken.csv','mimeType':'text/csv','buffer':b'abc,def\n1,2'})
     ck('読込失敗' in page.locator('#toast').inner_text(),'不正CSVのエラー表示')
