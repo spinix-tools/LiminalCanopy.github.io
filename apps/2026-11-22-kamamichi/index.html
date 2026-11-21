@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>窯みち | ベーカリー焼成段取りシミュレーター</title>
+  <meta name="description" content="仕込み・発酵・焼成・冷却を見通す、小さなベーカリーのローカル段取りツール。">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar"><div class="logo"><div class="mark">km<span>•</span></div><div><strong>窯みち</strong><small>KAMAMICHI / production lab</small></div></div><div class="top-actions"><span class="local"><i></i> DEVICE ONLY</span><button id="sample" class="ghost">デモに戻す</button><button id="print" class="ghost">印刷</button></div></header>
+<main class="wrap">
+<section class="intro"><div><div class="eyebrow">BATCH PLANNING / 01 — FREE TOOL</div><h1>焼き上がりの<span>渋滞</span>を、<br>開店前にほどく。</h1><p>仕込み → 発酵 → 焼成 → 冷却。天板の重なりと発酵待ちを計算して、今日の「焼き順」を一枚に。</p></div><div class="stamp"><div>SMALL BAKERY<br>OPERATIONS</div><strong>05<span>min</span></strong><span>単位の時間割</span></div></section>
+<section class="controls"><div class="section-label"><span>01</span><div><h2>今日の設備</h2><small>生地仕込み台は1つ。オーブンは天板数で管理。</small></div></div><div class="control-fields"><label>仕込み開始 <input id="start" type="time" step="300" value="05:00"></label><label>窯の天板容量 <div class="input-suffix"><input id="oven" type="number" min="1" max="16" value="4"><span>枚</span></div></label><label>並べ方 <select id="mode"><option value="auto">2方式を比較して選択</option><option value="due">完成期限が早い順</option><option value="proof">発酵上限が近い順</option><option value="manual">入力順を優先</option></select></label><button id="recalc" class="primary">計画を再計算 <span>↗</span></button></div></section>
+<section class="editor"><div class="section-label"><span>02</span><div><h2>製品バッチ</h2><small>時間はすべて分。最低発酵から上限までは焼成開始可能な目安の窓です。</small></div></div><div id="error" class="error" role="alert" hidden></div><div class="table-scroll"><table id="edit-table"><thead><tr><th>製品</th><th>天板<br>枚数</th><th>仕込み</th><th>発酵<br>最低</th><th>発酵<br>上限</th><th>焼成</th><th>冷却</th><th>完成期限</th><th></th></tr></thead><tbody id="jobs"></tbody></table></div><div class="row-end"><span id="count">最大30バッチ</span><button id="add" class="outline">＋ バッチを追加</button></div></section>
+<section class="results" id="results"><div class="results-head"><div class="section-label"><span>03</span><div><h2>焼き上がり計画</h2><small id="strategy">自動計算中…</small></div></div><span id="status" class="status">分析中</span></div><div class="stats"><article><small>完成期限の遅れ</small><strong id="lateCount">—</strong><span id="lateText">バッチ</span></article><article><small>発酵上限の超過</small><strong id="proofCount">—</strong><span id="proofText">バッチ</span></article><article><small>窯の使用量</small><strong id="ovenTime">—</strong><span>天板×分</span></article><article><small>最終完成時刻</small><strong id="finish">—</strong><span>冷却終了まで</span></article></div><div class="split"><div><h3>工程タイムライン</h3><p>白抜きは仕込み、薄色は発酵、濃色は焼成、斜線は冷却。横にスクロールできます。</p></div><div class="legend"><span><i class="prep"></i>仕込み</span><span><i class="proof"></i>発酵</span><span><i class="bake"></i>焼成</span><span><i class="cool"></i>冷却</span></div></div><div class="timeline-scroll"><div id="timeline"></div></div><div class="lower"><div class="panel"><h3>要確認のバッチ <span id="alert-count" class="countbadge">0</span></h3><div id="alerts" class="alerts"></div></div><div class="panel decision"><h3>もしも天板を1枚増やしたら？</h3><div id="whatif" class="whatif"></div><p class="hint">※ 実際の窯の増設能力や温度帯・配列の適否は別途確認してください。</p></div></div></section>
+<section class="export"><div><h2>手元に残す</h2><p>データはこのブラウザ内で管理。アカウントも外部送信も不要です。</p><span id="saveState" class="saveState" aria-live="polite">準備完了</span></div><div class="export-actions"><button id="csv" class="outline">予定表CSV</button><button id="json" class="outline">設定JSON保存</button><label class="file-label">設定JSON読込<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="ghost danger">保存削除</button></div></section>
+<footer><span>窯みち <b>© 2026</b> — handcrafted planning tools</span><span>計画補助のみ。食品衛生、温度、品質、スタッフ稼働や実機の運転安全を保証しません。</span></footer>
+</main>
+<script src="./engine.js"></script><script src="./app.js"></script>
+</body></html>
