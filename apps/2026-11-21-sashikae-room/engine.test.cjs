@@ -1,0 +1,46 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const E=require('./engine.js');
+const a='# 第一場\n葵：開演は明日です。\n渚：分かりました。\n葵：客席へどうぞ。';
+const b='# 第一場\n葵：開演は今夜です。\n渚：分かりました。\n葵：客席へどうぞ。';
+test('空稿は空差分',()=>{const r=E.compare('','');assert.deepEqual(r.counts,{change:0,add:0,delete:0});assert.equal(r.cues.length,0);});
+test('同一稿は空差分',()=>{assert.equal(E.compare(a,a).changes.length,0);});
+test('話者と日本語台詞を解析',()=>{const p=E.parse(a);assert.equal(p.scenes[0].title,'第一場');assert.equal(p.scenes[0].lines[0].speaker,'葵');assert.equal(p.scenes[0].lines[0].number,2);});
+test('ト書き解析',()=>{const p=E.parse('（入場）\n※ 明転\n山田：発言');assert.equal(p.scenes[0].lines[0].kind,'direction');assert.equal(p.scenes[0].lines[1].kind,'direction');assert.equal(p.scenes[0].lines[2].kind,'dialogue');});
+test('同一話者の改訂を検出',()=>{const r=E.compare(a,b);assert.equal(r.counts.change,1);assert.equal(r.changes[0].role,'葵');});
+test('直後の同一台詞に受け候補',()=>{const r=E.compare(a,b);assert.equal(r.cues.length,1);assert.equal(r.cues[0].role,'渚');assert.match(r.cues[0].newCue.text,/今夜/);});
+test('同役の直前台詞変更は受けにしない',()=>{const r=E.compare('葵：A\n葵：B','葵：C\n葵：B');assert.equal(r.cues.length,0);});
+test('追加行',()=>{const r=E.compare('葵：A','葵：A\n渚：B');assert.equal(r.counts.add,1);});
+test('削除行',()=>{const r=E.compare('葵：A\n渚：B','葵：A');assert.equal(r.counts.delete,1);});
+test('追加の前台詞で受け再確認',()=>{const r=E.compare('葵：A\n渚：B','葵：A\n葵：新しい一言\n渚：B');assert.equal(r.counts.add,1);assert.equal(r.cues.length,1);});
+test('削除の前台詞で受け再確認',()=>{const r=E.compare('葵：A\n葵：C\n渚：B','葵：A\n渚：B');assert.equal(r.cues.length,1);});
+test('別場面に受け台詞を持ち越さない',()=>{const r=E.compare('# A\n葵：A\n# B\n渚：B','# A\n葵：X\n# B\n渚：B');assert.equal(r.cues.length,0);});
+test('場面単位の差分',()=>{const r=E.compare('# A\n葵：A','# A\n葵：A\n# B\n渚：B');assert.equal(r.counts.add,1);});
+test('同名場面の出現順',()=>{const r=E.compare('# A\n葵：A\n# A\n葵：B','# A\n葵：A\n# A\n葵：C');assert.equal(r.counts.change,1);});
+test('違う役の台詞は改訂に誤認しない',()=>{const r=E.compare('葵：A','渚：B');assert.equal(r.counts.change,0);assert.equal(r.counts.add,1);assert.equal(r.counts.delete,1);});
+test('役別変更フィルタ',()=>{const r=E.compare('葵：A\n渚：B','葵：X\n渚：Y');assert.equal(E.filter(r,'葵').changes.length,1);assert.equal(E.filter(r,'ALL').changes.length,2);});
+test('CSVは引用符と改行をエスケープ',()=>{const r=E.compare('葵：「A」','葵：「B"」');const csv=E.buildCSV(r);assert.ok(csv.startsWith('\ufeff'));assert.ok(csv.includes('""'));assert.match(csv,/変更/);});
+test('空白の全角半角差は無視しない',()=>{assert.equal(E.compare('葵：Ａ','葵：A').counts.change,1);});
+test('CRLF入力',()=>{assert.equal(E.compare('葵：A\r\n渚：B','葵：A\n渚：B').changes.length,0);});
+test('文字数上限',()=>{assert.throws(()=>E.parse('x'.repeat(E.MAX_CHARS+1)),/9万文字/);});
+test('行数上限',()=>{assert.throws(()=>E.parse('葵：a\n'.repeat(E.MAX_LINES+1)),/600行/);});
+test('非文字列拒否',()=>{assert.throws(()=>E.parse(null),/テキスト/);});
+test('タグ文字もただの台詞',()=>{const r=E.compare('葵：a','葵：<img src=x>');assert.match(r.changes[0].now.text,/img/);});
+test('未変更の引用句は変更扱いにしない',()=>{assert.equal(E.compare('葵：？','葵：？').changes.length,0);});
+test('旧稿空で全件追加',()=>{const r=E.compare('','葵：A\n渚：B');assert.equal(r.counts.add,2);});
+test('新稿空で全件削除',()=>{const r=E.compare('葵：A\n渚：B','');assert.equal(r.counts.delete,2);});
+test('ランダムな完全一致・不変条件 180 回',()=>{
+ let state=314159;
+ const rnd=n=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state%n;};
+ for(let run=0;run<180;run++){
+   const count=5+rnd(35);
+   const lines=Array.from({length:count},(_,i)=>['葵','渚','空'][rnd(3)]+'：'+i+'話「'+rnd(100000)+'」');
+   const script='# 連続シーン\n'+lines.join('\n');
+   assert.equal(E.compare(script,script).changes.length,0);
+   const other=lines.slice();other.splice(rnd(other.length),0,'客：挿入_'+run);
+   const result=E.compare(script,'# 連続シーン\n'+other.join('\n'));
+   assert.equal(result.counts.add,1);
+   assert.equal(result.counts.delete,0);
+   assert.equal(result.counts.change,0);
+ }
+});
