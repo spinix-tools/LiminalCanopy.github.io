@@ -1,14 +1,12 @@
-"""Integration tests against Chromium using exact local files served through Playwright route interception.
-The runtime blocks file:// and loopback HTTP, hence a synthetic https origin; no remote calls.
+"""Chromium integration tests with exact JS/CSS embedded into the local HTML.
+This test environment blocks direct file:// and loopback navigation.
+Browser localStorage is mocked; persistence on normal file:// hosts remains unverified.
 """
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import json
-import mimetypes
-import traceback
 
 ROOT = Path(__file__).parent
-from html import escape
 checks = []
 def check(name, condition):
     if not condition:
