@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="露光段取り — フィルムのND・相反則不軌を踏まえた複数カットの露出時間と撮影時刻を組み立てる、オフラインの撮影段取り帳。">
+<title>露光段取り / ROKO DANDORI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><div class="brand-icon">◉</div><div><strong>露光段取り</strong><small>ROKO DANDORI · FILM EXPOSURE BLOCK</small></div></div><span class="offline-tag"><span aria-hidden="true">●</span> 完全ローカル</span></header>
+<main class="layout">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-left"><p class="eyebrow">FIELD NOTE  /  001</p><h1 id="hero-title">光を待つ時間も、<br><em>一枚の計画に。</em></h1><p class="lead">測光値・NDフィルター・フィルムの補正指数から露光を計算。ブラケットを含む撮影順と、最後の一枚が終わる時刻まで見通します。</p><p class="privacy">名前・位置情報の登録不要 ／ データ送信なし ／ シャッター制御なし</p></div>
+    <div class="hero-dial" aria-hidden="true"><span class="dial-outer"></span><span class="dial-inner"></span><span class="dial-center">1<span>↗</span>125</span><span class="dial-mark">EV / SEC</span></div>
+  </section>
+  <section class="stat-row" aria-label="計算サマリー">
+    <div class="stat"><span>総所要時間</span><strong id="totalTime">—</strong><small id="totalDetail">露光と準備を含む</small></div>
+    <div class="stat"><span>露光するコマ</span><strong id="frameCount">—</strong><small id="shotDetail">シーン・ブラケット</small></div>
+    <div class="stat"><span>最終コマ終了</span><strong id="endTime">—</strong><small id="budgetDetail">設定した撮影枠との差</small></div>
+  </section>
+  <div id="error" class="error" role="alert" hidden></div>
+  <div class="workspace">
+    <div class="edit-stack">
+      <section class="panel settings" aria-labelledby="session-title"><div class="panel-heading"><div><p class="eyebrow">01 / THE SESSION</p><h2 id="session-title">撮影枠の設定</h2></div><span class="smallcaps">TIME BUDGET</span></div>
+        <div class="settings-grid">
+          <label>開始時刻<input id="start" type="time" value="17:10"></label>
+          <label>撮影枠（分）<input id="budget" type="number" min="1" max="720" step="1" value="25"></label>
+          <label>コマ間準備（秒）<input id="gap" type="number" min="0" max="600" step="1" value="25"></label>
+        </div>
+        <p class="hint">フィルター着脱・レリーズ操作・フィルム巻き上げ等の準備は「コマ間準備」でまとめて計上します。準備時間は一定と仮定します。</p>
+      </section>
+      <section class="panel shot-panel" aria-labelledby="shots-title"><div class="panel-heading"><div><p class="eyebrow">02 / EXPOSURE NOTES</p><h2 id="shots-title">撮影シーン</h2></div><button class="ghost-btn" id="addShot" type="button">＋ シーン追加</button></div>
+      <div class="shot-list" id="shotList"></div><p class="hint">測光値はフィルター装着前のシャッター時間を秒数または <code>1/125</code> として入力。指数1.00は補正なし。指数はフィルムメーカー資料を確認して自分で指定してください。</p></section>
+      <section class="panel" aria-labelledby="data-title"><div class="panel-heading"><div><p class="eyebrow">03 / KEEP YOUR NOTES</p><h2 id="data-title">計画の保存・出力</h2></div></div>
+      <div class="tool-row"><button class="solid-btn" id="csvBtn" type="button">CSVを保存</button><button class="ghost-btn" id="jsonBtn" type="button">JSON書き出し</button><button class="ghost-btn" id="importBtn" type="button">JSON読み込み</button><button class="ghost-btn" id="saveBtn" type="button">端末に保存</button><button class="ghost-btn" id="loadBtn" type="button">端末から復元</button><button class="ghost-btn" id="printBtn" type="button">印刷</button></div>
+      <input id="jsonFile" type="file" accept="application/json,.json" hidden><p class="hint" id="status">データはブラウザ内で計算されます。端末保存とファイル保存は押したときだけ実行します。</p></section>
+    </div>
+    <div class="result-stack">
+      <section class="panel schedule-panel" aria-labelledby="timeline-title"><div class="panel-heading"><div><p class="eyebrow">LIVE / FIELD TIMELINE</p><h2 id="timeline-title">撮影タイムライン</h2></div><span class="smallcaps" id="fitsTag">計算待ち</span></div>
+        <div id="timeline" class="timeline" role="img" aria-label="露光時間の比率を表す横棒グラフ"></div><div class="legend"><span><i class="legend-exposure"></i> シャッター開</span><span><i class="legend-gap"></i> コマ間準備</span></div>
+        <div class="frames-header"><h3>コマごとの撮影票</h3><span id="framesSummary"></span></div><div class="frames" id="frames"></div>
+      </section>
+      <section class="panel timer-panel" aria-labelledby="timer-title"><div class="panel-heading"><div><p class="eyebrow">ON LOCATION / MANUAL TIMER</p><h2 id="timer-title">露光カウントダウン</h2></div><span class="smallcaps">NO CAMERA CONTROL</span></div>
+        <label class="timer-select-label">タイマー対象コマ<select id="timerFrame"></select></label><div class="timer-readout"><span id="timerStatus">READY</span><strong id="timerValue" aria-live="off">00:00</strong><div class="timer-track"><div id="timerProgress"></div></div></div>
+        <div class="timer-buttons"><button id="timerStart" class="solid-btn" type="button">開始</button><button id="timerPause" class="ghost-btn" type="button">一時停止</button><button id="timerReset" class="ghost-btn" type="button">リセット</button></div>
+        <p class="hint">タイマーは目安です。バックグラウンドでの通知・シャッター開閉は行いません。実際の露光は手元の機材で管理してください。</p>
+      </section>
+    </div>
+  </div>
+  <section class="caution"><strong>計算上の前提</strong><p>計算順は「測光時間 × ND倍率 × EV補正 → 1秒を超える場合に t<sup>p</sup>」。pはユーザー指定の試算指数で、実フィルムの補正曲線を保証するものではありません。NDの実透過率、撮影環境による露出変化、相反則不軌に伴う色ずれ、長時間露光時の実機性能は別途確認してください。</p></section>
+</main>
+<footer>© 2026 ROKO DANDORI · OFFLINE FIRST · MIT LICENSE <span>FILM / LIGHT / TIME</span></footer>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
