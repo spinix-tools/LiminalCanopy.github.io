@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light"><title>字幕すきま | 日本語字幕チェック</title>
+<style>
+:root{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;color:#163530;background:#f4f6f2}
+*{box-sizing:border-box}body{margin:0}header{padding:26px max(18px,calc((100vw - 1160px)/2));background:#103e3b;color:#f5faf6}
+h1{font-size:clamp(27px,3vw,38px);margin:4px 0 7px;letter-spacing:.045em}h2{font-size:18px;margin:0 0 14px}
+.kicker{text-transform:uppercase;font-size:11px;letter-spacing:.2em;color:#b6e4d4}header p{margin:6px 0;line-height:1.6;color:#dceae4}
+main{max-width:1160px;margin:22px auto 65px;padding:0 16px;display:grid;grid-template-columns:360px minmax(0,1fr);align-items:start;gap:19px}
+.panel{background:#fff;border:1px solid #dce5df;border-radius:16px;padding:20px;box-shadow:0 5px 26px #1938300c}
+.controls{display:grid;gap:13px}label{display:block;font-size:12px;font-weight:750;color:#36544a;margin:0 0 5px}
+textarea,input,select{font:inherit;border:1px solid #cadbd4;border-radius:9px;padding:9px 10px;width:100%;background:#fcfefc;color:#193c34}
+textarea{resize:vertical;min-height:205px;line-height:1.55;font-size:13px}input:focus,textarea:focus{outline:2px solid #0b8f78}
+.rules{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}button{border:0;border-radius:9px;padding:10px 14px;font:inherit;font-weight:750;cursor:pointer;background:#e6f1ec;color:#105446}
+button.primary{background:#086a58;color:#fff}button:hover{filter:brightness(.96)}button:disabled{cursor:not-allowed;opacity:.55}
+.buttonrow{display:flex;flex-wrap:wrap;gap:7px}.buttonrow button{font-size:12px;padding:9px 11px}
+.small{font-size:12px;line-height:1.55;color:#65776d}.status{padding:11px;background:#eaf5ef;border-radius:9px;font-size:12px;min-height:37px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}.stat{background:#eaf2ec;padding:12px;border-radius:10px}.stat strong{display:block;font-size:25px}.stat span{font-size:11px;color:#4e6b61}
+.cue{padding:16px 0;border-top:1px solid #e6ece7}.cuehead{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.num{font-size:12px;font-weight:800;color:#43645c}.flags{display:flex;gap:4px;flex-wrap:wrap}
+.flag{font-size:10px;font-weight:750;background:#fae8df;color:#953a1c;padding:4px 7px;border-radius:999px}
+.ok{background:#e8f4ec;color:#16694e}.meta{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#527067;padding:5px 0 9px}
+.timing{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cue textarea{min-height:75px;font-size:14px;margin:8px 0}
+.chip{font-size:11px;color:#487066;background:#ecf5f1;padding:5px 8px;border-radius:7px;display:inline-block;margin:5px 5px 5px 0}
+.hidden{display:none!important}.muted{color:#66776e}.footer-note{font-size:12px;color:#4f6960;line-height:1.5;margin-top:12px}
+@media(max-width:870px){main{grid-template-columns:1fr}header{padding:26px 20px}.rules{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:500px){.rules{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<header><div class="kicker">LOCAL SUBTITLE QUALITY CONTROL</div><h1>字幕すきま。</h1><p>日本語の字幕を、公開する前に。読速・表示時間・改行・重なりを、その場で点検。</p><p>原稿は端末内のみ・登録不要・外部通信なし</p></header>
+<main>
+<section class="panel controls">
+<h2>01 / 字幕を読み込む</h2>
+<div><label for="file">SRT / VTT ファイル</label><input type="file" id="file" accept=".srt,.vtt,text/plain"></div>
+<div><label for="source">またはテキスト貼り付け</label><textarea id="source" spellcheck="false" placeholder="1&#10;00:00:01,000 --> 00:00:03,000&#10;字幕本文"></textarea></div>
+<div><button id="parse" class="primary" style="width:100%">読み込んで診断する</button></div>
+<h2>02 / 基準を調整</h2>
+<div class="rules">
+<div><label>最大 全角/秒</label><input id="cps" type="number" value="4" min=".1" max="40" step=".5"></div>
+<div><label>最大 全角/行</label><input id="chars" type="number" value="13" min="1" max="100" step="1"></div>
+<div><label>最大行数</label><input id="lines" type="number" value="2" min="1" max="8" step="1"></div>
+<div><label>最短表示 秒</label><input id="min" type="number" value=".5" min=".1" max="30" step=".1"></div>
+<div><label>最長表示 秒</label><input id="max" type="number" value="7" min=".5" max="60" step=".5"></div>
+<div><label>最短間隔 ms</label><input id="gap" type="number" value="83" min="0" max="2000" step="10"></div>
+</div>
+<div class="small">初期値は日本語横書きの参考値。納品先に合わせて変更してください。音声同期やNetflix納品仕様を保証するものではありません。</div>
+<h2>03 / 安全な修正・出力</h2>
+<div class="buttonrow"><button id="extend">空き時間へ延長</button><button id="reflow">安全に改行候補</button><button id="undo">元に戻す</button></div>
+<div class="buttonrow"><button id="srt">SRT出力</button><button id="vtt">VTT出力</button><button id="csv">診断CSV</button></div>
+<div id="status" class="status" role="status">サンプル字幕を読み込んでいます。</div>
+<div class="small">文字幅は全角換算。ASCII・半角カナは原則0.5。原稿本文はネットワーク送信・ブラウザ保存をしません。</div>
+</section>
+<section class="panel">
+<h2>字幕ごとの問題を確認</h2>
+<div class="stats"><div class="stat"><strong id="total">0</strong><span>字幕</span></div><div class="stat"><strong id="issues">0</strong><span>要確認</span></div><div class="stat"><strong id="fast">0</strong><span>読速超過</span></div></div>
+<div class="buttonrow" style="margin:0 0 15px"><button id="allFilter" class="primary">すべて</button><button id="badFilter">問題だけ</button><button id="sort">時刻順</button></div>
+<div id="cues"><div class="small">字幕を読み込んでください。</div></div>
+<div class="footer-note">手動編集後は「保存して再診断」を押してください。空き時間への延長は開始位置を動かしません。余白が不足する字幕は変更せずに残します。</div>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const sample="1\n00:00:01,000 --> 00:00:02,000\nおはようございます。今日は町の歴史についてお話しします。\n\n2\n00:00:02,200 --> 00:00:04,300\nこの場所には昔から小さなお店がありました。\n\n3\n00:00:05,000 --> 00:00:06,000\nみなさん、こちらをご覧ください。\n\n4\n00:00:08,000 --> 00:00:11,000\nご来場ありがとうございました。";
+let cues=[],history=null,filter="all",notice="";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toMs(s){let m=String(s).trim().match(/^(?:(\d{1,3}):)?(\d{1,2}):(\d{2})[,.](\d{3})$/);if(!m)return NaN;let h=+(m[1]||0),mi=+m[2],sec=+m[3];if(mi>59||sec>59)return NaN;return ((h*60+mi)*60+sec)*1000 + +m[4];}
+function time(n,dot=false){n=Math.max(0,Math.round(n));let h=Math.floor(n/3600000),m=Math.floor(n/60000)%60,s=Math.floor(n/1000)%60,ms=n%1000;return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":")+(dot?".":",")+String(ms).padStart(3,"0");}
+function reading(t){return Array.from(String(t).replace(/<[^>]*>/g,"").replace(/[\r\n]/g,"")).reduce((a,c)=>a+((c.codePointAt(0)<=127||c.codePointAt(0)>=65377&&c.codePointAt(0)<=65439)?.5:1),0);}
+function width(t){return Math.round(reading(t)*10)/10;}
+function rules(){const r={cps:+$("cps").value,chars:+$("chars").value,lines:+$("lines").value,min:+$("min").value,max:+$("max").value,gap:+$("gap").value};if(!Number.isFinite(r.cps)||r.cps<=0||r.chars<1||r.lines<1||r.min<=0||r.max<r.min||r.gap<0)throw Error("基準値が不正です");return r;}
+function sortCues(){cues.sort((a,b)=>a.start-b.start||a.end-b.end);}
+function parse(text){
+ if(text.length>1e6)throw Error("ファイルは1MBまでです");
+ let raw=text.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").trim(),vtt=/^WEBVTT(?:\s|$)/.test(raw),out=[],bad=0;
+ for(const block of raw.split(/\n\s*\n/)){
+  let lines=block.split("\n");if(!lines.length||/^WEBVTT/.test(lines[0])||/^(NOTE|STYLE|REGION)(\s|$)/.test(lines[0]))continue;
+  let i=lines.findIndex(l=>l.includes("-->"));if(i<0){bad++;continue;}
+  let m=lines[i].match(/^\s*(\d{1,3}:\d{2}:\d{2}[,.]\d{3}|\d{1,2}:\d{2}[,.]\d{3})\s*-->\s*(\d{1,3}:\d{2}:\d{2}[,.]\d{3}|\d{1,2}:\d{2}[,.]\d{3})/);
+  if(!m){bad++;continue;}let start=toMs(m[1]),end=toMs(m[2]),text=lines.slice(i+1).join("\n");
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start){bad++;continue;}out.push({start,end,text});
+  if(out.length>800)throw Error("字幕は800件までです");
+ }
+ if(!out.length)throw Error("有効なSRT/VTT字幕が見つかりません");
+ out.sort((a,b)=>a.start-b.start);
+ return {out,bad,vtt};
+}
+function diagnostics(){
+ let r=rules();return cues.map((c,i)=>{
+ let dur=(c.end-c.start)/1000,rate=width(c.text)/Math.max(dur,.001),parts=c.text.split("\n"),flags=[];
+ if(rate>r.cps+1e-6)flags.push("読速超過");
+ if(parts.some(p=>width(p)>r.chars))flags.push("行が長い");
+ if(parts.length>r.lines)flags.push("行数超過");
+ if(dur<r.min)flags.push("短すぎ");
+ if(dur>r.max)flags.push("長すぎ");
+ if(i>0&&c.start<cues[i-1].end)flags.push("時間重複");
+ else if(i>0&&c.start-cues[i-1].end<r.gap)flags.push("間隔不足");
+ return {dur,rate,flags,needed:Math.max(0,width(c.text)/r.cps-dur),available:i<cues.length-1?Math.max(0,(cues[i+1].start-r.gap-c.end)/1000):Infinity};
+ });}
+function setStatus(s){$("status").textContent=s;}
+function snapshot(){history=JSON.stringify(cues);}
+function render(){
+ try{
+  sortCues();let d=diagnostics();$("total").textContent=cues.length;$("issues").textContent=d.filter(x=>x.flags.length).length;$("fast").textContent=d.filter(x=>x.flags.includes("読速超過")).length;
+  $("allFilter").classList.toggle("primary",filter==="all");$("badFilter").classList.toggle("primary",filter==="bad");
+  $("cues").innerHTML=cues.map((c,i)=>{
+  let q=d[i];if(filter==="bad"&&!q.flags.length)return "";
+  let tags=q.flags.length?q.flags.map(f=>'<span class="flag">'+esc(f)+'</span>').join(""):'<span class="flag ok">問題なし</span>';
+  let avail=Number.isFinite(q.available)?q.available.toFixed(2)+"秒":"最終字幕";
+  return '<article class="cue"><div class="cuehead"><span class="num">#'+(i+1)+'</span><div class="flags">'+tags+'</div></div>'+
+   '<div class="meta">'+time(c.start)+' → '+time(c.end)+'</div>'+
+   '<div><span class="chip">'+q.rate.toFixed(2)+' 全角/秒</span><span class="chip">不足 '+q.needed.toFixed(2)+'秒</span><span class="chip">次までの余白 '+avail+'</span></div>'+
+   '<div class="timing"><div><label>開始</label><input class="start" data-i="'+i+'" value="'+time(c.start)+'"></div><div><label>終了</label><input class="end" data-i="'+i+'" value="'+time(c.end)+'"></div></div>'+
+   '<textarea class="body" data-i="'+i+'" aria-label="字幕本文 #'+(i+1)+'">'+esc(c.text)+'</textarea>'+
+   '<button class="save" data-i="'+i+'">保存して再診断</button></article>';
+  }).join("")||'<div class="small">該当する字幕はありません。</div>';
+ }catch(e){setStatus("確認: "+e.message);}
+}
+function download(name,type,data){let url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);}
+function output(vtt){return (vtt?"WEBVTT\n\n":"")+cues.map((c,i)=>(vtt?"":(i+1)+"\n")+time(c.start,vtt)+" --> "+time(c.end,vtt)+"\n"+c.text).join("\n\n")+"\n";}
+function csvCell(s){return '"'+String(s).replace(/"/g,'""')+'"';}
+function exportCsv(){let d=diagnostics(),rows=[["番号","開始","終了","表示秒数","全角/秒","不足秒数","要確認","本文"]];cues.forEach((c,i)=>rows.push([i+1,time(c.start),time(c.end),d[i].dur.toFixed(2),d[i].rate.toFixed(2),d[i].needed.toFixed(2),d[i].flags.join(" / "),c.text]));download("jimaku-audit.csv","text/csv;charset=utf-8","\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n"));}
+function extend(){
+ let r=rules(),changed=0;snapshot();
+ cues.forEach((c,i)=>{let required=Math.max(r.min,width(c.text)/r.cps)*1000;
+ let limit=Math.min(c.start+r.max*1000,i<cues.length-1?cues[i+1].start-r.gap:Infinity);
+ let target=c.start+Math.ceil(required);if(target>c.end&&target<=limit){c.end=target;changed++;}});
+ render();setStatus(changed+"件を余白の範囲で延長しました。延長できない字幕はそのままです。");
+}
+function reflow(){
+ let r=rules(),changed=0;snapshot();
+ for(const c of cues){
+ if(c.text.includes("\n")||c.text.includes("<"))continue;
+ let s=Array.from(c.text),full=width(c.text);
+ if(full<=r.chars||full>2*r.chars||r.lines<2)continue;
+ let best=-1,bestScore=Infinity;
+ for(let i=1;i<s.length;i++){
+ let a=s.slice(0,i).join(""),b=s.slice(i).join("");
+ if(width(a)>r.chars||width(b)>r.chars)continue;
+ if(/^[、。，．！？!?）)\]」』]/.test(b)||/[（(\[「『]$/.test(a))continue;
+ let score=Math.abs(width(a)-width(b));if(score<bestScore){best=i;bestScore=score;}
+ }
+ if(best>0){c.text=s.slice(0,best).join("")+"\n"+s.slice(best).join("");changed++;}
+ }
+ render();setStatus(changed+"件の改行位置を変更しました。本文の文字は削除していません。");
+}
+$("source").value=sample;
+$("parse").onclick=()=>{try{let p=parse($("source").value);snapshot();cues=p.out;filter="all";render();setStatus(cues.length+"件を読み込みました。解析できないブロック "+p.bad+"件。")}catch(e){setStatus("読み込み失敗: "+e.message)}};
+$("file").onchange=async e=>{let f=e.target.files[0];if(!f)return;if(f.size>1e6){setStatus("1MB以下のファイルを選択してください");return;}try{$("source").value=await f.text();$("parse").click();}catch(e){setStatus("ファイルを読めません: "+e.message)}};
+for(let key of ["cps","chars","lines","min","max","gap"])$(key).onchange=render;
+$("allFilter").onclick=()=>{filter="all";render();};$("badFilter").onclick=()=>{filter="bad";render();};
+$("sort").onclick=()=>{sortCues();render();setStatus("時刻順で表示しています。");};
+$("cues").onclick=e=>{let btn=e.target.closest(".save");if(!btn)return;let i=+btn.dataset.i;try{
+ let start=toMs(document.querySelector('.start[data-i="'+i+'"]').value),end=toMs(document.querySelector('.end[data-i="'+i+'"]').value);
+ if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start)throw Error("開始・終了時刻が不正です");
+ let body=document.querySelector('.body[data-i="'+i+'"]').value;snapshot();cues[i]={start,end,text:body};render();setStatus("#"+(i+1)+"を保存しました。");}catch(err){setStatus("編集失敗: "+err.message);}};
+$("extend").onclick=()=>{try{extend();}catch(e){setStatus("延長失敗: "+e.message)}};
+$("reflow").onclick=()=>{try{reflow();}catch(e){setStatus("改行失敗: "+e.message)}};
+$("undo").onclick=()=>{if(!history){setStatus("戻せる操作はありません");return;}let cur=JSON.stringify(cues);cues=JSON.parse(history);history=cur;render();setStatus("直前の変更を復元しました。");};
+$("srt").onclick=()=>download("jimaku-output.srt","text/plain;charset=utf-8","\uFEFF"+output(false));
+$("vtt").onclick=()=>download("jimaku-output.vtt","text/vtt;charset=utf-8",output(true));
+$("csv").onclick=()=>{try{exportCsv();}catch(e){setStatus("CSV失敗: "+e.message)}};
+$("parse").click();
+})();
+</script>
+</body></html>
