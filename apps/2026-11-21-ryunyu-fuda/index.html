@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102129">
+<title>流入札｜キャンペーンURLの配信面・重複チェック</title>
+<meta name="description" content="複数の配信面のUTM付きURLを一括生成し、集計上の衝突を診断する。登録・送信不要のローカルWebアプリ。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="mast-inner">
+    <div class="brand"><div class="brand-symbol" aria-hidden="true">↗</div><div><span class="eyebrow inverse">CAMPAIGN LINK WORKBENCH</span><h1>流入札 <span>RYUNYU FUDA</span></h1></div></div>
+    <div class="head-actions"><span class="privacy">● 端末内で完結</span><button class="button ghost" id="resetBtn" type="button">サンプルに戻す</button></div>
+  </div>
+  <div class="intro mast-inner"><div><span class="eyebrow inverse">01 / BUILD &amp; AUDIT</span><h2>配ったリンクが、<br><em>同じ数字に見えていないか。</em></h2><p>チラシ・SNS・メールの計測URLをまとめて生成。配信面の違いが分析レポートに残るか、公開前に点検できます。</p></div><div class="hero-stamp"><span>CHECK POINT</span><strong>source<br>medium<br>campaign</strong><small>+ content / term</small></div></div>
+</header>
+<main class="layout">
+  <section class="main-column" aria-label="キャンペーンと配信面の設定">
+    <div class="section-heading"><span class="eyebrow">01 / CAMPAIGN</span><h2>キャンペーンの共通設定</h2><p>作成するすべてのURLに適用します。入力したURLにはアクセスしません。</p></div>
+    <div class="panel config-panel"><div class="form-grid"><label>キャンペーンID <small>utm_campaign</small><input id="campaign" maxlength="200" spellcheck="false" placeholder="winter_market_2026" autocomplete="off"></label><label>共通のリンク先URL <small>http(s)</small><input id="defaultUrl" maxlength="4000" spellcheck="false" placeholder="https://example.org/event" autocomplete="off"></label></div><p class="helper">すでに付いているUTMだけを新しい値に置換し、通常のクエリと <code>#アンカー</code> は残します。</p></div>
+    <div class="section-heading shift-heading"><div><span class="eyebrow">02 / PLACEMENTS</span><h2>配信面を編集</h2><p>同じ配信元でも story / profile などの配置差を <code>utm_content</code> に残せます。</p></div><button class="button primary" id="addBtn" type="button">＋ 配信面を追加</button></div>
+    <div class="placements" id="placements"></div>
+    <details class="panel bulk-panel"><summary>タブ区切りで配信面を一括追加 <span aria-hidden="true">＋</span></summary><div class="bulk-body"><p>1行ずつ「配信面名・source・medium・content・任意の個別URL・任意のterm」の順番でタブ区切り。最大80件です。</p><textarea id="bulkInput" rows="4" spellcheck="false" placeholder="駅前チラシ&#9;flyer&#9;qr&#9;station_a&#10;SNS告知&#9;instagram&#9;social&#9;story_a"></textarea><div class="right"><button type="button" class="button secondary" id="bulkBtn">行を追加</button></div></div></details>
+  </section>
+  <aside class="result-column" aria-label="生成したURLの診断結果">
+    <div class="section-heading"><span class="eyebrow">03 / AUDIT</span><h2>診断レポート</h2><p>変更すると即時に再計算します。下のURLをそのままコピーできます。</p></div>
+    <div class="panel dashboard"><div class="stat-row"><div><strong id="countTotal">—</strong><span>配信面</span></div><div><strong id="countOk">—</strong><span>指摘なし</span></div><div><strong id="countWarn">—</strong><span>要確認</span></div><div><strong id="countError">—</strong><span>要修正</span></div></div><div class="meter" id="meter" role="img" aria-label="診断結果の内訳"></div><p id="auditSummary" class="small-message" aria-live="polite"></p></div>
+    <div class="panel collision-panel"><div class="panel-mini-title">REPORT COLLISION <span>基本レポートの集約</span></div><div id="collisions"></div><p class="fine-print">集約は必ずしも誤りではありません。Google Analytics等の一般的な source / medium / campaign 切り口に content の違いが表示されない場合の注意です。実際の集計仕様は計測環境で確認してください。</p></div>
+    <div class="result-tools"><span class="eyebrow">GENERATED LINKS</span><label class="filter-label">表示<select id="filter"><option value="all">すべて</option><option value="error">要修正</option><option value="warning">要確認</option><option value="ok">指摘なし</option></select></label></div><div id="results" class="result-list"></div>
+    <div class="panel export-panel"><div class="panel-mini-title">HANDOVER <span>書き出し・引継ぎ</span></div><div class="button-grid"><button type="button" class="button primary" id="csvBtn">↓ URL台帳 CSV</button><button type="button" class="button secondary" id="jsonBtn">↓ 設定 JSON</button><button type="button" class="button secondary" id="loadBtn">↑ JSON読込</button><button type="button" class="button secondary" id="printBtn">印刷</button></div><div class="button-grid minor"><button type="button" class="text-button" id="saveBtn">端末内に保存</button><button type="button" class="text-button" id="clearBtn">端末保存を削除</button></div><input type="file" id="jsonFile" accept="application/json,.json" hidden><p class="fine-print">サーバーへの送信・短縮URL生成・外部解析は行いません。端末保存は使用中のブラウザだけに保存します。公開・共有するCSV/JSONに機密URLを含めないでください。</p></div>
+  </aside>
+</main>
+<footer><strong>流入札</strong><span>Make each placement count.</span><span>ローカルMVP / バージョン 0.1 / 2026.11.21</span></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
