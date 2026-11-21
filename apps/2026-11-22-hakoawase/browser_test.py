@@ -1,0 +1,100 @@
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import json, re, tempfile, traceback
+
+HERE=Path(__file__).resolve().parent
+# The administrator blocks file:// and localhost navigations in Chromium.
+# Render the exact source files by inlining the linked CSS / JS and simulate localStorage.
+source=(HERE/'index.html').read_text(encoding='utf-8')
+source=source.replace('<link rel="stylesheet" href="style.css">','<style>'+ (HERE/'style.css').read_text(encoding='utf-8')+'</style>')
+source=source.replace('<script defer src="engine.js"></script>','').replace('<script defer src="app.js"></script>','')
+mock_store='''<script>window.__store={};Object.defineProperty(window,'localStorage',{value:{getItem(k){return window.__store[k]??null},setItem(k,v){window.__store[k]=String(v)},removeItem(k){delete window.__store[k]},clear(){window.__store={}}}});</script>'''
+source=source.replace('</body>',mock_store+'<script>'+ (HERE/'engine.js').read_text(encoding='utf-8')+'</script><script>'+ (HERE/'app.js').read_text(encoding='utf-8')+'</script></body>')
+count=0
+
+def check(condition, description):
+    global count
+    assert condition, description
+    count+=1
+    print(f'PASS {count:02} {description}')
+
+with sync_playwright() as p:
+    browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-dev-shm-usage','--allow-file-access-from-files'])
+    context=browser.new_context(viewport={'width':1440,'height':1050},device_scale_factor=1,accept_downloads=True)
+    page=context.new_page()
+    problems=[];remote=[]
+    page.on('pageerror',lambda error: problems.append(str(error)))
+    page.on('request',lambda req: remote.append(req.url) if req.url.startswith(('http:','https:')) else None)
+    page.set_content(source,wait_until='load',timeout=20000)
+    page.wait_for_timeout(450)
+    check(page.title().startswith('箱あわせ'),'HTML・CSS・JSを同一DOMへ展開して起動（直接アクセスは環境で遮断）')
+    check(page.locator('[data-kind="items"]').count()==3,'商品3種類を編集できる')
+    check(page.locator('[data-kind="boxes"]').count()==3,'箱3種類を編集できる')
+    check(page.locator('.compare-card').count()==3,'3種の段ボールを比較できる')
+    check(page.locator('.status.ok').count()==2,'デモで適合する箱2種を検出')
+    check(page.locator('#chosenTitle').inner_text().startswith('レギュラー'),'最安の適合箱を自動選択')
+    check(page.locator('#drawing svg polygon').count()>0,'立体模式図をレンダリング')
+    check(page.locator('#packingSteps li').count()==5,'詰める順番を5件表示')
+    check(page.locator('#stepRange').input_value()=='5','初期表示は全て配置')
+    page.screenshot(path=str(HERE/'desktop.png'),full_page=True)
+    page.locator('#stepRange').fill('2')
+    check(page.locator('#stepCount').inner_text()=='2 / 5','スライダーで手順を切替')
+    page.locator('#nextStep').click()
+    check(page.locator('#stepCount').inner_text()=='3 / 5','次へボタンで手順を進める')
+    page.locator('#prevStep').click()
+    check(page.locator('#stepCount').inner_text()=='2 / 5','前へボタンで手順を戻す')
+    page.locator('.compare-card').last.click()
+    check('スリム' in page.locator('#chosenTitle').inner_text(),'不適合の箱を選択できる')
+    check('未配置' in page.locator('#packingSteps').inner_text(),'未配置商品を案内')
+    page.locator('#addItem').click()
+    check(page.locator('[data-kind="items"]').count()==4,'商品を追加できる')
+    page.locator('[data-kind="items"]').last.locator('[data-field="name"]').fill('テスト品')
+    page.locator('[data-kind="items"]').last.locator('[data-field="w"]').fill('200')
+    page.locator('[data-kind="items"]').last.locator('[data-field="d"]').fill('200')
+    page.locator('[data-kind="items"]').last.locator('[data-field="h"]').fill('200')
+    page.locator('#calculate').click()
+    check('なし' in page.locator('.summary').inner_text(),'入る箱がないケースを判定')
+    check(page.locator('.status.ok').count()==0,'適合なしを適合と誤認しない')
+    page.locator('[data-kind="items"]').last.locator('[data-action="delete"]').click()
+    page.locator('#calculate').click()
+    check(page.locator('.status.ok').count()==2,'商品削除後に結果を再計算')
+    page.locator('#padding').fill('3')
+    page.locator('#calculate').click()
+    check('3.0 cm'==page.locator('#paddingOut').inner_text(),'緩衝余白を変更できる')
+    page.locator('#padding').fill('0.5')
+    page.locator('#calculate').click()
+    page.locator('#addBox').click()
+    check(page.locator('[data-kind="boxes"]').count()==4,'箱の候補を追加できる')
+    page.locator('[data-kind="boxes"]').last.locator('[data-action="delete"]').click()
+    check(page.locator('[data-kind="boxes"]').count()==3,'箱候補を削除できる')
+    page.locator('#helpBtn').click()
+    check(page.locator('#helpDialog').evaluate('(x)=>x.open'),'ヘルプダイアログが開く')
+    page.locator('#closeHelp2').click()
+    check(not page.locator('#helpDialog').evaluate('(x)=>x.open'),'ヘルプダイアログを閉じる')
+    page.locator('#save').click()
+    check('hakoawase-mvp-v1' in page.evaluate('JSON.stringify(window.__store)'),'設定がlocalStorageへ保存される')
+    with page.expect_download() as d:
+        page.locator('#exportJson').click()
+    path=d.value.path()
+    candidate=json.loads(Path(path).read_text())
+    check(candidate['padding']==0.5,'JSONをダウンロードできる')
+    with page.expect_download() as d:
+        page.locator('#exportCsv').click()
+    csv=Path(d.value.path()).read_text(encoding='utf-8-sig')
+    check('箱名' in csv and 'マグカップ箱' in csv,'CSVに配置と日本語商品名が含まれる')
+    page.locator('[data-kind="items"]').first.locator('[data-field="name"]').fill('編集した名称')
+    check('未反映' in page.locator('#stale').inner_text(),'変更後に未反映警告を表示')
+    page.locator('#importJson').set_input_files({'name':'restore.json','mimeType':'application/json','buffer':json.dumps(candidate,ensure_ascii=False).encode()})
+    check(page.locator('[data-kind="items"]').first.locator('[data-field="name"]').input_value()=='マグカップ箱','JSONから設定を復元できる')
+    page.set_content(source,wait_until='load')
+    check(page.locator('.compare-card').count()==3,'再読込後も初期化・再計算が動く')
+    check(len(remote)==0,'外部HTTPリクエストなし')
+    check(len(problems)==0,f'JavaScript例外なし {problems}')
+    context2=browser.new_context(viewport={'width':390,'height':844},device_scale_factor=1)
+    mobile=context2.new_page();mobile.set_content(source,wait_until='load')
+    mobile.wait_for_timeout(250)
+    check(mobile.locator('.compare-card').count()==3,'モバイル幅でも候補カードを表示')
+    check(mobile.evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),'モバイル横方向のはみ出しなし')
+    mobile.screenshot(path=str(HERE/'mobile.png'),full_page=True)
+    browser.close()
+    print(f'ALL {count} browser checks passed')
