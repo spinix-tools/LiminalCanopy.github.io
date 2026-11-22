@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>輪話図 WAWAZU | 班替えの接点を見える化</title>
+<style>
+:root{--fg:#183631;--ink:#0c5b4e;--bg:#f3f6f1;--line:#dae4dc;--soft:#e8f5ec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.65 system-ui,-apple-system,sans-serif}
+header{background:#173d38;color:#fff;padding:24px max(16px,calc((100vw - 1140px)/2))}header h1{margin:0;font-size:32px}header p{opacity:.85;margin:3px 0}
+main{max-width:1170px;margin:23px auto;display:grid;grid-template-columns:340px 1fr;gap:18px;padding:0 15px}
+section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 8px 28px #20392f08}
+h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:15px 0 7px}label{display:block;font-size:12px;font-weight:750;margin-top:12px;margin-bottom:5px}
+textarea,input{width:100%;border:1px solid #bbcfc2;border-radius:8px;padding:10px;color:var(--fg);font:inherit;background:#fcfefd}
+textarea{height:205px;font:13px/1.7 monospace;resize:vertical}textarea:focus,input:focus{outline:3px solid #c0dfcf}
+.twos{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{border-radius:8px;border:1px solid #bdd0c2;background:white;color:var(--fg);padding:10px;cursor:pointer;font-weight:750}
+button:hover{background:#ecf6ee}button:disabled{opacity:.42;cursor:not-allowed}
+.primary{width:100%;background:var(--ink);color:#fff;border:0;margin:14px 0 8px}.primary:hover{background:#08483d}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{font-size:12px}
+.small{font-size:11px;color:#658078}#err{background:#fff1eb;border:1px solid #efbfb7;padding:9px;border-radius:8px;color:#984d43;display:none;margin-top:8px}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.num{padding:14px;background:white;border-radius:12px;border:1px solid var(--line)}.num strong{display:block;font-size:27px}.num span{font-size:11px;color:#5c766b}
+#summary{background:#edf7ee;border:1px solid #c9e3d0;border-radius:9px;padding:11px;margin:12px 0}
+#groups{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.team{border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:95px}.team strong{display:block;background:var(--soft);padding:6px 10px}.people{display:flex;flex-wrap:wrap;padding:10px;gap:6px}.chip{background:#e3f2e9;padding:3px 8px;border-radius:5px;font:700 12px monospace}
+#people{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px}#people>div{display:flex;align-items:center;gap:10px;border-bottom:1px solid #ecf2ed;padding:7px 0}#people b{min-width:37px;font:700 12px monospace}
+.bar{flex:1;height:8px;border-radius:30px;background:#e4ede6;overflow:hidden}.bar>i{display:block;height:100%;background:#5eaf91}
+#history{font-size:12px;color:#537168}#repeatlist{font-size:12px;max-height:180px;overflow:auto}
+footer{max-width:1170px;margin:24px auto;padding:0 15px 30px;font-size:11px;color:#617a70}
+@media(max-width:800px){main{grid-template-columns:1fr}.nums{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){#groups,#people{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{header{background:#fff;color:#000}aside,.actions,footer{display:none!important}main{display:block}section{box-shadow:none}}
+</style></head>
+<body><header><h1>輪話図 <small style="font-size:14px">WAWAZU</small></h1><p>前回と同じ組を減らし、まだ同じ班になっていない相手との接点を広げる。</p></header>
+<main><aside><section><h2>01 / 参加コード・設定</h2><p class="small">匿名の英数字コードのみ（4〜48人）。個人名は入力しないでください。</p>
+<label for="roster">参加コード（1行に1件）</label><textarea id="roster" spellcheck="false">P01
+P02
+P03
+P04
+P05
+P06
+P07
+P08
+P09
+P10
+P11
+P12</textarea>
+<div class="twos"><div><label for="count">グループ数</label><input type="number" id="count" min="2" max="12" value="4"></div><div><label for="seed">再現シード</label><input id="seed" value="workshop-01" maxlength="30"></div></div>
+<label for="absent">欠席コード（カンマ区切り・任意）</label><input id="absent" placeholder="P03, P08">
+<button class="primary" id="generate">次の班替え案を作る</button>
+<div class="actions"><button id="confirm" disabled>✓ 実施して確定</button><button id="again" disabled>↻ 別案</button><button id="undo" disabled>直前の確定を戻す</button><button id="clear">履歴を削除</button></div><div id="err" role="alert"></div></section>
+<section><h2>02 / 保存・共有</h2><div class="actions"><button id="save">端末に保存</button><button id="load">端末から復元</button><button id="json">JSON書き出し</button><button id="import">JSON読み込み</button><button id="csv">班表CSV</button><button id="print">印刷</button></div><input type="file" accept=".json,application/json" id="file" hidden><p class="small">ログイン、課金、通信は不要。端末保存は明示的操作のみ。共有端末では保存しないでください。</p></section></aside>
+<div><div class="nums"><div class="num"><span>確定した回</span><strong id="round">0</strong></div><div class="num"><span>今回の新しいペア</span><strong id="new">—</strong></div><div class="num"><span>今回の再会ペア</span><strong id="old">—</strong></div><div class="num"><span>累積接点カバー率</span><strong id="coverage">—</strong></div></div>
+<section><h2>03 / 班替えプレビュー</h2><div id="summary">参加コードを入れて「次の班替え案を作る」を押してください。</div><div id="groups"></div><p class="small" id="history"></p></section>
+<section><h2>会話接点の広がり</h2><p class="small">同じ班になった相手の人数／今回の出席者数−1。実際に会話したことの証明ではありません。</p><div id="people"></div><h3>今回の再会ペア</h3><div id="repeatlist" class="small">次の班替え案を作ると表示されます。</div></section>
+</div></main><footer>輪話図 v1.0｜オフライン・匿名コード・近似探索。最適編成、教育上の公平性、対人安全性は保証しません。</footer>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+let past=[],plan=null,variation=0;
+const key='wawazu-v1',MAX=48;
+const fail=m=>{throw Error(m)};
+const pair=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+function roster(){
+ const r=$('roster').value.split(/[\n\r,]+/).map(x=>x.trim()).filter(Boolean);
+ if(r.length<4||r.length>MAX)fail('参加コードは4〜48件必要です。');
+ if(r.some(x=>!/^[A-Za-z0-9_-]{1,12}$/.test(x)))fail('英数字、-、_ の12文字以下の匿名コードだけ使えます。');
+ if(new Set(r).size!==r.length)fail('参加コードが重複しています。');
+ const a=$('absent').value.split(/[\s,、]+/).filter(Boolean);
+ if(new Set(a).size!==a.length||a.some(x=>!r.includes(x)))fail('欠席コードが重複、または登録されていません。');
+ const active=r.filter(x=>!a.includes(x)),count=Number($('count').value);
+ if(active.length<4||!Number.isInteger(count)||count<2||count>12||count>active.length)fail('出席4人以上、グループ数2〜12かつ出席数以下にしてください。');
+ return {r,active,a,count,seed:$('seed').value.slice(0,30)||'default'};
+}
+function validateRound(gs){if(!Array.isArray(gs)||!gs.length||gs.length>12)fail('履歴の形式が不正です。');
+ const flat=gs.flat();if(flat.length>MAX||new Set(flat).size!==flat.length||gs.some(g=>!Array.isArray(g)||!g.length)||flat.some(x=>typeof x!=='string'||!/^[A-Za-z0-9_-]{1,12}$/.test(x)))fail('履歴の参加コードが不正です。')}
+function counts(){const m=new Map();for(const gs of past){validateRound(gs);for(const g of gs)for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++){const p=pair(g[i],g[j]);m.set(p,(m.get(p)||0)+1)}}return m}
+function random(seed){let x=2166136261;for(const c of seed){x=Math.imul(x^c.charCodeAt(0),16777619)}return function(){x^=x<<13;x^=x>>>17;x^=x<<5;return(x>>>0)/4294967296}}
+function shuffle(arr,rand){for(let i=arr.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function group(ids,n){const a=Array.from({length:n},()=>[]);for(let i=0;i<ids.length;i++)a[i%n].push(ids[i]);return a}
+function pairs(gs){let out=[];for(const g of gs)for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++)out.push([g[i],g[j]]);return out}
+function measure(gs,h,ids){const ps=pairs(gs),rs=ps.filter(([a,b])=>h.has(pair(a,b)));
+ const seen=new Set();const active=new Set(ids);
+ for(const p of h.keys()){const [a,b]=p.split('|');if(active.has(a)&&active.has(b))seen.add(p)}
+ for(const [a,b] of ps)seen.add(pair(a,b));
+ const people=ids.map(id=>{let n=0;for(const other of ids)if(other!==id&&seen.has(pair(id,other)))n++;return{id,n}});
+ return{repeated:rs.length,newCount:ps.length-rs.length,coverage:Math.round(seen.size/(ids.length*(ids.length-1)/2)*100),rs,people};
+}
+function search(c){
+ const h=counts(),r=random(c.seed+'#'+variation+'#'+JSON.stringify(past));
+ const baseline=group(shuffle([...c.active],r),c.count),base=measure(baseline,h,c.active);
+ let best=baseline,bestScore=Infinity;
+ for(let k=0;k<(h.size?900:1);k++){
+  const candidate=k===0?baseline:group(shuffle([...c.active],r),c.count);
+  let score=0;for(const [a,b] of pairs(candidate)){const seen=h.get(pair(a,b))||0;if(seen)score+=100+25*seen*seen}
+  if(score<bestScore){best=candidate;bestScore=score}
+  if(score===0)break;
+ }
+ return {gs:best,metrics:measure(best,h,c.active),base:base.repeated,config:JSON.stringify({ids:c.active,n:c.count})};
+}
+function err(e){$('err').textContent=e?String(e):'';$('err').style.display=e?'block':'none'}
+function node(tag,text,cl){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cl)e.className=cl;return e}
+function draw(){
+ $('round').textContent=past.length;$('confirm').disabled=!plan;$('again').disabled=!plan;$('undo').disabled=!past.length;
+ $('groups').replaceChildren();$('people').replaceChildren();$('repeatlist').replaceChildren();
+ $('new').textContent=plan?plan.metrics.newCount:'—';$('old').textContent=plan?plan.metrics.repeated:'—';$('coverage').textContent=plan?plan.metrics.coverage+'%':'—';
+ if(!plan){$('summary').textContent='確定済み '+past.length+' 回。次の班替え案を作ってください。';return}
+ $('summary').textContent='新しいペア '+plan.metrics.newCount+'組、再会 '+plan.metrics.repeated+'組。比較用の単純シャッフルは '+plan.base+'組が再会。近似探索で最適性は保証しません。';
+ plan.gs.forEach((g,i)=>{const box=node('div',undefined,'team'),head=node('strong',String.fromCharCode(65+i)+' 班 ・ '+g.length+'人'),people=node('div',undefined,'people');g.forEach(id=>people.append(node('span',id,'chip')));box.append(head,people);$('groups').append(box)});
+ for(const p of plan.metrics.people){const row=node('div'),bar=node('span',undefined,'bar'),fill=node('i');fill.style.width=(p.n/(plan.metrics.people.length-1)*100)+'%';bar.append(fill);row.append(node('b',p.id),bar,node('span',p.n+'/'+(plan.metrics.people.length-1)));$('people').append(row)}
+ if(!plan.metrics.rs.length)$('repeatlist').textContent='過去の再会ペアはありません。';else{const h=counts();for(const [a,b] of plan.metrics.rs)$('repeatlist').append(node('div',a+' × '+b+'（過去 '+h.get(pair(a,b))+'回）'))}
+ $('history').textContent='出席 '+plan.metrics.people.length+'人 ・ 実施済み '+past.length+'回 ・ 候補 '+(variation+1)+'号';
+}
+function planNow(reset){try{const c=roster();if(reset)variation=0;plan=search(c);err('');draw()}catch(e){plan=null;draw();err(e.message)}}
+function file(name,body,type){const b=new Blob([body],{type:type||'text/plain;charset=utf-8'}),url=URL.createObjectURL(b),a=node('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}
+function snapshot(){const c=roster();if(past.flat(2).some(id=>!c.r.includes(id)))fail('履歴に含まれるコードを参加一覧から削除しないでください。');return{format:'wawazu-v1',roster:c.r,absent:c.a.join(','),groupCount:c.count,seed:c.seed,rounds:past}}
+function restore(value){if(!value||value.format!=='wawazu-v1'||!Array.isArray(value.roster)||!Array.isArray(value.rounds)||value.rounds.length>150)fail('JSONデータが不正です。');
+ const old={r:$('roster').value,a:$('absent').value,n:$('count').value,s:$('seed').value};
+ $('roster').value=value.roster.join('\n');$('absent').value=String(value.absent||'');$('count').value=value.groupCount;$('seed').value=String(value.seed||'default').slice(0,30);
+ try{const c=roster();for(const round of value.rounds){validateRound(round);if(round.flat().some(id=>!c.r.includes(id)))fail('履歴に未登録のコードがあります。')}past=value.rounds.map(gs=>gs.map(g=>[...g]));plan=null;variation=0;draw()}
+ catch(e){$('roster').value=old.r;$('absent').value=old.a;$('count').value=old.n;$('seed').value=old.s;throw e}
+}
+function run(fn){return function(){try{err('');fn()}catch(e){err(e.message)}}}
+$('generate').onclick=()=>planNow(true);
+$('again').onclick=()=>{variation++;planNow(false)};
+$('confirm').onclick=run(()=>{if(!plan)fail('案を先に作ってください。');const c=roster();if(JSON.stringify({ids:c.active,n:c.count})!==plan.config)fail('設定が変更されています。再生成してください。');past.push(plan.gs.map(g=>[...g]));plan=null;variation=0;draw();$('summary').textContent='この回を実施済みとして確定しました。'});
+$('undo').onclick=()=>{past.pop();plan=null;variation=0;draw()};
+$('clear').onclick=()=>{if(past.length&&!confirm('確定済みの班履歴を削除しますか？'))return;past=[];plan=null;variation=0;draw()};
+$('save').onclick=run(()=>{localStorage.setItem(key,JSON.stringify(snapshot()));$('summary').textContent='この端末に保存しました。'});
+$('load').onclick=run(()=>{const raw=localStorage.getItem(key);if(!raw)fail('この端末に保存されたデータがありません。');restore(JSON.parse(raw))});
+$('json').onclick=run(()=>file('wawazu-history.json',JSON.stringify(snapshot(),null,2),'application/json;charset=utf-8'));
+$('import').onclick=()=>$('file').click();
+$('file').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>350000)fail('ファイルが大きすぎます。');restore(JSON.parse(await f.text()));err('')}catch(ex){err(ex.message)}finally{e.target.value=''}};
+$('csv').onclick=run(()=>{if(!plan)fail('班替え案を作ってください。');let out='round,group,participant_code,status\r\n';plan.gs.forEach((g,i)=>g.forEach(id=>{out+=(past.length+1)+','+String.fromCharCode(65+i)+','+id+',preview\r\n'}));file('wawazu-group-preview.csv','\ufeff'+out,'text/csv;charset=utf-8')});
+$('print').onclick=()=>window.print();draw();
+})();
+</script></body></html>
