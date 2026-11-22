@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>キットまわし — 貸出セットの部品衝突を先読み</title>
+<style>
+:root{font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;color:#243248;background:#f6f7f5;font-size:14px;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}input,select{background:#fff;border:1px solid #d8dedf;border-radius:10px;padding:11px 12px;color:#26374a;width:100%;min-width:0}input:focus,select:focus,button:focus-visible{outline:3px solid #70b7b1;outline-offset:1px}input[type=number]{font-variant-numeric:tabular-nums}.container{max-width:1240px;margin:auto;padding:0 28px}.hero{background:radial-gradient(ellipse at 90% -40%,#28566c 0%,transparent 54%),#102c3e;color:#f1f7f4;padding:24px 0 67px}.topline{display:flex;justify-content:space-between;align-items:center;gap:15px}.brand{font-weight:900;font-size:20px;letter-spacing:-.5px}.brand small{font-size:10px;letter-spacing:2px;color:#a6c6cc;margin-left:12px}.brandmark{display:inline-grid;place-items:center;background:#cdf5bb;color:#163f42;border-radius:9px;width:31px;height:31px;margin-right:5px}.label{border:1px solid #5b8594;color:#d9ede6;border-radius:40px;padding:8px 12px;font-size:11px}.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);align-items:center;gap:40px;margin-top:48px}.eyebrow{font-size:10px;letter-spacing:2.1px;font-weight:800;color:#a2d2cc;margin:0 0 9px}.eyebrow.dark{color:#437f82}.hero h1{font-size:clamp(36px,4.5vw,62px);letter-spacing:-2px;line-height:1.18;margin:0}.hero h1 em{font-style:normal;color:#c8f1af}.lead{font-size:15px;line-height:1.9;color:#c4d4da;max-width:650px;margin:23px 0}.hero-note{border:1px solid #4d7180;background:#194052;border-radius:18px;padding:25px;color:#c8dce0;box-shadow:0 16px 40px #0002}.hero-note p{line-height:1.85}.dotrow{font-weight:800;color:#dff4e5}.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#b7e9a4;margin-right:7px}.flow-mini{display:flex;flex-wrap:wrap;gap:7px;margin-top:25px;align-items:center}.flow-mini span{background:#2b5665;padding:8px 10px;border-radius:6px;font-size:11px;color:#e6f2ea}.flow-mini b{color:#a4d2b6}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:-32px 0 23px;position:relative}.metric{background:#fff;border:1px solid #e8eeee;box-shadow:0 5px 25px #192d3210;border-radius:16px;padding:21px 22px}.metric small{display:block;color:#667788;font-size:12px;font-weight:700}.metric strong{display:block;color:#1a3746;font-size:33px;margin:7px 0 1px;line-height:1.2}.metric strong.warn{color:#c85938}.metric em{font-size:11px;font-style:normal;color:#829098}.layout{display:grid;grid-template-columns:1.03fr .97fr;gap:22px}.stack{display:grid;gap:22px;align-content:start}.panel{background:white;border:1px solid #e5ebeb;border-radius:18px;padding:24px;box-shadow:0 4px 18px #1c2f3210;min-width:0}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}.panel h2{font-size:19px;letter-spacing:-.5px;margin:0;color:#1c3b48}.pill{font-size:10px;background:#eaf2f0;border:1px solid #d4e6e3;color:#457b75;border-radius:20px;padding:7px 10px;white-space:nowrap}.count{font-size:12px;color:#859298}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.form-grid label,.timeline-controls label,.kit-switch label{display:block;color:#526574;font-size:11px;font-weight:700}.form-grid label input,.form-grid label select,.timeline-controls input,.timeline-controls select,.kit-switch select{margin-top:8px}.wide{grid-column:1/-1}.form-action{display:flex;align-items:end}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid transparent;padding:11px 15px;font-weight:800;white-space:nowrap;transition:filter .15s,transform .15s}.btn:hover{filter:brightness(.96);transform:translateY(-1px)}.btn.primary{background:#bdecae;color:#153b39;width:100%}.btn.secondary{background:#e9f2f0;color:#245f60}.btn.ghost{background:#fff;color:#647684;border-color:#dbe4e5}.btn.danger{background:#fff0ea;color:#b64f35}.btn:disabled{cursor:not-allowed;opacity:.43;transform:none}.btn.tiny{font-size:11px;padding:7px 10px}.hint{font-size:11px;color:#8b99a2;line-height:1.65;margin:15px 0 0}.muted{color:#697a86;font-size:12px;line-height:1.7}.booking-list{display:grid;gap:10px}.booking{border:1px solid #e7eded;border-radius:12px;padding:15px 16px;background:#fcfdfd}.booking.problem{border-color:#f1bc9f;background:#fffbf8}.booking-header{display:flex;align-items:center;gap:8px;justify-content:space-between}.booking-title{font-weight:800;color:#1e3647}.status{font-size:10px;border-radius:40px;padding:5px 9px;background:#e6f1ef;color:#2d746c;font-weight:800}.status.proposal{background:#f4ebd7;color:#87632b}.booking-info{color:#637785;font-size:12px;margin-top:9px;line-height:1.7}.booking-message{font-size:11px;line-height:1.6;color:#a35637;margin-top:6px}.booking-message.ok{color:#328269}.booking-actions{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}.booking-actions button{font-size:11px;padding:7px 9px}.dark-panel{background:#193d49;color:#e2f7f1;border-color:#193d49}.dark-panel h2{color:#ecfff9}.glyph{font-size:27px;color:#bde9ad}.dark-panel .eyebrow{color:#8fcebd}.alert-empty{background:#275a58;padding:19px;border-radius:12px;line-height:1.7}.alert-list{display:grid;gap:9px}.alert{background:#36535b;border-radius:10px;padding:12px 14px;font-size:12px;display:flex;justify-content:space-between;gap:12px}.alert strong{color:#fcd7b1}.alert-sub{font-size:11px;color:#b9d1d1;margin:0 0 13px}.timeline-controls{display:flex;gap:10px;margin-bottom:17px}.timeline-controls label{flex:1}.timeline{overflow-x:auto}.time-head,.time-row{display:grid;grid-template-columns:112px repeat(8,minmax(53px,1fr));gap:4px;min-width:580px;align-items:center}.time-head{font-size:10px;color:#8b98a1;text-align:center;margin-bottom:9px}.time-row{margin-bottom:9px}.time-label{color:#344c59;font-size:11px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.time-cell{height:42px;background:#edf3f1;border-radius:8px;display:grid;place-items:center;font-size:10px;color:#628073;font-variant-numeric:tabular-nums;font-weight:800}.time-cell.busy{background:#bfe9d4;color:#205e4b}.time-cell.full{background:#ffe1c9;color:#8b5b30}.time-cell.over{background:#f6a98e;color:#813b23}.lower-layout{margin-top:22px}.item-head,.item-row{display:grid;grid-template-columns:minmax(0,1fr) 86px 40px;gap:8px;align-items:center}.item-row{padding:8px 0;border-bottom:1px solid #eef1f0}.item-row input{padding:8px}.item-row .btn{padding:7px}.compact-form{display:flex;gap:8px;margin-top:17px}.compact-form input:first-child{flex:1;min-width:0}.compact-form input[type=number]{width:82px;flex:none}.kit-switch{display:flex;align-items:end;gap:10px;margin-bottom:12px}.kit-switch label{flex:1}.parts-head{font-size:11px;color:#85969b;margin-bottom:8px}.part-row{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid #eef1f0;font-size:12px}.part-row input{padding:8px}.kit-add input{flex:1}.tools{margin-top:22px;display:flex;justify-content:space-between;gap:24px;align-items:center}.tools .panel h2{margin-top:0}.tool-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.upload{cursor:pointer}footer{text-align:center;padding:32px 0;color:#81929a;font-size:11px}footer span{margin-left:20px}footer p{margin-top:8px}.message{position:sticky;z-index:10;top:10px;margin:12px 0;background:#e1f6eb;border:1px solid #8fc8b0;color:#265948;border-radius:10px;padding:12px 16px;box-shadow:0 6px 18px #0001}.message.bad{background:#fff1e8;color:#9e493c;border-color:#e5a58f}.empty{padding:16px;color:#84959b;background:#f4f7f6;border-radius:10px;font-size:12px}
+@media(max-width:950px){.hero-grid{grid-template-columns:1fr}.hero-note{display:none}.layout{grid-template-columns:1fr}.metric-grid{grid-template-columns:repeat(2,1fr)}.tools{display:block}.tool-actions{justify-content:start}}@media(max-width:560px){.container{padding:0 16px}.hero{padding-bottom:55px}.topline{align-items:flex-start}.brand{font-size:17px}.brand small{display:block;margin:5px 0 0 37px}.label{font-size:9px}.hero-grid{margin-top:40px}.hero h1{font-size:39px}.lead{font-size:13px}.metric-grid{gap:9px;margin-top:-25px}.metric{padding:15px}.metric strong{font-size:27px}.panel{padding:17px}.panel-head{flex-wrap:wrap}.compact-form{flex-wrap:wrap}.tool-actions{gap:7px}.tool-actions .btn{font-size:11px}.time-head,.time-row{grid-template-columns:95px repeat(8,51px)}}
+@media print{.hero{background:#fff;color:#111;padding:12px}.hero h1,.hero h1 em{color:#111}.hero-note,.form-grid,.tool-actions,.compact-form,.booking-actions,.btn,.message{display:none!important}.layout{display:block}.panel{box-shadow:none;break-inside:avoid}.metric-grid{margin:10px 0}.lead{color:#555}.timeline{overflow:visible}body{background:#fff}}
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <div class="topline"><div class="brand"><span class="brandmark">↗</span> キットまわし <small>KITMAWASHI</small></div><span class="label">ローカル完結・登録不要</span></div>
+    <div class="hero-grid"><div><p class="eyebrow">SHARED EQUIPMENT PLANNER · v1.0</p><h1>同じ部品を、<br><em>二度貸さない。</em></h1><p class="lead">マイクやバッテリーを複数の貸出セットで共用しても、日付の重なりから欠品を先読み。予約候補ごとに「確定できるか」と代替日をすぐに確認できます。</p></div>
+    <aside class="hero-note"><div class="dotrow"><span class="live-dot"></span> ワークスペース稼働中</div><p>アカウント・API・サーバー送信なし。<br>内容はこのブラウザ内に保存されます。</p><div class="flow-mini"><span>部品</span><b>→</b><span>キット</span><b>→</b><span>予約</span><b>→</b><span>不足検査</span></div></aside></div>
+  </div>
+</header>
+<main class="container">
+<div id="message" role="status" aria-live="polite" class="message" hidden></div>
+<section class="metric-grid" id="metrics"></section>
+<section class="layout main-layout" aria-label="予約と容量の概要">
+<div class="stack">
+  <section class="panel" id="reserve"><div class="panel-head"><div><p class="eyebrow dark">01 / REQUEST</p><h2>新しい貸出を試す</h2></div><span class="pill">まず候補で追加</span></div>
+  <form id="bookingForm" class="form-grid"><label class="wide">予約の呼び名 <input id="bName" maxlength="60" placeholder="例：週末ワークショップ" required></label>
+  <label class="wide">貸出キット <select id="bKit" required></select></label>
+  <label>開始日 <input type="date" id="bStart" required></label><label>返却予定日 <input type="date" id="bEnd" required></label>
+  <label>キット数 <input type="number" id="bQty" min="1" max="40" value="1" required></label>
+  <div class="form-action"><button type="submit" class="btn primary">＋ 候補を追加</button></div></form>
+  <p class="hint">貸出開始日と返却予定日を含む全日を占有として計算。返却当日の即時再貸出は想定しません。</p></section>
+  <section class="panel" id="bookings"><div class="panel-head"><div><p class="eyebrow dark">02 / BOOKINGS</p><h2>予約と衝突チェック</h2></div><span class="count" id="bookingCount"></span></div><div id="bookingList" class="booking-list"></div></section>
+</div>
+<div class="stack">
+  <section class="panel dark-panel"><div class="panel-head"><div><p class="eyebrow">CAPACITY HEALTH</p><h2>在庫を超える日は？</h2></div><span class="glyph">◴</span></div><div id="alerts"></div></section>
+  <section class="panel" id="calendar"><div class="panel-head"><div><p class="eyebrow dark">03 / TIMELINE</p><h2>部品ごとの使用量</h2></div></div><div class="timeline-controls"><label>表示開始日 <input type="date" id="viewStart"></label><label>表示モード <select id="viewMode"><option value="all">確定＋候補</option><option value="confirmed">確定のみ</option></select></label></div><div id="timeline" class="timeline"></div><p class="hint">分子＝予約で必要な数、分母＝保有数。赤は在庫超過。候補の重なりも確認できます。</p></section>
+</div></section>
+<section class="layout lower-layout" aria-label="マスターデータ">
+<section class="panel" id="inventory"><div class="panel-head"><div><p class="eyebrow dark">04 / INVENTORY</p><h2>部品の在庫</h2></div><span class="pill">種類別に管理</span></div><div id="itemList"></div><form id="itemForm" class="compact-form"><input id="iName" placeholder="新しい部品名" maxlength="54" aria-label="新しい部品名" required><input id="iQty" type="number" min="0" max="999" value="1" aria-label="在庫数" required><button class="btn secondary" type="submit">＋ 追加</button></form></section>
+<section class="panel" id="kits"><div class="panel-head"><div><p class="eyebrow dark">05 / RECIPES</p><h2>貸出キットの構成</h2></div><span class="pill">共有部品を指定</span></div><div class="kit-switch"><label>編集するキット <select id="kitSelect"></select></label><button id="deleteKit" class="btn tiny ghost" type="button">削除</button></div><div id="partList"></div><form id="kitForm" class="compact-form kit-add"><input id="kName" placeholder="新しいキット名" maxlength="54" aria-label="新しいキット名" required><button class="btn secondary" type="submit">＋ キット作成</button></form><p class="hint">構成数はキット1つあたりの必要数です。0にすると構成から除外します。</p></section>
+</section>
+<section class="panel tools"><div><p class="eyebrow dark">06 / YOUR DATA</p><h2>保存・持ち出し</h2><p class="muted">サンプルは架空データ。名称に氏名などの個人情報は入力しないでください。</p></div><div class="tool-actions"><button type="button" class="btn secondary" id="undo">↶ 元に戻す</button><button type="button" class="btn secondary" id="saveJson">JSON出力</button><button type="button" class="btn secondary" id="saveCsv">CSV出力</button><label class="btn secondary upload">JSON読込<input type="file" id="loadJson" accept="application/json,.json" hidden></label><button type="button" class="btn ghost" id="reset">デモに戻す</button></div></section>
+<footer>キットまわし <span>© 2026 · MIT License</span><p>数量・日付の計画支援のみ。破損・整備・移動時間・複数拠点・実物の個体識別は未対応です。</p></footer>
+</main>
+<script>
+/* KITMAWASHI engine — pure, dependency-free, MIT. */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.KitEngine = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const MAX = {items: 45, kits: 35, bookings: 120};
+  const DAY_MS = 86400000;
+  function day(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(s))) return NaN;
+    const n = Date.parse(s + 'T00:00:00.000Z');
+    return Number.isFinite(n) && new Date(n).toISOString().slice(0,10) === s ? Math.floor(n / DAY_MS) : NaN;
+  }
+  function date(n) { return new Date(n * DAY_MS).toISOString().slice(0,10); }
+  function plus(s, offset) { return date(day(s) + offset); }
+  function safeName(v, max=54) { return String(v ?? '').replace(/[\r\n\t<>]/g, ' ').trim().slice(0,max); }
+  function bounded(v, lo, hi) {
+    const x = Number(v);
+    return Number.isInteger(x) && x >= lo && x <= hi ? x : NaN;
+  }
+  function validate(raw) {
+    if (!raw || typeof raw !== 'object' || !Array.isArray(raw.items) || !Array.isArray(raw.kits) || !Array.isArray(raw.bookings)) throw new Error('JSONの構造が正しくありません。');
+    for (const kind of ['items','kits','bookings']) if (raw[kind].length > MAX[kind]) throw new Error('登録件数の上限を超えています: ' + kind);
+    const unique = (rows, label) => {
+      const ids = new Set();
+      for (const r of rows) {
+        if (!r || typeof r.id !== 'string' || !/^[a-zA-Z0-9_-]{1,36}$/.test(r.id) || ids.has(r.id)) throw new Error(label + 'のIDに重複または不正があります。');
+        ids.add(r.id);
+      }
+    };
+    unique(raw.items,'部品'); unique(raw.kits,'キット'); unique(raw.bookings,'予約');
+    const items = raw.items.map(x => {
+      const name = safeName(x.name), qty = bounded(x.qty, 0, 999);
+      if (!name || !Number.isFinite(qty)) throw new Error('部品名または在庫数が不正です。');
+      return {id:x.id, name, qty};
+    });
+    const itemIds = new Set(items.map(x=>x.id));
+    const kits = raw.kits.map(x => {
+      const name=safeName(x.name), parts={};
+      if (!name || !x.parts || typeof x.parts !== 'object' || Array.isArray(x.parts)) throw new Error('キット構成が不正です。');
+      for (const [id, n] of Object.entries(x.parts)) {
+        if (!itemIds.has(id) || !Number.isFinite(bounded(n,1,99))) throw new Error('キットに不明な部品または不正な数量があります。');
+        parts[id]=bounded(n,1,99);
+      }
+      if (Object.keys(parts).length===0) throw new Error('キットには部品を1つ以上登録してください。');
+      return {id:x.id,name,parts};
+    });
+    const kitIds = new Set(kits.map(x=>x.id));
+    const bookings=raw.bookings.map(x => {
+      const name=safeName(x.name,60), a=day(x.start), z=day(x.end), qty=bounded(x.qty,1,40);
+      if (!name || !kitIds.has(x.kitId) || !Number.isFinite(a) || !Number.isFinite(z) || a>z || z-a>89 || !Number.isFinite(qty) || !['confirmed','proposal'].includes(x.status)) throw new Error('予約の日付・構成・数量が不正です（期間は90日以内）。');
+      return {id:x.id,name,kitId:x.kitId,start:x.start,end:x.end,qty,status:x.status};
+    });
+    return {items,kits,bookings};
+  }
+  function demand(data, booking) {
+    const kit = data.kits.find(k=>k.id===booking.kitId);
+    if (!kit) return {};
+    return Object.fromEntries(Object.entries(kit.parts).map(([id,n])=>[id,n*booking.qty]));
+  }
+  function loadAt(data, bookings, d) {
+    const used = {};
+    for (const b of bookings) {
+      if (d < day(b.start) || d > day(b.end)) continue;
+      for (const [id,n] of Object.entries(demand(data,b))) used[id]=(used[id]||0)+n;
+    }
+    return used;
+  }
+  function issues(data, bookings) {
+    const points=new Set();
+    for (const b of bookings) for(let d=day(b.start);d<=day(b.end);d++) points.add(d);
+    const out=[];
+    const stock=Object.fromEntries(data.items.map(x=>[x.id,x.qty]));
+    for (const d of [...points].sort((a,b)=>a-b)) {
+      const used=loadAt(data,bookings,d);
+      for (const [id,n] of Object.entries(used)) {
+        if (n>stock[id]) out.push({date:date(d),itemId:id,used:n,stock:stock[id],short:n-stock[id]});
+      }
+    }
+    return out;
+  }
+  function assess(data, b) {
+    const confirmed=data.bookings.filter(x=>x.status==='confirmed' && x.id!==b.id);
+    const collisions=issues(data,[...confirmed,b]).filter(x=>day(x.date)>=day(b.start) && day(x.date)<=day(b.end));
+    const baseline=issues(data,confirmed);
+    const baselineSet=new Set(baseline.map(x=>x.date+'|'+x.itemId));
+    const induced=collisions.filter(x=>!baselineSet.has(x.date+'|'+x.itemId) || x.used> (baseline.find(y=>y.date===x.date&&y.itemId===x.itemId)?.used||0));
+    return {ok:collisions.length===0, collisions, induced};
+  }
+  function suggestion(data,b,limit=21) {
+    const duration=day(b.end)-day(b.start);
+    for(let offset=1;offset<=limit;offset++) {
+      const start=plus(b.start,offset), end=plus(start,duration);
+      if (assess(data,{...b,start,end}).ok) return {start,end,offset};
+    }
+    return null;
+  }
+  function analyse(data) {
+    const confirmed=data.bookings.filter(b=>b.status==='confirmed');
+    const proposals=data.bookings.filter(b=>b.status==='proposal');
+    return {
+      confirmedIssues:issues(data,confirmed),
+      allIssues:issues(data,data.bookings),
+      proposals:proposals.map(b=>({id:b.id,...assess(data,b),suggest:suggestion(data,b)}))
+    };
+  }
+  function demo(today) {
+    const origin=Number.isFinite(day(today)) ? today : new Date().toLocaleDateString('sv-SE');
+    const items=[
+      {id:'battery',name:'予備バッテリー',qty:5}, {id:'mic',name:'ワイヤレスマイク',qty:3},
+      {id:'tripod',name:'三脚',qty:4}, {id:'light',name:'LEDライト',qty:3}, {id:'case',name:'ハードケース',qty:2}
+    ];
+    const kits=[
+      {id:'interview',name:'インタビューセット',parts:{battery:2,mic:1,tripod:1}},
+      {id:'stream',name:'配信セット',parts:{battery:2,mic:2,tripod:1,light:1,case:1}},
+      {id:'lighting',name:'照明セット',parts:{battery:1,light:2,tripod:1}}
+    ];
+    const bookings=[
+      {id:'b1',name:'地域講座',kitId:'interview',start:plus(origin,1),end:plus(origin,3),qty:1,status:'confirmed'},
+      {id:'b2',name:'公開収録',kitId:'stream',start:plus(origin,3),end:plus(origin,4),qty:1,status:'confirmed'},
+      {id:'b3',name:'映像研究会（候補）',kitId:'interview',start:plus(origin,3),end:plus(origin,5),qty:1,status:'proposal'},
+      {id:'b4',name:'校内展示（候補）',kitId:'lighting',start:plus(origin,6),end:plus(origin,7),qty:1,status:'proposal'}
+    ];
+    return {items,kits,bookings};
+  }
+  return {day,date,plus,safeName,validate,demand,loadAt,issues,assess,suggestion,analyse,demo,MAX};
+});
+
+</script><script>
+(() => {
+  'use strict';
+  const E = globalThis.KitEngine, STORAGE = 'kitmawashi-v1';
+  const $ = id => document.getElementById(id);
+  const escapeHTML = value => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let state, selectedKit, history=[], messageTimer;
+  function id(prefix) { return prefix + Math.random().toString(36).slice(2,11); }
+  function initial() { try { const raw=localStorage.getItem(STORAGE); if(raw) return E.validate(JSON.parse(raw)); } catch(e) { console.warn('Stored data ignored',e); } return E.demo(); }
+  state=initial(); selectedKit=state.kits[0]?.id;
+  function notify(text,bad=false) { const el=$('message'); el.textContent=text;el.className='message'+(bad?' bad':'');el.hidden=false;clearTimeout(messageTimer);messageTimer=setTimeout(()=>el.hidden=true,6000); }
+  function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch(e){notify('端末への保存に失敗しました。JSON出力でバックアップしてください。',true);}}
+  function apply(mutator, success) {
+    try {
+      const next=structuredClone(state); mutator(next); const validated=E.validate(next);
+      history.push(JSON.stringify(state)); if(history.length>25)history.shift();state=validated;persist();render(); if(success)notify(success);
+      return true;
+    } catch(e) {notify(e.message||'更新できませんでした。',true);render();return false;}
+  }
+  function fmt(s){return s.replace(/^\d{4}-/,'').replace('-','/');}
+  function labelKit(kid){return state.kits.find(k=>k.id===kid)?.name||'未登録';}
+  function itemName(iid){return state.items.find(x=>x.id===iid)?.name||iid;}
+  function render(){
+    const analysis=E.analyse(state), allCount=state.bookings.length;
+    $('metrics').innerHTML=[
+      ['管理中の部品',state.items.length,'種類の在庫マスタ'],
+      ['貸出キット',state.kits.length,'組合せテンプレート'],
+      ['確定予約',state.bookings.filter(x=>x.status==='confirmed').length,'候補を除く'],
+      ['不足の日×部品',analysis.allIssues.length,'全候補を採用した場合']
+    ].map((m,i)=>`<div class="metric"><small>${escapeHTML(m[0])}</small><strong class="${i===3&&m[1]?'warn':''}">${m[1]}</strong><em>${escapeHTML(m[2])}</em></div>`).join('');
+    $('bookingCount').textContent=`${allCount}件 / 候補 ${analysis.proposals.length}件`;
+    $('bKit').innerHTML=state.kits.map(k=>`<option value="${k.id}">${escapeHTML(k.name)}</option>`).join('');
+    $('bookingForm').querySelector('button[type=submit]').disabled=!state.kits.length;
+    const proposals=Object.fromEntries(analysis.proposals.map(x=>[x.id,x]));
+    $('bookingList').innerHTML=state.bookings.length ? [...state.bookings].sort((a,b)=>a.start.localeCompare(b.start)).map(b=>{
+      const p=proposals[b.id], bad=p&&!p.ok;
+      const contents=Object.entries(E.demand(state,b)).map(([part,n])=>`${escapeHTML(itemName(part))} ×${n}`).join(' / ');
+      let notice='';
+      if(p) notice=bad ? `<div class="booking-message">⚠ 確定予約との重複で${p.collisions.length}件の容量超過。${p.suggest?'代替案 '+fmt(p.suggest.start)+' 〜 '+fmt(p.suggest.end):'21日先まで空きなし'}</div>` : '<div class="booking-message ok">✓ 確定済み予約との比較では受入可能</div>';
+      return `<article class="booking ${bad?'problem':''}" data-id="${b.id}"><div class="booking-header"><span class="booking-title">${escapeHTML(b.name)}</span><span class="status ${b.status==='proposal'?'proposal':''}">${b.status==='confirmed'?'確定':'候補'}</span></div><div class="booking-info">${escapeHTML(labelKit(b.kitId))} ×${b.qty}セット ｜ ${fmt(b.start)} — ${fmt(b.end)}<br>${contents}</div>${notice}<div class="booking-actions">${b.status==='proposal'?`<button data-action="confirm" class="btn secondary" ${!p.ok?'disabled':''}>✓ 確定</button>${p.suggest&&!p.ok?'<button data-action="move" class="btn secondary">代替日へ移動</button>':''}`:`<button data-action="unconfirm" class="btn ghost">候補に戻す</button>`}<button data-action="delete" class="btn ghost">削除</button></div></article>`;
+    }).join('') : '<p class="empty">予約はありません。左上から候補を追加してください。</p>';
+    if(analysis.confirmedIssues.length===0 && analysis.allIssues.length===0){$('alerts').innerHTML='<div class="alert-empty">✓ 確定済み・候補を同時採用しても、登録在庫内に収まっています。</div>'}
+    else {
+      let html=analysis.confirmedIssues.length ? `<p class="alert-sub">⚠ 確定予約だけで ${analysis.confirmedIssues.length} 件の容量超過があります。</p>` : '<p class="alert-sub">✓ 確定済みのみでは超過なし。候補を全部採用すると以下の日に不足します。</p>';
+      html+='<div class="alert-list">'+analysis.allIssues.slice(0,7).map(x=>`<div class="alert"><span>${fmt(x.date)}　${escapeHTML(itemName(x.itemId))}</span><strong>${x.used} / ${x.stock}（−${x.short}）</strong></div>`).join('')+'</div>';
+      if(analysis.allIssues.length>7)html+=`<p class="alert-sub" style="margin-top:12px">ほか ${analysis.allIssues.length-7} 件。時間表で確認してください。</p>`;
+      $('alerts').innerHTML=html;
+    }
+    $('itemList').innerHTML=state.items.map(x=>`<div class="item-row" data-id="${x.id}"><input aria-label="部品名" data-item-key="name" maxlength="54" value="${escapeHTML(x.name)}"><input aria-label="在庫数" data-item-key="qty" type="number" min="0" max="999" value="${x.qty}"><button class="btn tiny ghost" data-action="delete-item" aria-label="${escapeHTML(x.name)}を削除">×</button></div>`).join('') || '<p class="empty">部品を追加してください。</p>';
+    if(!state.kits.some(k=>k.id===selectedKit))selectedKit=state.kits[0]?.id;
+    $('kitSelect').innerHTML=state.kits.map(k=>`<option value="${k.id}" ${k.id===selectedKit?'selected':''}>${escapeHTML(k.name)}</option>`).join('');
+    $('deleteKit').disabled=!selectedKit;
+    const kit=state.kits.find(k=>k.id===selectedKit);
+    $('partList').innerHTML=kit?`<p class="parts-head">部品ごとの必要数（0＝含めない）</p>`+state.items.map(x=>`<div class="part-row"><span>${escapeHTML(x.name)}</span><input type="number" min="0" max="99" data-part="${x.id}" value="${kit.parts[x.id]||0}" aria-label="${escapeHTML(x.name)}のキット構成数"></div>`).join(''):'<p class="empty">部品を先に追加してからキットを作成します。</p>';
+    $('kName').disabled=state.items.length===0;$('kitForm').querySelector('button').disabled=state.items.length===0;
+    renderTimeline();
+  }
+  function renderTimeline(){
+    const start=$('viewStart').value||E.plus(new Date().toLocaleDateString('sv-SE'),0);
+    if (!Number.isFinite(E.day(start))) return;
+    const use=$('viewMode').value==='confirmed'?state.bookings.filter(b=>b.status==='confirmed'):state.bookings;
+    const days=Array.from({length:8},(_,i)=>E.plus(start,i));
+    let html='<div class="time-head"><div>部品 / 日付</div>'+days.map(s=>`<div>${fmt(s)}</div>`).join('')+'</div>';
+    for(const item of state.items){
+      html+=`<div class="time-row"><span class="time-label" title="${escapeHTML(item.name)}">${escapeHTML(item.name)}</span>`;
+      for(const d of days){ const n=E.loadAt(state,use,E.day(d))[item.id]||0; const css=n>item.qty?'over':n===item.qty&&n>0?'full':n>0?'busy':'';html+=`<div class="time-cell ${css}" title="${escapeHTML(item.name)} ${d}: ${n}/${item.qty}">${n}/${item.qty}</div>`; }
+      html+='</div>';
+    }
+    $('timeline').innerHTML=html||'<p class="empty">部品を追加してください。</p>';
+  }
+  function download(filename,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+  function csvField(v){const s=String(v??'');return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+  function toCsv(){
+    const lines=[['種別','ID','名前','開始日','終了日','数量','状態','部品ID','部品名','必要数'], ...state.items.map(i=>['部品',i.id,i.name,'','',i.qty,'','','','']),...state.kits.flatMap(k=>Object.entries(k.parts).map(([part,n])=>['キット構成',k.id,k.name,'','',1,'',part,itemName(part),n])),...state.bookings.map(b=>['予約',b.id,b.name,b.start,b.end,b.qty,b.status,b.kitId,labelKit(b.kitId),''])];
+    return '\uFEFF'+lines.map(row=>row.map(csvField).join(',')).join('\r\n');
+  }
+  $('bookingForm').addEventListener('submit',e=>{e.preventDefault();const name=$('bName').value.trim(),start=$('bStart').value,end=$('bEnd').value,kitId=$('bKit').value,qty=Number($('bQty').value);if(!name||!kitId)return notify('入力を確認してください。',true);if(apply(data=>data.bookings.push({id:id('b'),name,kitId,start,end,qty,status:'proposal'}),'予約候補を追加しました。')) $('bName').value='';});
+  $('bookingList').addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn)return;const box=btn.closest('[data-id]'),bid=box?.dataset.id,b=state.bookings.find(x=>x.id===bid);if(!b)return;
+    if(btn.dataset.action==='confirm'){if(!E.assess(state,b).ok)return notify('確定予約と容量が衝突しています。',true);apply(d=>d.bookings.find(x=>x.id===bid).status='confirmed','予約を確定しました。');}
+    if(btn.dataset.action==='unconfirm')apply(d=>d.bookings.find(x=>x.id===bid).status='proposal','予約を候補に戻しました。');
+    if(btn.dataset.action==='move'){const s=E.suggestion(state,b);if(!s)return notify('21日以内に代替日がありません。',true);apply(d=>Object.assign(d.bookings.find(x=>x.id===bid),{start:s.start,end:s.end}),'候補を代替日へ移動しました。');}
+    if(btn.dataset.action==='delete' && confirm('この予約を削除しますか？'))apply(d=>d.bookings=d.bookings.filter(x=>x.id!==bid),'予約を削除しました。');
+  });
+  $('itemForm').addEventListener('submit',e=>{e.preventDefault();const name=$('iName').value.trim(),qty=Number($('iQty').value);if(apply(d=>d.items.push({id:id('i'),name,qty}),'部品を追加しました。')) $('iName').value='';});
+  $('itemList').addEventListener('change',e=>{const key=e.target.dataset.itemKey;if(!key)return;const iid=e.target.closest('[data-id]').dataset.id;apply(d=>{const x=d.items.find(x=>x.id===iid);x[key]=key==='qty'?Number(e.target.value):e.target.value;},'部品を更新しました。');});
+  $('itemList').addEventListener('click',e=>{const btn=e.target.closest('[data-action="delete-item"]');if(!btn)return;const iid=btn.closest('[data-id]').dataset.id,affected=state.kits.filter(k=>k.parts[iid]);if(affected.length && !confirm(`この部品は${affected.length}キットに含まれています。キット構成からも削除しますか？`))return;
+    apply(d=>{d.items=d.items.filter(x=>x.id!==iid);for(const k of d.kits)delete k.parts[iid];const emptied=new Set(d.kits.filter(k=>Object.keys(k.parts).length===0).map(k=>k.id));d.kits=d.kits.filter(k=>!emptied.has(k.id));d.bookings=d.bookings.filter(b=>!emptied.has(b.kitId));},'部品を削除しました。');
+  });
+  $('kitSelect').addEventListener('change',e=>{selectedKit=e.target.value;render();});
+  $('partList').addEventListener('change',e=>{const part=e.target.dataset.part;if(!part||!selectedKit)return;const qty=Number(e.target.value);apply(d=>{const kit=d.kits.find(x=>x.id===selectedKit);if(qty===0)delete kit.parts[part];else kit.parts[part]=qty;},'キット構成を更新しました。');});
+  $('kitForm').addEventListener('submit',e=>{e.preventDefault();if(!state.items.length)return;const name=$('kName').value.trim(),newId=id('k');if(apply(d=>d.kits.push({id:newId,name,parts:{[d.items[0].id]:1}}),'キットを追加しました。')){selectedKit=newId;$('kName').value='';render();}});
+  $('deleteKit').addEventListener('click',()=>{const k=state.kits.find(x=>x.id===selectedKit);if(!k)return;const n=state.bookings.filter(x=>x.kitId===k.id).length;if(!confirm(`「${k.name}」を削除しますか？関連予約${n}件も削除されます。`))return;apply(d=>{d.kits=d.kits.filter(x=>x.id!==selectedKit);d.bookings=d.bookings.filter(x=>x.kitId!==selectedKit);},'キットと関連予約を削除しました。');});
+  $('viewStart').addEventListener('change',renderTimeline);$('viewMode').addEventListener('change',renderTimeline);
+  $('undo').addEventListener('click',()=>{if(!history.length)return notify('戻せる操作がありません。',true);state=E.validate(JSON.parse(history.pop()));persist();render();notify('直前の変更を戻しました。');});
+  $('saveJson').addEventListener('click',()=>download('kitmawashi-data.json',JSON.stringify(state,null,2),'application/json'));
+  $('saveCsv').addEventListener('click',()=>download('kitmawashi-export.csv',toCsv(),'text/csv;charset=utf-8'));
+  $('loadJson').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>1_000_000)throw new Error('JSONファイルは1MBまでです。');const data=E.validate(JSON.parse(await f.text()));history.push(JSON.stringify(state));state=data;persist();render();notify('JSONを読み込みました。');}catch(err){notify('読込失敗: '+err.message,true);}finally{e.target.value='';}});
+  $('reset').addEventListener('click',()=>{if(confirm('現在の作業内容を破棄し、デモに戻しますか？'))apply(d=>{const demo=E.demo();d.items=demo.items;d.kits=demo.kits;d.bookings=demo.bookings;},'デモデータに戻しました。');});
+  const localToday=new Date().toLocaleDateString('sv-SE');
+  $('bStart').value=E.plus(localToday,1);$('bEnd').value=E.plus(localToday,2);$('viewStart').value=E.plus(localToday,1);
+  render();
+})();
+
+</script>
+</body></html>
