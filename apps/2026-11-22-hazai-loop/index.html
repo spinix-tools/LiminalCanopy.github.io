@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>端材ループ | HAZAI LOOP</title>
+<style>
+:root{--a:#123c36;--b:#e4d68a;--c:#f6f4eb;--e:#e3e9df}*{box-sizing:border-box}body{margin:0;font:14px system-ui,"Hiragino Kaku Gothic ProN",sans-serif;color:#1a302a;background:var(--c)}
+header{background:#0b2826;color:#fff;padding:17px 5vw;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}header strong{font-size:23px}header small{color:#b9d5c8}main{max-width:1260px;margin:auto;padding:25px 18px}.hero{background:var(--a);border-radius:18px;color:#fff;padding:32px;margin-bottom:18px}.hero h1{font-size:clamp(24px,3.8vw,42px);margin:4px 0 9px}.hero p{color:#cbded1;line-height:1.8;max-width:720px}.columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.left{display:grid;gap:16px}.panel{background:#fffefa;border:1px solid var(--e);border-radius:15px;padding:19px;min-width:0}.panel h2{margin:0 0 6px;font-size:20px}.panel p{color:#74817b;font-size:12px;margin:0 0 14px;line-height:1.6}button{border:1px solid #b9cdbd;color:#2b5647;background:#f3f7ed;border-radius:9px;padding:9px 12px;font:inherit;cursor:pointer;font-weight:700}button:hover{filter:brightness(.96)}button:disabled{opacity:.45;cursor:default}.mainbutton{background:var(--b);color:#172d26;border:0;padding:13px 18px}.rowhead{display:flex;justify-content:space-between;align-items:center;gap:9px}table{width:100%;border-collapse:collapse;min-width:460px}th{font-size:11px;text-align:left;background:#f4f7f0;color:#79867c}th,td{padding:7px 4px;border-bottom:1px solid #e8ece6}td input,td select{width:100%;min-width:0}input,select{border:1px solid #d4ddd2;border-radius:8px;padding:8px 6px;background:#fff;color:#19362b;font:inherit}.scroll{overflow:auto}.options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.options label{font-size:11px;color:#506457}.options input{display:block;width:100%;margin-top:7px}.msg{margin:14px 0;background:#eaf2e5;padding:11px;border-radius:9px;line-height:1.5}.bad{background:#fff0e4;color:#a84d32}.stats{display:flex;gap:10px}.stat{flex:1;background:#eff3e9;border-radius:8px;padding:12px;font-size:11px}.stat b{display:block;font-size:22px;color:#1e5a45}.cut{padding:15px 0;border-bottom:1px solid #e7eae4}.bar{width:100%;height:27px;border:1px solid #dbe2d6;border-radius:6px;display:flex;overflow:hidden;background:#f0f2e9;margin:8px 0}.piece{display:grid;place-items:center;background:#3c7b6b;color:#fff;font-size:10px;border-right:2px solid white;overflow:hidden;white-space:nowrap}.piece:nth-child(2n){background:#aa9762}.remain{background:#c1d6ad}small{font-size:11px}#actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.empty{padding:55px 8px;text-align:center;color:#6c8576}.note{color:#718578;font-size:11px;line-height:1.6;margin-top:13px}footer{color:#849287;font-size:11px;text-align:center;padding:26px}@media(max-width:900px){.columns{grid-template-columns:1fr}}@media print{header,.hero,.left,#actions,footer,.note,#notice{display:none}main{padding:0}.columns{display:block}.panel{border:0}.bar,.piece{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style></head>
+<body><header><strong>↺ 端材ループ <small>HAZAI LOOP</small></strong><div><button id="save">JSON保存</button> <button id="load">JSON読込</button><input id="file" type="file" accept=".json" hidden></div></header>
+<main><section class="hero"><small>LOCAL-FIRST · 1D CUT PLANNER</small><h1>残り木に、次の役目を。</h1><p>手持ちの長尺材と必要部材を登録。切りしろを考慮して配置し、確定するまで在庫を変更しません。すべてブラウザ内で完結します。</p><button class="mainbutton" id="compute">カット計画をつくる</button> <button id="reset">サンプルに戻す</button></section>
+<div id="notice" role="status"></div><div class="columns"><div class="left">
+<section class="panel"><div class="rowhead"><h2>01 / 手持ち材料</h2><button id="addStock">＋材料追加</button></div><p>材料区分・材種・長さ(mm)・本数を入力</p><div class="scroll"><table><thead><tr><th>区分・名前</th><th>材種</th><th>長さmm</th><th>本数</th><th></th></tr></thead><tbody id="stockRows"></tbody></table></div></section>
+<section class="panel"><div class="rowhead"><h2>02 / 必要部材</h2><button id="addPart">＋部材追加</button></div><p>材種が一致するものだけを切断案に使います</p><div class="scroll"><table><thead><tr><th>部材名</th><th>材種</th><th>長さmm</th><th>本数</th><th></th></tr></thead><tbody id="partRows"></tbody></table></div></section>
+<section class="panel"><h2>03 / 加工条件</h2><div class="options"><label>刃幅mm<input id="kerf" type="number" min="0" max="30"></label><label>両端余白mm<input id="trim" type="number" min="0" max="100"></label><label>端材保管閾値mm<input id="reuse" type="number" min="1" max="10000"></label></div><div class="note">断面・欠陥・固定余長や作業安全は計算していません。実物・設備の取扱規則を必ず確認。</div></section>
+</div><section class="panel"><div class="rowhead"><h2>04 / 切断プレビュー</h2><button id="recompute">↻ 再計算</button></div><p>計画は近似解です。確定は台帳更新であり、実作業の完了確認ではありません。</p><div id="result" class="empty">「カット計画をつくる」を押すと切断図を表示します。</div><div id="actions"><button class="mainbutton" id="commit" disabled>計画を確定して在庫を更新</button><button id="undo" disabled>直前の確定を戻す</button><button id="csv" disabled>CSV出力</button><button id="print">印刷</button></div></section></div>
+<footer>端末内保存 · 外部通信なし · ログイン・有料APIなし · © 2026 HAZAI LOOP / MIT</footer></main>
+<script>
+(function(){
+"use strict";
+var k="hazai-loop-lite-1",d,plan=null,undo=null,n=0;
+function demo(){return {settings:{kerf:3,trim:0,reuse:150},stock:[{id:"s1",label:"保管端材A",material:"SPF",length:820,qty:1,kind:"端材"},{id:"s2",label:"保管端材B",material:"SPF",length:550,qty:1,kind:"端材"},{id:"s3",label:"定尺1820",material:"SPF",length:1820,qty:3,kind:"定尺"}],parts:[{id:"p1",label:"脚",material:"SPF",length:720,qty:3},{id:"p2",label:"桟",material:"SPF",length:380,qty:4},{id:"p3",label:"補強",material:"SPF",length:260,qty:2}]}}
+function id(x){return document.getElementById(x)}
+function esc(x){return String(x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function number(x,lo,hi){var v=Number(x);if(!Number.isSafeInteger(v)||v<lo||v>hi)throw Error("数量・寸法は "+lo+"〜"+hi+" の整数にしてください");return v}
+function valid(z){if(!z||!Array.isArray(z.stock)||!Array.isArray(z.parts)||z.stock.length>100||z.parts.length>100)throw Error("登録行が不正です");
+var s=z.settings;if(!s)throw Error("加工条件がありません");s.kerf=number(s.kerf,0,30);s.trim=number(s.trim,0,100);s.reuse=number(s.reuse,1,10000);
+var seen={};var total=0;z.stock.forEach(function(a){a.id=String(a.id);if(seen[a.id])throw Error("材料IDが重複しています");seen[a.id]=true;a.length=number(a.length,1,50000);a.qty=number(a.qty,1,100);total+=a.qty;if(a.length<=2*s.trim)throw Error("材料が両端余白より短い");a.label=String(a.label).slice(0,60);a.material=String(a.material).slice(0,60);a.kind=a.kind==="端材"?"端材":"定尺"});if(total>400)throw Error("材料は400本以内");
+total=0;seen={};z.parts.forEach(function(a){a.id=String(a.id);if(seen[a.id])throw Error("部材IDが重複しています");seen[a.id]=true;a.length=number(a.length,1,50000);a.qty=number(a.qty,1,100);total+=a.qty;a.label=String(a.label).slice(0,60);a.material=String(a.material).slice(0,60)});if(total>400)throw Error("部材は400本以内");return z}
+try{d=valid(JSON.parse(localStorage.getItem(k)))}catch(e){d=demo()}
+function save(){try{localStorage.setItem(k,JSON.stringify(d))}catch(e){}}
+function msg(t,bad){id("notice").innerHTML=t?'<div class="msg '+(bad?"bad":"")+'">'+esc(t)+'</div>':""}
+function field(a,i,key,value,type){return '<input data-group="'+a+'" data-i="'+i+'" data-key="'+key+'" type="'+(type||"text")+'" value="'+esc(value)+'">'}
+function render(){id("stockRows").innerHTML=d.stock.map(function(s,i){return '<tr><td><select data-group="stock" data-i="'+i+'" data-key="kind"><option '+(s.kind==="端材"?"selected":"")+'>端材</option><option '+(s.kind!=="端材"?"selected":"")+'>定尺</option></select>'+field("stock",i,"label",s.label)+'</td><td>'+field("stock",i,"material",s.material)+'</td><td>'+field("stock",i,"length",s.length,"number")+'</td><td>'+field("stock",i,"qty",s.qty,"number")+'</td><td><button data-del="stock" data-i="'+i+'">×</button></td></tr>'}).join("");
+id("partRows").innerHTML=d.parts.map(function(s,i){return '<tr><td>'+field("parts",i,"label",s.label)+'</td><td>'+field("parts",i,"material",s.material)+'</td><td>'+field("parts",i,"length",s.length,"number")+'</td><td>'+field("parts",i,"qty",s.qty,"number")+'</td><td><button data-del="parts" data-i="'+i+'">×</button></td></tr>'}).join("");
+["kerf","trim"].forEach(function(x){id(x).value=d.settings[x]});id("reuse").value=d.settings.reuse;id("undo").disabled=!undo}
+function clear(){plan=null;undo=null;id("result").innerHTML="「カット計画をつくる」を押すと切断図を表示します。";id("result").className="empty";id("commit").disabled=true;id("csv").disabled=true;save()}
+document.addEventListener("change",function(e){var a=e.target,g=a.dataset.group;if(g){d[g][Number(a.dataset.i)][a.dataset.key]=a.type==="number"?Number(a.value):a.value;clear();render();msg("")}else if(["kerf","trim","reuse"].indexOf(a.id)>=0){d.settings[a.id]=Number(a.value);clear();msg("")}});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-del]");if(b){d[b.dataset.del].splice(Number(b.dataset.i),1);clear();render();msg("")}});
+id("addStock").onclick=function(){d.stock.push({id:"s"+Date.now()+"-"+(++n),label:"新しい材料",material:"SPF",length:1820,qty:1,kind:"定尺"});clear();render()};
+id("addPart").onclick=function(){d.parts.push({id:"p"+Date.now()+"-"+(++n),label:"新しい部材",material:"SPF",length:300,qty:1});clear();render()};
+id("reset").onclick=function(){d=demo();clear();render();msg("サンプルに戻しました")};
+function solve(){var source=[],want=[],s=d.settings;
+d.stock.forEach(function(a){for(var i=0;i<a.qty;i++)source.push({src:a,key:a.id+"-"+i,rem:a.length-2*s.trim,cuts:[]})});
+d.parts.forEach(function(a){for(var i=0;i<a.qty;i++)want.push({src:a,key:a.id+"-"+i})});
+want.sort(function(a,b){return b.src.length-a.src.length});var missed=[];
+want.forEach(function(p){var fits=source.filter(function(a){return a.src.material===p.src.material&&a.rem>=p.src.length+(a.rem===p.src.length?0:s.kerf)});
+fits.sort(function(a,b){var z=a.cuts.length?0:1,w=b.cuts.length?0:1;if(z!==w)return z-w;if(a.src.kind!==b.src.kind)return a.src.kind==="端材"?-1:1;return (a.rem-p.src.length)-(b.rem-p.src.length)});
+if(!fits.length){missed.push(p);return}var bin=fits[0],loss=bin.rem===p.src.length?0:s.kerf;bin.cuts.push({label:p.src.label,length:p.src.length,loss:loss});bin.rem-=p.src.length+loss});
+return {bins:source.filter(function(a){return a.cuts.length}),missed:missed,total:want.length}}
+function show(){var p=plan,s=d.settings;id("commit").disabled=!p||p.missed.length>0||!p.total;id("csv").disabled=!p;if(!p)return;
+var done=p.total-p.missed.length,offs=p.bins.filter(function(b){return b.src.kind==="端材"}).length;
+var html='<div class="stats"><div class="stat"><b>'+done+'/'+p.total+'</b>配置部材</div><div class="stat"><b>'+offs+'</b>使用端材</div><div class="stat"><b>'+p.bins.length+'</b>使用母材</div></div>';
+html+='<div class="msg '+(p.missed.length?"bad":"")+'">'+(p.missed.length?"⚠ 未配置 "+p.missed.length+"本。確定不可。":"✓ 全部材を配置できました")+'</div>';
+p.bins.forEach(function(b,i){html+='<div class="cut"><b>'+(i+1)+'. '+esc(b.src.label)+'</b> <small>('+esc(b.src.kind)+' / '+b.src.length+'mm)</small><div class="bar">';
+if(s.trim)html+='<div style="width:'+(s.trim/b.src.length*100)+'%;background:#d6d8cd"></div>';
+b.cuts.forEach(function(c){html+='<div class="piece" title="'+esc(c.label)+'" style="width:'+(c.length/b.src.length*100)+'%">'+esc(c.label)+'</div>';if(c.loss)html+='<div style="background:#eee;width:'+(c.loss/b.src.length*100)+'%"></div>'});
+html+='<div class="remain" style="width:'+(b.rem/b.src.length*100)+'%"></div>';if(s.trim)html+='<div style="width:'+(s.trim/b.src.length*100)+'%;background:#d6d8cd"></div>';
+html+='</div><small>'+esc(b.src.material)+' · '+b.cuts.map(function(c){return esc(c.label)+" "+c.length+"mm"}).join(" / ")+' · 残り '+b.rem+'mm</small></div>'});
+if(p.missed.length)html+='<p class="bad msg">不足：'+p.missed.map(function(x){return esc(x.src.label)+" "+x.src.length+"mm"}).join(" / ")+'</p>';
+id("result").className="";id("result").innerHTML=html}
+function recalc(){try{valid(d);plan=solve();show();msg("計画を計算しました。実物に照らして確認してください")}catch(e){msg(e.message,true)}}
+id("compute").onclick=recalc;id("recompute").onclick=recalc;
+id("commit").onclick=function(){if(!plan||plan.missed.length||!plan.total)return;try{valid(d);undo=JSON.parse(JSON.stringify(d));var used={};plan.bins.forEach(function(b){used[b.src.id]=(used[b.src.id]||0)+1});d.stock=d.stock.map(function(a){a.qty-=used[a.id]||0;return a}).filter(function(a){return a.qty>0});plan.bins.forEach(function(b){if(b.rem>=d.settings.reuse&&b.rem>2*d.settings.trim)d.stock.push({id:"r"+Date.now()+"-"+(++n),label:"端材 "+b.src.label,material:b.src.material,length:b.rem,kind:"端材",qty:1})});plan=null;save();render();id("result").innerHTML="台帳更新済み。もう一度計画を作成してください。";id("commit").disabled=true;id("csv").disabled=true;msg("確定しました。端材を次回在庫に登録しました")}catch(e){msg(e.message,true)}};
+id("undo").onclick=function(){if(!undo)return;d=undo;undo=null;plan=null;render();clear();msg("直前の確定を戻しました")};
+function download(name,content,type){var u=URL.createObjectURL(new Blob([content],{type:type})),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(u)},900)}
+id("save").onclick=function(){try{valid(d);download("hazai-loop.json",JSON.stringify(d,null,2),"application/json")}catch(e){msg(e.message,true)}};
+id("load").onclick=function(){id("file").click()};
+id("file").onchange=async function(e){try{var f=e.target.files[0];if(!f)return;if(f.size>400000)throw Error("400KB以下のJSONを指定してください");d=valid(JSON.parse(await f.text()));clear();render();msg("JSONを読み込みました")}catch(err){msg(err.message,true)}finally{e.target.value=""}};
+id("csv").onclick=function(){if(!plan)return;var rows=[["母材","材種","部材","長さmm","切りしろmm","残りmm"]];plan.bins.forEach(function(b){b.cuts.forEach(function(c){rows.push([b.src.label,b.src.material,c.label,c.length,c.loss,b.rem])})});download("hazai-loop-cuts.csv","\uFEFF"+rows.map(function(row){return row.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}).join("\r\n"),"text/csv;charset=utf-8")};
+id("print").onclick=function(){window.print()};
+render();
+})();
+</script></body></html>
