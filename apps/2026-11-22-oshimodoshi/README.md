@@ -15,7 +15,7 @@
 
 ## テスト（完全版ソース）
 `node engine.test.cjs`：21/21合格（うち固定シードのランダム検査1,200ケース）。
-`python browser_test.py`：Chromiumの33/33操作チェック合格。JavaScript例外・外部HTTP要求0。管理環境の制約でブラウザテストはHTMLのインライン挿入とlocalStorageメモリ模擬で実施。通常のfile://起動・永続保存・実業務適合は未検証。
+`python browser_test.py`：Chromiumの33/33操作チェック合格。gzip起動版に対しても33/33合格。JavaScript例外・外部HTTP要求0。管理環境の制約でブラウザテストはHTMLのインライン挿入とlocalStorageメモリ模擬で実施。通常のfile://起動・永続保存・実業務適合は未検証。
 
 ## GitHubでの実装
-`index.html` は検証済み完全版HTMLをgzip化して埋め込み、ブラウザ内で復元する**同一アプリの無通信ブートストラップ**（現代的な`DecompressionStream`対応ブラウザが必要）。完全版の編集可能な元コードとテストはZIPに同梱。アプリ本体は外部から読み込まず、広告・トラッキング・外部通信なし。
+`index.html` は検証済み完全版HTMLをgzip化して埋め込み、ブラウザ内で復元する**同一アプリの無通信ブートストラップ**（現代的な`DecompressionStream`対応ブラウザが必要）。編集可能な元コードは `python unpack.py` で `source.html` に完全復元できます（SHA-256検証つき）。テストコードは成果物ZIPにも同梱。アプリ本体は外部から読み込まず、広告・トラッキング・外部通信なし。
