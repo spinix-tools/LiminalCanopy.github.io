@@ -7,6 +7,7 @@
 学校新聞、授業教材、地域広報、社内プレゼンの制作担当者。総務省が2026-07-14に公表したICTリテラシー実態調査は、偽・誤情報を拡散した経験とICTリテラシーテスト結果に関連があると報告した。これは本製品の市場規模や需要を直接示すものではない。
 
 - 日本の背景：[総務省2026年度ICTリテラシー調査](https://prtimes.jp/main/html/rd/p/000000001.000161939.html)
+- 日本国内の近接競合：[Sakura Chart](https://www.takachiho-toukei.com/en/) は表を貼り付けてブラウザでグラフ化し、[xGrapher](https://xgrapher.com/) はグラフ作成・共有に対応。[総務省統計局・なるほど統計学園](https://www.stat.go.jp/naruhodo/4_graph/index.html) は種類別のグラフの扱いを教材化している。
 - 海外競合：[Datawrapper](https://www.datawrapper.de/academy/why-our-column-and-bar-charts-start-at-zero) は棒グラフの0起点を重視する作図サービス。[FairCharts](https://www.faircharts.com/) はグラフを診断するベータサービス。[ChartHawk](https://charthawk.info/) はAIで画像の縦軸切断等を調べる。[vibech.art](https://vibech.art/) は誤解を招く表示の教材を提供する。
 
 ## 差別化仮説
