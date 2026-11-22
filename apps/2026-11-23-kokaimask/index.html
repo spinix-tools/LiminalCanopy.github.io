@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>公開マスク — 写真の公開前チェック</title>
+<style>
+:root{font-family:system-ui,"Noto Sans JP",sans-serif;color:#e9f0e8;background:#111b15}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(at top left,#253e30,transparent 36%),#111b15}.wrap{max-width:1080px;margin:auto;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3e5544;padding:8px 0 20px}
+header strong{font-size:24px}header span{color:#c9f8a4;font-size:12px}.hero{padding:40px 0 22px}h1{font-size:clamp(25px,4vw,42px);margin:0 0 12px;line-height:1.4}h1 em{font-style:normal;color:#caff83}p{color:#aec1b0;line-height:1.75;font-size:13px}.columns{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}.column{display:grid;gap:16px}.panel{background:#212e26;border:1px solid #42584a;border-radius:17px;padding:20px}.panel h2{font-size:17px;margin:0 0 14px}label.choose,.btn{font-size:13px;border:1px solid #728875;background:#304c38;color:#f1f9e8;padding:11px 14px;border-radius:9px;cursor:pointer;display:inline-block;font-weight:700}.btn.primary,label.choose{background:#d0ff88;border-color:#d0ff88;color:#192a1c}.btn:disabled{opacity:.35;cursor:not-allowed}.drop{border:1px dashed #728971;background:#19271e;padding:20px;border-radius:11px;text-align:center}.drop.drag{background:#335440}.tiny{font-size:11px;color:#9db29f}.scene{position:relative;background:#13231a;border:1px solid #506850;border-radius:10px;overflow:hidden}canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}.empty{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;background:#15241be6;color:#a7bea7;font-size:12px;padding:15px;text-align:center}.empty[hidden]{display:none}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}.bar button{border:0;background:none;color:#d4eeb5;cursor:pointer}.bar button:disabled{opacity:.4}.bar small{margin-left:auto;color:#a3b4a5}.chip{background:#3c503b;color:#e1efb8;border-radius:20px;padding:5px 9px;font-size:11px;display:inline-block;margin:5px 5px 0 0}.checks label{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #4b6252;border-radius:10px;margin-bottom:8px;font-size:12px;line-height:1.6}.checks input{accent-color:#cbff80}.checks small{color:#aabaaa}.status{padding:11px;border-radius:9px;background:#192b20;white-space:pre-line;font-size:12px;color:#b0dfbb}.status.good{background:#334b35;color:#dcffbe}.status.error{background:#52302c;color:#ffbdac}#preview{width:100%;margin-top:12px;border-radius:9px;border:1px solid #567057}footer{color:#92aa98;padding:35px 0;font-size:11px}
+@media(max-width:760px){.columns{grid-template-columns:1fr}.wrap{padding:14px}.hero{padding:25px 0}}
+</style></head><body><div class="wrap">
+<header><strong>▣ 公開マスク</strong><span>● ブラウザ内で完結 / API不要</span></header>
+<section class="hero"><h1>写真の<em>「見える情報・見えない情報」</em>を<br>公開前に点検。</h1><p>写り込んだ住所・名札などを黒塗り。EXIF等の追加情報を引き継がないPNGを再生成します。画像の送信・保存履歴はありません。</p></section>
+<main class="columns"><div class="column">
+<section class="panel"><h2>01. 画像を選ぶ</h2><div class="drop" id="drop"><p>JPEG / PNG、20MB以内（静止画のみ）</p><label class="choose" for="file">写真を選択</label> <button type="button" class="btn" id="demo">ダミー画像で試す</button><input id="file" type="file" accept="image/jpeg,image/png" hidden></div><p id="details" class="tiny">ファイルを選んでください。</p></section>
+<section class="panel"><h2>02. 隠したい箇所をドラッグで指定</h2><p>黒塗りは画像のピクセルに直接焼き込みます。ぼかしではありません。</p><div class="scene"><canvas id="canvas" width="880" height="500" aria-label="塗りつぶし領域の編集"></canvas><div class="empty" id="empty">写真を選ぶとここに表示されます</div></div><div class="bar"><button id="undo" disabled>↶ Undo</button><button id="clear" disabled>すべて取り消す</button><small id="count">0か所</small></div></section></div>
+<div class="column"><section class="panel"><h2>検出した付加情報</h2><div id="found"><span class="tiny">画像選択後に表示します。</span></div><p class="tiny">EXIF等のコンテナ有無を検出。GPS値そのものは解析しません。ICC等の色プロファイルは個人情報としてカウントしません。</p></section>
+<section class="panel"><h2>03. 目視確認して生成</h2><div class="checks">
+<label><input type="checkbox" class="check"><span>人物・名札・制服・番号が特定されないか確認</span></label>
+<label><input type="checkbox" class="check"><span>住所・車のナンバー・書類・地名を確認</span></label>
+<label><input type="checkbox" class="check"><span>背景・鏡・反射・他者の公開同意を確認</span></label></div>
+<button id="make" class="btn primary" style="width:100%" disabled>公開用PNGを生成 →</button>
+<p class="tiny">見落としを防ぐ自動画像認識はしていません。全項目を確認すると生成できます。</p></section>
+<section class="panel"><h2>保存前の再点検</h2><div id="status" class="status" role="status">画像と確認項目が必要です。</div><img id="preview" alt="再生成した画像" hidden><div class="bar"><button class="btn primary" id="save" disabled>PNGを保存</button><button class="btn" id="json" disabled>点検JSON</button></div><p class="tiny">ダウンロードはメタデータ再検査が合格した場合のみ。すべての識別情報・画質・色再現を保証するものではありません。</p></section></div></main>
+<footer>公開マスク / KOKAI MASK · 静的HTML一式 · ローカル処理のみ。GIF/HEIC/WebP、アニメーションには非対応。</footer>
+</div><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const cv=$('canvas'),c=cv.getContext('2d'),checks=[...document.querySelectorAll('.check')];
+let img=null,rects=[],start=null,moving=null,sourceInfo=null,sourceSize=0,generated=null,genInfo=null,url=null;
+function scan(a){const b=new Uint8Array(a),tags=[];let format='',valid=false,anim=false;
+if(b.length>3&&b[0]===255&&b[1]===216&&b[2]===255){format='jpeg';valid=true;let p=2;
+while(p<b.length){if(b[p++]!==255){valid=false;break}while(b[p]===255)p++;let marker=b[p++];if(marker===218||marker===217)break;
+if(marker===216||marker===1||(marker>=208&&marker<=215))continue;
+if(p+2>b.length){valid=false;break}let n=b[p]*256+b[p+1];if(n<2||p+n>b.length){valid=false;break}
+let pre=String.fromCharCode(...b.subarray(p+2,Math.min(p+n,p+27)));
+if(marker===225)tags.push(pre.startsWith('Exif')?'EXIF':pre.startsWith('http://ns.adobe.com')?'XMP':'APP1');
+else if(marker===237)tags.push('IPTC/APP13');else if(marker===254)tags.push('コメント');
+else if(marker>=226&&marker<=239&&!(marker===226&&pre.startsWith('ICC_PROFILE')))tags.push('APP'+(marker-224));
+p+=n}}
+else if(b.length>=8&&[137,80,78,71,13,10,26,10].every((x,i)=>b[i]===x)){format='png';valid=true;let p=8,end=false;
+while(p+12<=b.length){let n=((b[p]*16777216)+(b[p+1]<<16)+(b[p+2]<<8)+b[p+3])>>>0;
+if(n>20971520||p+12+n>b.length){valid=false;break}let type=String.fromCharCode(...b.subarray(p+4,p+8));
+if(['eXIf','tEXt','iTXt','zTXt','tIME','iCCP'].includes(type))tags.push(type);
+if(type==='acTL')anim=true;p+=n+12;if(type==='IEND'){end=true;break}}
+valid=valid&&end}
+return {format,valid,anim,tags:[...new Set(tags)],count:tags.length}}
+function norm(a,b){let x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),r=Math.max(a.x,b.x),bt=Math.max(a.y,b.y);
+x=Math.max(0,Math.min(cv.width,x));y=Math.max(0,Math.min(cv.height,y));r=Math.max(0,Math.min(cv.width,r));bt=Math.max(0,Math.min(cv.height,bt));
+return {x:Math.round(x),y:Math.round(y),w:Math.round(r-x),h:Math.round(bt-y)}}
+function render(){if(!img)return;c.clearRect(0,0,cv.width,cv.height);c.drawImage(img,0,0);
+for(const r of rects){c.fillStyle='#060606';c.fillRect(r.x,r.y,r.w,r.h);c.strokeStyle='#d1ff8d';c.lineWidth=3;c.strokeRect(r.x,r.y,r.w,r.h)}
+if(start&&moving){const r=norm(start,moving);c.fillStyle='#0b110bbb';c.fillRect(r.x,r.y,r.w,r.h);c.strokeStyle='#dbffa0';c.lineWidth=3;c.strokeRect(r.x,r.y,r.w,r.h)}}
+function point(e){const b=cv.getBoundingClientRect();return {x:(e.clientX-b.x)*cv.width/b.width,y:(e.clientY-b.y)*cv.height/b.height}}
+function status(s,kind=''){const el=$('status');el.textContent=s;el.className='status '+kind}
+function reset(){generated=null;genInfo=null;$('save').disabled=$('json').disabled=true;$('preview').hidden=true;if(url){URL.revokeObjectURL(url);url=null}status('生成前です。目視確認後、画像を生成してください。')}
+function update(){$('undo').disabled=$('clear').disabled=!rects.length;$('count').textContent=rects.length+'か所';$('make').disabled=!img||!checks.every(x=>x.checked);render()}
+cv.addEventListener('pointerdown',e=>{if(!img||e.button!==0)return;start=point(e);moving=start;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(start){moving=point(e);render()}});
+cv.addEventListener('pointerup',e=>{if(!start)return;const r=norm(start,point(e));start=moving=null;if(r.w>=4&&r.h>=4){rects.push(r);reset()}update()});
+cv.addEventListener('pointercancel',()=>{start=moving=null;render()});
+$('undo').onclick=()=>{rects.pop();reset();update()};$('clear').onclick=()=>{rects=[];reset();update()};
+checks.forEach(x=>x.onchange=()=>{reset();update()});
+async function load(f){try{
+if(!f||!['image/jpeg','image/png'].includes(f.type)||f.size>20*1048576)throw Error('JPEG/PNG、20MB以内の画像が必要です');
+let bytes=await f.arrayBuffer(),meta=scan(bytes);if(!meta.valid||meta.anim)throw Error('画像形式が不正、またはアニメーションです');
+let bitmap=await createImageBitmap(new Blob([bytes],{type:f.type}),{imageOrientation:'from-image'});if(bitmap.width*bitmap.height>25e6){bitmap.close();throw Error('画像は2,500万画素以内にしてください')}
+if(img)img.close();img=bitmap;sourceInfo=meta;sourceSize=f.size;cv.width=img.width;cv.height=img.height;
+rects=[];checks.forEach(x=>x.checked=false);$('empty').hidden=true;$('details').textContent=f.name+' · '+img.width+'×'+img.height+'px';
+$('found').replaceChildren();if(meta.count){for(const t of meta.tags){let span=document.createElement('span');span.className='chip';span.textContent=t;$('found').append(span)}}else $('found').textContent='対象コンテナ 0件';
+reset();update()}catch(e){status(e.message,'error')}}
+$('file').onchange=e=>{load(e.target.files[0]);e.target.value=''};
+for(const type of ['dragover','dragenter'])$('drop').addEventListener(type,e=>{e.preventDefault();$('drop').classList.add('drag')});
+for(const type of ['dragleave','drop'])$('drop').addEventListener(type,e=>{e.preventDefault();$('drop').classList.remove('drag')});
+$('drop').addEventListener('drop',e=>{if(e.dataTransfer.files.length)load(e.dataTransfer.files[0])});
+function blob(c,type){return new Promise((r,j)=>c.toBlob(v=>v?r(v):j(Error('書き出し失敗')),type))}
+$('make').onclick=async()=>{if(!img||!checks.every(x=>x.checked))return;$('make').disabled=true;status('PNGを生成・再点検中…');
+try{const out=document.createElement('canvas');out.width=img.width;out.height=img.height;const g=out.getContext('2d',{alpha:false});g.fillStyle='white';g.fillRect(0,0,out.width,out.height);g.drawImage(img,0,0);g.fillStyle='black';rects.forEach(r=>g.fillRect(r.x,r.y,r.w,r.h));
+const result=await blob(out,'image/png'),info=scan(await result.arrayBuffer());if(!info.valid||info.format!=='png'||info.count)throw Error('出力に付加情報が検出されました');
+generated=result;genInfo=info;url=URL.createObjectURL(result);$('preview').src=url;$('preview').hidden=false;$('save').disabled=$('json').disabled=false;
+status('出力成功 · 付加情報 0件 / 塗りつぶし '+rects.length+'か所。写真の中身を最後に目視で確認してください。','good')}
+catch(e){status(e.message,'error')}finally{update()}};
+function saveBlob(b,name){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+$('save').onclick=()=>{if(generated&&genInfo&&!genInfo.count)saveBlob(generated,'public-safe-image.png')};
+$('json').onclick=()=>{if(!generated)return;const report={app:'KOKAI MASK',inputFormat:sourceInfo.format,inputBytes:sourceSize,inputContainers:sourceInfo.tags,outputFormat:'png',outputContainers:genInfo.count,redactions:rects,manualInspection:true,notice:'画像内の識別情報・すべてのメタデータの除去を保証しません'};
+saveBlob(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}),'public-safe-check.json')};
+$('demo').onclick=async()=>{let a=document.createElement('canvas');a.width=800;a.height=460;let g=a.getContext('2d');g.fillStyle='#264a38';g.fillRect(0,0,800,460);g.fillStyle='#d7efa7';g.font='bold 45px sans-serif';g.fillText('DEMO PHOTO',55,130);g.font='26px sans-serif';g.fillText('HIDE PRIVATE TEXT: 123-456',55,245);let b=await blob(a,'image/jpeg'),j=new Uint8Array(await b.arrayBuffer()),ex=new TextEncoder().encode('Exif\0\0DEMO'),seg=new Uint8Array([255,225,0,ex.length+2,...ex]),o=new Uint8Array(j.length+seg.length);o.set(j.subarray(0,2));o.set(seg,2);o.set(j.subarray(2),seg.length+2);load(new File([o],'demo-with-exif.jpg',{type:'image/jpeg'}))};
+})();
+</script></body></html>
