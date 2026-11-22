@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102e2a"><meta name="description" content="委託販売の納品・売上・返却・破損・残品を照合し、精算前に数量差を見つけるオフラインWebアプリ。">
+<title>棚じまい — 委託精算の前に、数を合わせる。</title><style>
+:root{--ink:#17332f;--deep:#102f2b;--soft:#557069;--teal:#0c766b;--bg:#f7f6f0;--paper:#fffefa;--line:#dddcd3;--coral:#bd4f36;--pale:#fbe6d9;--green:#dcece2;--radius:18px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:var(--ink)}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;font-size:14px}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #9bbb68;outline-offset:2px}.app{max-width:1440px;margin:auto;padding:0 42px}.masthead{height:84px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:13px}.brand-mark{display:grid;place-items:center;width:43px;height:43px;font-size:32px;border-radius:11px;color:#eee7c7;background:var(--deep)}.brand strong{display:block;font-size:23px;letter-spacing:.14em;line-height:1.2}.brand small{font-size:10px;letter-spacing:.12em;color:var(--soft)}.no-cloud{color:var(--soft);font-size:12px}.signal{display:inline-block;width:8px;height:8px;border-radius:50%;background:#65a588;margin-right:7px}.hero{min-height:334px;display:grid;grid-template-columns:1.5fr .6fr;align-items:center;border-bottom:1px solid var(--line);position:relative;overflow:hidden;padding:50px 0}.eyebrow{font-size:10px;color:#a05b45;letter-spacing:.2em;font-weight:800;margin:0 0 15px}.hero h1{font-size:clamp(35px,4.2vw,66px);font-weight:800;letter-spacing:-.075em;line-height:1.25;margin:0 0 20px}.hero h1 em{font-style:normal;color:var(--teal)}.lead{font-size:15px;line-height:1.9;color:var(--soft);margin:0}.hero-art{position:relative;width:290px;height:220px;justify-self:center;transform:rotate(-3deg)}.shelf{height:52px;border-bottom:8px solid var(--deep);display:flex;align-items:end;gap:8px;justify-content:space-around;margin-bottom:16px}.shelf i{display:block;height:45px;width:44px;background:#a9c3a6;border:2px solid var(--deep);border-radius:3px 3px 0 0}.shelf.one i:nth-child(2),.shelf.two i:nth-child(3){background:#dcac7b;height:39px}.shelf.two i{height:50px;width:58px;background:#dbd7ac}.shelf.three i{height:38px;width:36px;background:#7fa9a5}.sticker{position:absolute;z-index:2;right:-18px;top:-20px;width:98px;height:98px;background:#edcb87;border:2px solid var(--deep);border-radius:50%;font-size:12px;letter-spacing:.12em;font-weight:800;text-align:center;display:grid;place-content:center;transform:rotate(18deg);line-height:1.35;box-shadow:4px 5px 0 rgba(23,51,47,.18)}.sticker b{font-size:24px}.toolbar{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:22px 0}.event-name{color:var(--soft);font-size:12px;display:flex;gap:12px;align-items:center}.event-name input{background:white;border:1px solid var(--line);border-radius:9px;padding:11px 13px;min-width:280px;color:var(--ink)}.toolbar-actions,.export-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.btn{padding:11px 16px;border-radius:9px;border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;font-size:12px;font-weight:800;letter-spacing:.01em}.btn.dark{color:white;background:var(--deep)}.btn.primary{color:white;background:var(--teal)}.btn.ghost{color:var(--ink);background:transparent}.btn.outline{background:var(--paper);border-color:var(--line);color:var(--ink)}.btn:hover{filter:brightness(.95)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 46px}.metric{background:var(--deep);color:#e8ebdb;padding:22px 24px;border-radius:13px;min-height:140px}.metric.alert{background:#a65237}.metric span{display:block;font-size:12px;letter-spacing:.08em;color:#d7ded3}.metric strong{display:block;font-size:clamp(28px,3vw,43px);font-weight:650;margin:11px 0 2px;letter-spacing:-.05em;white-space:nowrap}.metric small{font-size:11px;opacity:.74}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:0 0 21px}.section-head .eyebrow{margin-bottom:9px}.section-head h2,.exports h2{font-size:27px;letter-spacing:-.06em;margin:0 0 7px}.section-head p:not(.eyebrow),.exports p:not(.eyebrow){color:var(--soft);margin:0;line-height:1.7;font-size:13px}.limit{font-size:11px;color:var(--soft);white-space:nowrap}.workarea,.settlements{margin-bottom:53px}.guide{background:#e8eee7;border-left:4px solid var(--teal);border-radius:7px;padding:13px 18px;display:flex;gap:18px;font-size:12px;line-height:1.7;margin-bottom:14px}.guide b{white-space:nowrap}.table-scroll{overflow-x:auto;background:var(--paper);border-radius:13px;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;min-width:1080px}th,td{border-bottom:1px solid var(--line);text-align:left;padding:11px 8px;vertical-align:middle}th{background:#efefe8;color:var(--soft);font-size:10px;white-space:nowrap;letter-spacing:.04em}td:first-child,th:first-child{padding-left:18px;min-width:260px}tr:last-child td{border-bottom:none}.item-meta{display:flex;flex-direction:column;gap:6px}.item-meta input{width:100%;min-width:90px;border:1px solid #e3e2d9;background:white;border-radius:6px;padding:7px 8px;color:var(--ink)}.item-meta .owner-input{font-size:11px;color:var(--soft)}.item-meta .sku-input{font-size:10px;color:var(--soft)}.cell-num{width:75px;max-width:75px;border:1px solid #e3e2d9;border-radius:6px;padding:8px 4px;text-align:center;background:white;font-variant-numeric:tabular-nums;color:var(--ink)}.cell-num.wide{width:98px;max-width:98px}.status-cell{font-size:12px;font-weight:800;white-space:nowrap}.status-cell.ok{color:#187455}.status-cell.shortage,.status-cell.overage,.status-cell.invalid{color:#b74a30}.row-buttons{display:flex;flex-direction:column;gap:4px}.mini-btn{border:0;background:transparent;padding:4px 3px;text-align:left;color:#0c766b;font-size:11px;white-space:nowrap}.mini-btn.danger{color:#ad4f38}.warning-row{background:#fff9f3}.invalid-row{background:#ffece9}.empty{padding:40px;text-align:center}.text-button{background:none;color:var(--teal);border:0;text-decoration:underline}.vendor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.vendor-card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:21px;display:flex;flex-direction:column;gap:17px}.vendor-top{display:flex;gap:12px;justify-content:space-between;align-items:start}.vendor-card h3{margin:0;font-size:18px;letter-spacing:-.03em;overflow-wrap:anywhere}.vendor-card small{font-size:11px;color:var(--soft)}.status-pill{padding:6px 9px;border-radius:30px;font-weight:800;white-space:nowrap;font-size:10px}.status-pill.ok{background:var(--green);color:#176448}.status-pill.hold{background:var(--pale);color:#a94930}.money{font-size:32px;letter-spacing:-.055em;font-weight:700}.vendor-details{display:flex;justify-content:space-between;font-size:12px;color:var(--soft);border-top:1px solid var(--line);padding-top:13px}.vendor-problem{border-radius:7px;background:#fbede6;padding:11px;font-size:11px;line-height:1.7;color:#9e4b35;overflow-wrap:anywhere}.exports{background:#e6eee7;border-radius:16px;padding:30px;display:flex;align-items:center;gap:20px;justify-content:space-between}.export-actions{justify-content:flex-end}.notes{padding:22px 0;color:var(--soft);font-size:11px;line-height:1.8}.notes p{max-width:1100px}footer{border-top:1px solid var(--line);display:flex;justify-content:space-between;padding:25px 0 45px;font-size:11px;color:var(--soft);gap:15px}#toast{position:fixed;right:20px;bottom:20px;background:var(--deep);color:white;padding:13px 18px;border-radius:9px;max-width:min(370px,calc(100vw - 40px));box-shadow:0 10px 35px #1234;display:none;z-index:99;line-height:1.5}#toast.show{display:block}@media(max-width:1050px){.app{padding:0 20px}.vendor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.exports{flex-wrap:wrap}.metric{padding:17px}}@media(max-width:700px){.app{padding:0 14px}.masthead{height:70px}.no-cloud{font-size:9px}.hero{grid-template-columns:1fr;min-height:0;padding:42px 0}.hero-art{display:none}.hero h1{font-size:36px}.lead{font-size:13px}.toolbar,.section-head{align-items:stretch;flex-direction:column}.event-name{align-items:flex-start;flex-direction:column}.event-name input{width:100%;min-width:0}.toolbar-actions{justify-content:stretch}.toolbar-actions .btn{flex:1}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:35px}.metric{min-height:113px;padding:15px}.metric strong{font-size:29px}.vendor-grid{grid-template-columns:1fr}.guide{flex-direction:column;gap:4px}.exports{padding:20px}.export-actions .btn{flex:1}.section-head h2{font-size:24px}footer{flex-direction:column}}@media print{.app{max-width:none;padding:0}.hero-art,.toolbar-actions,.export-actions,.mini-btn,.no-cloud,#toast{display:none!important}.masthead{height:auto}.hero{min-height:0;padding:12px 0}.hero h1{font-size:26px}.metrics{margin-bottom:18px}.metric{background:white!important;color:black!important;min-height:0;border:1px solid #bbb}.metrics{grid-template-columns:repeat(4,1fr)}.table-scroll{overflow:visible}table{min-width:0}td,th{padding:4px;font-size:8px}.item-meta input,.cell-num{border:0!important;font-size:8px;padding:2px;width:48px}.vendor-grid{grid-template-columns:repeat(3,1fr)}.vendor-card{break-inside:avoid}.notes{font-size:9px}}
+
+</style></head>
+<body>
+<div class="app">
+<header class="masthead"><div class="brand"><span class="brand-mark" aria-hidden="true">▦</span><div><strong>棚じまい</strong><small>TANAJIMAI / consignment closeout</small></div></div><div class="no-cloud"><span class="signal"></span>ブラウザ内で完結 · 送信なし</div></header>
+<main>
+<section class="hero"><div><p class="eyebrow">委託販売・イベント終わりの照合ツール / FREE</p><h1>精算する前に、<br><em>ひとつずつ</em>数を合わせる。</h1><p class="lead">「納品 − 売上 − 返却 − 破損 − 保管」はゼロですか？<br>差異が残った委託元を自動で保留し、確認すべき商品を示します。</p></div><div class="hero-art" aria-hidden="true"><div class="sticker">CHECK<br><b>↘</b><br>SETTLE</div><div class="shelf one"><i></i><i></i><i></i><i></i></div><div class="shelf two"><i></i><i></i><i></i></div><div class="shelf three"><i></i><i></i><i></i><i></i><i></i></div></div></section>
+<section class="toolbar"><label class="event-name">この台帳の名前 <input id="eventTitle" maxlength="80" placeholder="例：秋のZINE委託フェア" aria-label="台帳の名前"></label><div class="toolbar-actions"><button class="btn ghost" id="demoBtn">デモに戻す</button><button class="btn ghost" id="newBtn">空の台帳</button><button class="btn dark" id="addBtn">＋ 商品を追加</button></div></section>
+<section class="metrics" aria-label="集計"><div class="metric"><span>登録商品</span><strong id="mItems">0</strong><small>品目</small></div><div class="metric alert"><span>未照合</span><strong id="mProblems">0</strong><small>品目</small></div><div class="metric"><span>売上合計</span><strong id="mSales">¥0</strong><small>円 · 税・値引なし</small></div><div class="metric"><span>委託元受取予定</span><strong id="mPayout">¥0</strong><small>保留分を含む参考額</small></div></section>
+<section class="workarea"><div class="section-head"><div><p class="eyebrow">01 / INVENTORY RECONCILIATION</p><h2>数量を照合する</h2><p>計算式：納品 − 販売 − 返却 − 破損 − 保管 = <b>差異</b>。ゼロ以外は要確認。</p></div><span class="limit" id="countLimit">最大120品目</span></div>
+<div class="guide" role="note"><b>入力のコツ</b><span>「保管」は現物を数えた残数。「返却」は委託元へ実際に返した数です。売上が不明な場合は現物数から<strong>候補数</strong>を算出できますが、自動で確定しません。</span></div>
+<div class="table-scroll"><table id="itemsTable"><thead><tr><th>委託元・商品</th><th>単価 (円)</th><th>手数料 (%)</th><th>納品</th><th>販売</th><th>返却</th><th>破損</th><th>保管</th><th>差異</th><th>操作</th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+<div id="empty" class="empty" hidden>まだ商品がありません。<button class="text-button" id="emptyAdd">＋ 最初の商品を追加</button></div>
+</section>
+<section class="settlements"><div class="section-head"><div><p class="eyebrow">02 / SETTLEMENT READINESS</p><h2>委託元ごとの精算候補</h2><p>数量差がある委託元は自動で「保留」に表示します。実際の送金・精算は行いません。</p></div><button class="btn outline" id="statementBtn">精算一覧 CSV ↓</button></div><div id="consignors" class="vendor-grid"></div></section>
+<section class="exports"><div><p class="eyebrow">03 / SAVE &amp; EXPORT</p><h2>結果を持ち帰る</h2><p>ログイン不要。端末内に自動保存します。ブラウザデータ消去に備えてJSONバックアップを保管してください。</p></div><div class="export-actions"><button class="btn primary" id="csvBtn">商品明細 CSV ↓</button><button class="btn outline" id="jsonBtn">台帳 JSON ↓</button><label class="btn outline upload" for="importInput">JSON 読込 ↑</label><input id="importInput" type="file" accept="application/json,.json" hidden><button class="btn ghost" id="printBtn">印刷する ↗</button></div></section>
+<section class="notes"><p><b>重要:</b> これは数量と単純な歩率の照合補助です。税、消費税の内外税、値引・返品返金、振込手数料、契約ごとの精算条件は含みません。手数料は商品行ごとに「販売数×単価×率」を1円未満切り捨てます。金額や支払候補を正式な会計記録・送金指図として扱わず、契約とレシートを確認してください。</p></section>
+</main><footer>棚じまい / TANAJIMAI <span>Built for tiny shops, zine fairs &amp; thoughtful handoffs · 2026</span></footer></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/* TANAJIMAI engine — no dependencies. Pure, browser/Node compatible. */
+(function(root,factory){ const api=factory(); if(typeof module==='object'&&module.exports)module.exports=api; root.TanajimaiEngine=api; })(typeof globalThis!=='undefined'?globalThis:this,function(){
+'use strict';
+const MAX_ROWS=120;
+const FIELDS=['received','sold','returned','damaged','onHand'];
+function asInt(v,max){ const n=Number(v); return typeof v!=='boolean' && v!==null && v!==undefined && !(typeof v==='string' && !v.trim()) && Number.isSafeInteger(n) && n>=0 && n<=max ? n : null; }
+function normalizeItem(row){
+  const x=row&&typeof row==='object'&&!Array.isArray(row)?row:{};
+  return {id:String(x.id||'').slice(0,80), consignor:String(x.consignor||'').trim().slice(0,60), title:String(x.title||'').trim().slice(0,100), sku:String(x.sku||'').trim().slice(0,40), price:x.price, rate:x.rate, received:x.received, sold:x.sold, returned:x.returned, damaged:x.damaged, onHand:x.onHand};
+}
+function inspect(row){
+ const r=normalizeItem(row);const errors=[];
+ if(!r.consignor) errors.push('委託元の呼称が空欄');
+ if(!r.title) errors.push('商品名が空欄');
+ const price=asInt(r.price,10000000),rate=asInt(r.rate,100);
+ if(price===null) errors.push('単価は0〜10,000,000円の整数');
+ if(rate===null) errors.push('手数料率は0〜100の整数');
+ const n={};for(const k of FIELDS){n[k]=asInt(r[k],100000);if(n[k]===null)errors.push(`${k} は0〜100,000の整数`);}
+ const valid=!errors.length;
+ const diff=valid?n.received-n.sold-n.returned-n.damaged-n.onHand:null;
+ const gross=valid?price*n.sold:null;
+ const fee=valid?Math.floor(gross*rate/100):null;
+ return {...r,...n,price,rate,valid,errors,diff,expected:valid?n.received-n.sold-n.damaged:null,gross,fee,share:valid?gross-fee:null,status:!valid?'invalid':diff===0?'ok':diff>0?'shortage':'overage'};
+}
+function analyze(rows){
+ const items=(Array.isArray(rows)?rows:[]).slice(0,MAX_ROWS).map(inspect);
+ const map=new Map();let gross=0,fee=0,share=0,problems=0,unexplained=0,complete=0;
+ for(const item of items){
+   if(item.status!=='ok')problems++;else complete++;
+   if(item.valid){gross+=item.gross;fee+=item.fee;share+=item.share;unexplained+=item.diff;}
+   const key=item.consignor||'（未入力）';
+   if(!map.has(key))map.set(key,{consignor:key,items:0,gross:0,fee:0,share:0,issues:0,issueNames:[],status:'ready'});
+   const a=map.get(key);a.items++;
+   if(item.valid){a.gross+=item.gross;a.fee+=item.fee;a.share+=item.share;}
+   if(item.status!=='ok'){a.issues++;a.status='hold';a.issueNames.push(item.title||'（商品名未入力）');}
+ }
+ const consignors=[...map.values()].sort((a,b)=>a.consignor.localeCompare(b.consignor,'ja'));
+ return {items,consignors,totals:{rows:items.length,complete,problems,gross,fee,share,unexplained,ready:consignors.filter(c=>c.status==='ready').length,held:consignors.filter(c=>c.status==='hold').length}};
+}
+function inferredSold(row){
+ const x=inspect(row); if(!x.valid)return null;
+ const possible=x.received-x.returned-x.damaged-x.onHand;
+ return possible>=0&&possible<=x.received? possible : null;
+}
+function escapeCsv(x){const str=String(x??'');return /[",\r\n]/.test(str)?'"'+str.replaceAll('"','""')+'"':str;}
+function makeCsv(result){
+ const h=['委託元','商品','SKU','単価円','手数料率%','納品','販売','返却','破損','保管','数量差','状態','売上円','手数料円','委託元受取予定円'];
+ const lines=[h,...result.items.map(i=>[i.consignor,i.title,i.sku,i.price??'',i.rate??'',i.received??'',i.sold??'',i.returned??'',i.damaged??'',i.onHand??'',i.diff??'',i.status,i.gross??'',i.fee??'',i.share??''])];
+ return '\uFEFF'+lines.map(r=>r.map(escapeCsv).join(',')).join('\r\n')+'\r\n';
+}
+function makeStatementsCsv(result){const lines=[['委託元','商品数','売上円','手数料円','委託元受取予定円','状態','未照合商品']];for(const c of result.consignors){lines.push([c.consignor,c.items,c.gross,c.fee,c.share,c.status==='hold'?'要照合（支払保留）':'照合済（支払候補）',c.issueNames.join(' / ')])}return '\uFEFF'+lines.map(r=>r.map(escapeCsv).join(',')).join('\r\n')+'\r\n';}
+function validateImport(obj){
+ if(!obj||typeof obj!=='object'||Array.isArray(obj)||obj.format!=='tanajimai-v1'||!Array.isArray(obj.items))throw Error('対応していないバックアップ形式です');
+ if(obj.items.length>MAX_ROWS)throw Error(`登録上限は${MAX_ROWS}商品です`);
+ const items=obj.items.map((x,i)=>{const item=normalizeItem(x);item.id=item.id||`import-${i}`;return item;});
+ if(items.some(i=>!i.consignor||!i.title))throw Error('委託元・商品名が空欄の行を含みます');
+ if(items.some(i=>!inspect(i).valid))throw Error('数値の範囲外・不正なデータを含みます');
+ return {title:String(obj.title||'棚じまい台帳').slice(0,80),items};
+}
+return {MAX_ROWS,normalizeItem,inspect,analyze,inferredSold,makeCsv,makeStatementsCsv,validateImport};
+});
+
+</script><script>
+/* TANAJIMAI browser app. All data remains in this browser unless explicitly exported. */
+(function(){
+'use strict';
+const E=window.TanajimaiEngine;
+const KEY='tanajimai:v1';
+const DEMO={title:'秋の小さなZINE市（サンプル）',items:[
+{id:'demo-1',consignor:'灯台文庫',title:'海辺のZINE',sku:'Z-001',price:850,rate:20,received:15,sold:9,returned:5,damaged:0,onHand:1},
+{id:'demo-2',consignor:'灯台文庫',title:'栞セット',sku:'B-002',price:350,rate:20,received:20,sold:12,returned:7,damaged:0,onHand:0},
+{id:'demo-3',consignor:'青い窓',title:'ポストカード（5枚）',sku:'C-010',price:700,rate:15,received:12,sold:6,returned:6,damaged:0,onHand:0},
+{id:'demo-4',consignor:'青い窓',title:'小冊子「音の地図」',sku:'Z-019',price:1200,rate:15,received:8,sold:4,returned:3,damaged:1,onHand:0},
+{id:'demo-5',consignor:'庭の標本室',title:'植物図版カード',sku:'P-031',price:500,rate:25,received:16,sold:10,returned:5,damaged:0,onHand:1},
+{id:'demo-6',consignor:'庭の標本室',title:'ミニポスター',sku:'P-032',price:900,rate:25,received:10,sold:3,returned:5,damaged:0,onHand:2}
+]};
+const $=id=>document.getElementById(id);
+const yen=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+const clone=o=>JSON.parse(JSON.stringify(o));
+let state=clone(DEMO), counter=0;
+function notify(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.classList.remove('show'),3400);}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({format:'tanajimai-v1',title:state.title,items:state.items}));return true;}catch{return false;}}
+function restore(){try{const raw=localStorage.getItem(KEY);if(raw){state=E.validateImport(JSON.parse(raw));return true;}}catch(e){notify('保存データを読み込めませんでした。サンプルで起動しました。');}return false;}
+function dom(tag,cls,txt){const el=document.createElement(tag);if(cls)el.className=cls;if(txt!==undefined)el.textContent=String(txt);return el;}
+function inp(value,field,index,klass,type){const el=dom('input',klass||'');el.value=value??'';el.dataset.field=field;el.dataset.index=index;el.setAttribute('aria-label',`商品${index+1} ${field}`);if(type==='number'){el.type='number';el.step='1';el.min='0';el.max=field==='rate'?'100':field==='price'?'10000000':'100000';el.inputMode='numeric';}else {el.maxLength=field==='consignor'?60:field==='title'?100:40;}return el;}
+function fieldCell(tr,node){const td=dom('td');td.append(node);tr.append(td);return td;}
+function renderRows(result){const body=$('itemsBody');body.replaceChildren();
+ result.items.forEach((r,index)=>{
+   const tr=dom('tr',r.status==='invalid'?'invalid-row':r.status==='ok'?'':'warning-row');tr.dataset.itemid=r.id;
+   const meta=dom('div','item-meta');meta.append(inp(state.items[index].consignor,'consignor',index,'owner-input','text'),inp(state.items[index].title,'title',index,'title-input','text'),inp(state.items[index].sku,'sku',index,'sku-input','text'));fieldCell(tr,meta);
+   for(const fld of ['price','rate','received','sold','returned','damaged','onHand'])fieldCell(tr,inp(state.items[index][fld],fld,index,'cell-num'+(fld==='price'?' wide':''),'number'));
+   const tag=dom('div','status-cell '+r.status);
+   if(r.status==='invalid'){tag.textContent='入力確認';tag.title=r.errors.join(' / ');}else if(r.diff===0){tag.textContent='✓ 一致';tag.title='数量差0';}else{tag.textContent=(r.diff>0?'+':'')+r.diff+' 個';tag.title=r.diff>0?'未配分の在庫があり不足が疑われます':'入力合計が納品数を超えています';}
+   fieldCell(tr,tag);
+   const actions=dom('div','row-buttons');const suggest=dom('button','mini-btn','販売数を逆算');suggest.dataset.action='suggest';suggest.dataset.index=index;suggest.title='現物の残数から販売数の候補を表示し、確認後に反映します';
+   const del=dom('button','mini-btn danger','削除');del.dataset.action='remove';del.dataset.index=index;actions.append(suggest,del);fieldCell(tr,actions);
+   body.append(tr);
+ });$('empty').hidden=result.items.length!==0;$('countLimit').textContent=`${result.items.length} / ${E.MAX_ROWS} 品目`;
+}
+function vendorCard(c){
+ const box=dom('article','vendor-card');const top=dom('div','vendor-top'),names=dom('div');names.append(dom('h3','',c.consignor),dom('small','',c.items+'品目の照合'));const tag=dom('span','status-pill '+(c.status==='ready'?'ok':'hold'),c.status==='ready'?'✓ 照合済':'! 要照合・保留');top.append(names,tag);box.append(top);
+ const money=dom('div');money.append(dom('div','money',yen(c.share)),dom('small','','委託元受取予定（参考）'));box.append(money);
+ const d=dom('div','vendor-details');d.append(dom('span','',`売上 ${yen(c.gross)}`),dom('span','',`手数料 ${yen(c.fee)}`));box.append(d);
+ if(c.issues)box.append(dom('div','vendor-problem',`${c.issues}品目を要照合：${c.issueNames.join('、')}。数量が一致するまで精算しないでください。`));
+ return box;
+}
+function render(){
+ const result=E.analyze(state.items);
+ $('eventTitle').value=state.title;
+ $('mItems').textContent=String(result.totals.rows);$('mProblems').textContent=String(result.totals.problems);$('mSales').textContent=yen(result.totals.gross);$('mPayout').textContent=yen(result.totals.share);
+ renderRows(result);const area=$('consignors');area.replaceChildren(...result.consignors.map(vendorCard));if(!result.consignors.length)area.append(dom('p','', '商品を登録すると委託元の精算候補を表示します。'));
+}
+function updated(){persist();render();}
+function newItem(){return {id:'item-'+Date.now()+'-'+(++counter),consignor:'新しい委託元',title:'新しい商品',sku:'',price:500,rate:20,received:1,sold:0,returned:0,damaged:0,onHand:1};}
+function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=dom('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function downloadJson(){download('tanajimai-backup.json',JSON.stringify({format:'tanajimai-v1',title:state.title,items:state.items},null,2),'application/json;charset=utf-8');notify('台帳のJSONを保存しました。');}
+$('itemsBody').addEventListener('change',ev=>{const el=ev.target;if(!el.matches('input[data-field]'))return;const idx=Number(el.dataset.index),key=el.dataset.field;if(!state.items[idx])return;state.items[idx][key]=el.value;updated();});
+$('itemsBody').addEventListener('click',ev=>{const btn=ev.target.closest('button[data-action]');if(!btn)return;const index=Number(btn.dataset.index),row=state.items[index];if(!row)return;
+ if(btn.dataset.action==='remove'){if(confirm(`「${row.title}」を台帳から削除しますか？`)){state.items.splice(index,1);updated();notify('商品を削除しました');}}
+ if(btn.dataset.action==='suggest'){const n=E.inferredSold(row);if(n===null){notify('入力値を確認してください。逆算できません。');return;}const msg=`「${row.title}」の販売候補は ${n} 個です。\n（納品 − 返却 − 破損 − 保管）\n現在の販売記録 ${row.sold} 個を ${n} 個に変更しますか？\n\n※レシートと照合してから確定してください。`;if(confirm(msg)){row.sold=n;updated();notify('販売数の候補を適用しました。実売上の確認が必要です。');}}
+ });
+function add(){if(state.items.length>=E.MAX_ROWS){notify('登録上限120品目です');return;}state.items.push(newItem());updated();$('itemsTable').scrollIntoView({behavior:'smooth',block:'center'});notify('商品を追加しました');}
+$('addBtn').addEventListener('click',add);$('emptyAdd').addEventListener('click',add);
+$('eventTitle').addEventListener('change',e=>{state.title=String(e.target.value).slice(0,80);persist();});
+$('demoBtn').addEventListener('click',()=>{if(confirm('現在の台帳をデモ内容に置き換えますか？ 必要なら先にJSON保存してください。')){state=clone(DEMO);updated();notify('デモに戻しました');}});
+$('newBtn').addEventListener('click',()=>{if(confirm('空の台帳に切り替えますか？ 現在の内容は上書きされます。')){state={title:'新しい委託販売台帳',items:[]};updated();notify('空の台帳を作成しました');}});
+$('csvBtn').addEventListener('click',()=>{download('tanajimai-items.csv',E.makeCsv(E.analyze(state.items)),'text/csv;charset=utf-8');notify('商品明細CSVを保存しました');});
+$('statementBtn').addEventListener('click',()=>{download('tanajimai-settlements.csv',E.makeStatementsCsv(E.analyze(state.items)),'text/csv;charset=utf-8');notify('精算候補CSVを保存しました');});
+$('jsonBtn').addEventListener('click',downloadJson);
+$('printBtn').addEventListener('click',()=>window.print());
+$('importInput').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>2000000)throw Error('2MB以下のJSONを指定してください');const parsed=E.validateImport(JSON.parse(await f.text()));if(!confirm(`${parsed.items.length}品目の台帳を読み込み、現在のデータを置き換えますか？`))return;state=parsed;updated();notify('JSONを読み込みました');}catch(err){notify('読込失敗: '+err.message);}finally{e.target.value='';}});
+restore();render();
+})();
+
+</script></body></html>
