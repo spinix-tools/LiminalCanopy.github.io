@@ -42,7 +42,7 @@ function inferredSold(row){
  const possible=x.received-x.returned-x.damaged-x.onHand;
  return possible>=0&&possible<=x.received? possible : null;
 }
-function escapeCsv(x){const str=String(x??'');return /[",\r\n]/.test(str)?'"'+str.replaceAll('"','""')+'"':str;}
+function escapeCsv(x){let str=String(x??'');if(typeof x==='string' && /^[\s]*[=+@\-]/.test(str))str="'"+str;return /[",\r\n]/.test(str)?'"'+str.replaceAll('"','""')+'"':str;}
 function makeCsv(result){
  const h=['委託元','商品','SKU','単価円','手数料率%','納品','販売','返却','破損','保管','数量差','状態','売上円','手数料円','委託元受取予定円'];
  const lines=[h,...result.items.map(i=>[i.consignor,i.title,i.sku,i.price??'',i.rate??'',i.received??'',i.sold??'',i.returned??'',i.damaged??'',i.onHand??'',i.diff??'',i.status,i.gross??'',i.fee??'',i.share??''])];
