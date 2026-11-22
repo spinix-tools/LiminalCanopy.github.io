@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102e2a"><meta name="description" content="委託販売の納品・売上・返却・破損・残品を照合し、精算前に数量差を見つけるオフラインWebアプリ。">
+<title>棚じまい — 委託精算の前に、数を合わせる。</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="app">
+<header class="masthead"><div class="brand"><span class="brand-mark" aria-hidden="true">▦</span><div><strong>棚じまい</strong><small>TANAJIMAI / consignment closeout</small></div></div><div class="no-cloud"><span class="signal"></span>ブラウザ内で完結 · 送信なし</div></header>
+<main>
+<section class="hero"><div><p class="eyebrow">委託販売・イベント終わりの照合ツール / FREE</p><h1>精算する前に、<br><em>ひとつずつ</em>数を合わせる。</h1><p class="lead">「納品 − 売上 − 返却 − 破損 − 保管」はゼロですか？<br>差異が残った委託元を自動で保留し、確認すべき商品を示します。</p></div><div class="hero-art" aria-hidden="true"><div class="sticker">CHECK<br><b>↘</b><br>SETTLE</div><div class="shelf one"><i></i><i></i><i></i><i></i></div><div class="shelf two"><i></i><i></i><i></i></div><div class="shelf three"><i></i><i></i><i></i><i></i><i></i></div></div></section>
+<section class="toolbar"><label class="event-name">この台帳の名前 <input id="eventTitle" maxlength="80" placeholder="例：秋のZINE委託フェア" aria-label="台帳の名前"></label><div class="toolbar-actions"><button class="btn ghost" id="demoBtn">デモに戻す</button><button class="btn ghost" id="newBtn">空の台帳</button><button class="btn dark" id="addBtn">＋ 商品を追加</button></div></section>
+<section class="metrics" aria-label="集計"><div class="metric"><span>登録商品</span><strong id="mItems">0</strong><small>品目</small></div><div class="metric alert"><span>未照合</span><strong id="mProblems">0</strong><small>品目</small></div><div class="metric"><span>売上合計</span><strong id="mSales">¥0</strong><small>円 · 税・値引なし</small></div><div class="metric"><span>委託元受取予定</span><strong id="mPayout">¥0</strong><small>保留分を含む参考額</small></div></section>
+<section class="workarea"><div class="section-head"><div><p class="eyebrow">01 / INVENTORY RECONCILIATION</p><h2>数量を照合する</h2><p>計算式：納品 − 販売 − 返却 − 破損 − 保管 = <b>差異</b>。ゼロ以外は要確認。</p></div><span class="limit" id="countLimit">最大120品目</span></div>
+<div class="guide" role="note"><b>入力のコツ</b><span>「保管」は現物を数えた残数。「返却」は委託元へ実際に返した数です。売上が不明な場合は現物数から<strong>候補数</strong>を算出できますが、自動で確定しません。</span></div>
+<div class="table-scroll"><table id="itemsTable"><thead><tr><th>委託元・商品</th><th>単価 (円)</th><th>手数料 (%)</th><th>納品</th><th>販売</th><th>返却</th><th>破損</th><th>保管</th><th>差異</th><th>操作</th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+<div id="empty" class="empty" hidden>まだ商品がありません。<button class="text-button" id="emptyAdd">＋ 最初の商品を追加</button></div>
+</section>
+<section class="settlements"><div class="section-head"><div><p class="eyebrow">02 / SETTLEMENT READINESS</p><h2>委託元ごとの精算候補</h2><p>数量差がある委託元は自動で「保留」に表示します。実際の送金・精算は行いません。</p></div><button class="btn outline" id="statementBtn">精算一覧 CSV ↓</button></div><div id="consignors" class="vendor-grid"></div></section>
+<section class="exports"><div><p class="eyebrow">03 / SAVE &amp; EXPORT</p><h2>結果を持ち帰る</h2><p>ログイン不要。端末内に自動保存します。ブラウザデータ消去に備えてJSONバックアップを保管してください。</p></div><div class="export-actions"><button class="btn primary" id="csvBtn">商品明細 CSV ↓</button><button class="btn outline" id="jsonBtn">台帳 JSON ↓</button><label class="btn outline upload" for="importInput">JSON 読込 ↑</label><input id="importInput" type="file" accept="application/json,.json" hidden><button class="btn ghost" id="printBtn">印刷する ↗</button></div></section>
+<section class="notes"><p><b>重要:</b> これは数量と単純な歩率の照合補助です。税、消費税の内外税、値引・返品返金、振込手数料、契約ごとの精算条件は含みません。手数料は商品行ごとに「販売数×単価×率」を1円未満切り捨てます。金額や支払候補を正式な会計記録・送金指図として扱わず、契約とレシートを確認してください。</p></section>
+</main><footer>棚じまい / TANAJIMAI <span>Built for tiny shops, zine fairs &amp; thoughtful handoffs · 2026</span></footer></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="engine.js"></script><script src="app.js" defer></script></body></html>
