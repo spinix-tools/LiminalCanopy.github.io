@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>皿めぐり | リユース食器の循環台帳</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:0;color:#173d3e;background:#f3f8f6}.wrap{max-width:700px;margin:13vh auto;padding:36px;background:#fff;border-radius:20px;box-shadow:0 14px 50px #153b3c15}h1{font-size:28px}.small{font-size:14px;line-height:1.8;color:#69817e}#err{color:#aa4836;white-space:pre-wrap}
+</style></head>
+<body><main class="wrap"><h1>↻ 皿めぐり</h1><p>リユース食器の循環台帳を開いています。</p><p class="small">オフライン動作・会員登録不要。アプリ本体は4つの圧縮済みソース断片を復元して起動します。データは端末内に保存されます。</p><p id="err" role="alert"></p></main>
+<script src="./payload-1.js"></script><script src="./payload-2.js"></script><script src="./payload-3.js"></script><script src="./payload-4.js"></script>
+<script>
+(async function(){
+  try {
+    if(typeof DecompressionStream==='undefined')throw Error('このブラウザはDecompressionStream(gzip)に未対応です。新しいChrome/Edge/Safari/Firefoxなどをご利用ください。');
+    const parts=globalThis.SARAMEGURI_PARTS;
+    if(!Array.isArray(parts)||parts.length!==4||parts.some(p=>typeof p!=='string'))throw Error('アプリ本体を読み込めませんでした。4つのpayloadファイルが揃っているか確認してください。');
+    const encoded=parts.join('');
+    const compressed=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    const stream=new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const html=await new Response(stream).text();
+    if(!html.includes('<script id="engine">'))throw Error('アプリ本体の検証に失敗しました。');
+    document.open();document.write(html);document.close();
+  }catch(e){document.getElementById('err').textContent='起動エラー: '+e.message;}
+})();
+</script>
+</body></html>
