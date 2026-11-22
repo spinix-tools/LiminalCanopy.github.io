@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>差替え灯 / SASHIKAE LAMP</title>
+<style>
+:root{font-family:system-ui,'Noto Sans JP',sans-serif;color:#18362c;background:#f4f7f1}*{box-sizing:border-box}body{margin:0}header{padding:23px max(20px,5vw);background:#12352f;color:#fff}header b{font-size:23px}header small{display:block;color:#bfd4a9;margin-top:5px}main{max-width:1200px;margin:auto;padding:28px 20px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}section{background:#fff;border:1px solid #dae6d8;border-radius:14px;padding:21px;margin-bottom:18px}h1{font-size:25px;margin:0 0 9px}h2{font-size:18px;margin:0 0 15px}h3{font-size:15px;margin:0}.note{color:#697e70;font-size:12px;line-height:1.8}.warn{background:#fff3d7;border-left:4px solid #c89535;padding:12px;margin:16px 0;font-size:12px;line-height:1.7}label{display:block;font-size:13px;font-weight:700;margin:13px 0 5px}input,select{width:100%;padding:10px;border:1px solid #cbdbcf;border-radius:7px;background:#fff;color:#18362c}button{border:1px solid #b9d0b8;border-radius:8px;padding:10px 15px;background:#ebf4e2;color:#204b37;font-weight:700;cursor:pointer}button:hover{background:#d9ebc5}button:disabled{opacity:.45}button.primary{background:#164433;color:#fff}button.primary:hover{background:#24634a}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.chips{display:flex;gap:6px;flex-wrap:wrap;max-height:185px;overflow:auto}.chip{border-radius:20px;padding:7px 9px;border:1px solid #ccddc5;background:#f8faf6;font-size:11px;cursor:pointer}.chip.on{background:#c9e6ae;border-color:#85b66c;font-weight:bold}.stat{display:flex;gap:15px;margin-bottom:18px}.stat div{flex:1;padding:16px;background:#e7f0df;border-radius:10px}.stat strong{display:block;font-size:27px}.stat span{font-size:12px}.impact{border:1px solid #dfebda;border-radius:10px;padding:12px;margin:10px 0;background:#fbfdfa}.path{color:#4d8a62;font-size:12px;margin:7px 0;overflow-wrap:anywhere}.delta{color:#97611c;font-size:12px}.muted{color:#71857a}.row{padding:9px 0;border-bottom:1px solid #edf1eb;font-size:13px;display:flex;justify-content:space-between;gap:12px}.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status{font-size:12px;color:#376f50;min-height:22px}.foot{font-size:11px;color:#6b7e71;line-height:1.7}@media(max-width:800px){.grid,.split{grid-template-columns:1fr}main{padding:17px}.stat{gap:7px}.stat div{padding:10px}.stat strong{font-size:23px}}
+</style></head><body>
+<header><b>◈ 差替え灯 <span style="font-size:12px;color:#a8c891">SASHIKAE LAMP</span></b><small>その仕入れ変更、どのメニューまで届く？ · 端末内で処理 / 外部送信なし</small></header>
+<main><h1>仕入れ変更の影響を、経路で確認。</h1><p class="note">材料・共通仕込み品・販売メニューをつなぎ、更新の前に点検対象を抽出。最初から架空のデモを操作できます。</p>
+<div class="stat"><div><span>材料</span><strong id="ic">0</strong></div><div><span>メニュー</span><strong id="mc">0</strong></div><div><span>影響対象</span><strong id="ac">0</strong></div></div>
+<div class="grid"><section><h2>01 変更内容を試す</h2><label for="item">変更する材料</label><select id="item"></select><div class="note" id="before"></div>
+<label for="supplier">変更後の仕入先</label><input id="supplier" maxlength="100">
+<label for="revision">変更後の規格書・版</label><input id="revision" maxlength="100">
+<label>変更後の登録アレルゲン（29品目）</label><div class="chips" id="tags"></div>
+<label style="display:flex;gap:8px;align-items:center"><input style="width:auto" type="checkbox" id="verified">規格書を人が照合済み</label>
+<div class="actions"><button class="primary" id="apply">変更を台帳に反映</button><button id="restore">変更案を戻す</button></div><p class="status" id="status"></p>
+</section><section><h2>02 確認が必要なメニュー</h2><div id="report"></div><p class="note">追加・削除は「登録した情報」の差分。削除が表示されても、食材に含まれないことの証明ではありません。</p></section></div>
+<section><h2>03 材料とレシピを編集</h2><div class="grid"><div><h3>登録済み材料</h3><div id="ingredients"></div><label for="newIng">材料を追加</label><div class="split"><input id="newIng" placeholder="材料名" maxlength="100"><input id="newSup" placeholder="仕入先" maxlength="100"></div><div class="actions"><button id="addIng">＋ 材料追加</button></div></div>
+<div><h3>レシピの構成</h3><label for="recipe">レシピを選ぶ</label><select id="recipe"></select><div id="parts"></div><div class="split"><select id="kind"><option value="ingredient">材料</option><option value="recipe">共通仕込み品</option></select><select id="target"></select></div><div class="actions"><button id="addPart">＋ 構成へ接続</button></div>
+<div class="split"><input id="newRec" placeholder="新しいレシピ名" maxlength="100"><select id="newType"><option value="menu">販売メニュー</option><option value="prep">仕込み品</option></select></div><div class="actions"><button id="addRec">＋ レシピ追加</button></div></div></div></section>
+<section><h2>データ管理</h2><div class="actions"><button id="outJson">JSON書出し</button><button id="outCsv">影響CSV</button><button id="inJson">JSON読込</button><button id="undo">1手戻す</button><button id="reset">架空デモに戻す</button></div><input id="file" type="file" accept=".json" hidden></section>
+<div class="warn"><b>食品安全上の注意：</b>このアプリは台帳の差分確認補助です。規格書の真偽、交差接触・コンタミネーション、製造工程、法令適合性は判定しません。現物と仕入先規格書を担当者が必ず確認してください。</div><p class="foot">差替え灯 © 2026 · 無料・APIなし・デモは架空 · <a href="README.md">市場調査・README</a></p></main>
+<script>
+(function(){
+'use strict';
+var required=['えび','カシューナッツ','かに','くるみ','小麦','そば','卵','乳','落花生'];
+var other=['アーモンド','あわび','いか','いくら','オレンジ','キウイフルーツ','牛肉','ごま','さけ','さば','大豆','鶏肉','バナナ','ピスタチオ','豚肉','マカダミアナッツ','もも','やまいも','りんご','ゼラチン'];
+var tags=required.concat(other),storage='sashikae-github-v1',past=[],data,selected='i3',recipe='r2',draft;
+function el(id){return document.getElementById(id)}
+function node(tag,text){var e=document.createElement(tag);e.textContent=text||'';return e}
+function opt(id,name){var o=node('option',name);o.value=id;return o}
+function seed(){return {ingredients:[
+{id:'i1',name:'食パン',supplier:'製パンA（架空）',revision:'1',tags:['小麦','乳'],verified:true},
+{id:'i2',name:'トマト',supplier:'農園B（架空）',revision:'1',tags:[],verified:true},
+{id:'i3',name:'マヨネーズ',supplier:'調味料C（架空）',revision:'1',tags:['卵','大豆'],verified:true},
+{id:'i4',name:'くるみ',supplier:'卸D（架空）',revision:'1',tags:['くるみ'],verified:true},
+{id:'i5',name:'チキン',supplier:'惣菜E（架空）',revision:'1',tags:['鶏肉'],verified:false}],
+recipes:[
+{id:'r1',name:'共通ソース',kind:'prep',parts:[{type:'ingredient',id:'i3'}]},
+{id:'r2',name:'週末サンド',kind:'menu',parts:[{type:'ingredient',id:'i1'},{type:'recipe',id:'r1'},{type:'ingredient',id:'i5'}]},
+{id:'r3',name:'野菜サラダ',kind:'menu',parts:[{type:'recipe',id:'r1'},{type:'ingredient',id:'i2'},{type:'ingredient',id:'i4'}]}]};}
+function copy(x){return JSON.parse(JSON.stringify(x))}
+function saved(){try{localStorage.setItem(storage,JSON.stringify(data))}catch(e){}}
+function info(s){el('status').textContent=s}
+function snapshot(){past.push(copy(data));if(past.length>20)past.shift()}
+function findIng(id){return data.ingredients.find(function(x){return x.id===id})}
+function findRec(id){return data.recipes.find(function(x){return x.id===id})}
+function current(){return findIng(selected)}
+function baseline(demo){var x=current();if(!x){draft=null;return}draft={supplier:x.supplier,revision:x.revision,tags:x.tags.slice(),verified:x.verified};if(demo&&selected==='i3'){draft.supplier='試験用の新仕入先';draft.revision='2026-11';draft.tags.push('小麦');draft.verified=false}}
+function walk(id,seen,trail,out){if(seen.indexOf(id)>=0)return;var r=findRec(id);if(!r)return;var visited=seen.concat(id),path=trail.concat(r.name);r.parts.forEach(function(p){if(p.type==='ingredient'){var i=findIng(p.id);if(i)out.push({id:i.id,path:path.concat(i.name)})}else walk(p.id,visited,path,out)})}
+function profile(id,change){var paths=[];walk(id,[],[],paths);var v=[],missing=[];paths.forEach(function(p){var x=findIng(p.id),f=(change&&p.id===selected)?draft:x;if(!f.verified&&missing.indexOf(x.name)<0)missing.push(x.name);f.tags.forEach(function(t){if(v.indexOf(t)<0)v.push(t)})});return {paths:paths,tags:v,missing:missing}}
+function changed(){var x=current();return x&&JSON.stringify([x.supplier,x.revision,x.tags.slice().sort(),x.verified])!==JSON.stringify([draft.supplier,draft.revision,draft.tags.slice().sort(),draft.verified])}
+function impact(){if(!current()||!changed())return [];return data.recipes.filter(function(r){return r.kind==='menu'}).map(function(r){var before=profile(r.id,false),paths=before.paths.filter(function(p){return p.id===selected});if(!paths.length)return null;var after=profile(r.id,true);return {name:r.name,paths:paths,added:after.tags.filter(function(t){return before.tags.indexOf(t)<0}),removed:before.tags.filter(function(t){return after.tags.indexOf(t)<0}),missing:after.missing}}).filter(Boolean)}
+function renderTags(){el('tags').replaceChildren();if(!draft)return;tags.forEach(function(t){var b=node('button',t);b.type='button';b.className='chip'+(draft.tags.indexOf(t)>=0?' on':'');b.onclick=function(){draft.tags=draft.tags.indexOf(t)>=0?draft.tags.filter(function(x){return x!==t}):draft.tags.concat(t);renderTags();renderImpact()};el('tags').append(b)})}
+function renderImpact(){var list=impact();el('ac').textContent=list.length;el('report').replaceChildren();list.forEach(function(r){var a=node('article','');a.className='impact';var name=node('h3',r.name);var path=node('div',r.paths.map(function(p){return p.path.join(' → ')}).join(' / '));path.className='path';var delta=node('div','追加: '+(r.added.join('、')||'—')+' ／ 削除: '+(r.removed.join('、')||'—'));delta.className='delta';var missing=node('div','未照合: '+(r.missing.join('、')||'なし'));missing.className='note';a.append(name,path,delta,missing);el('report').append(a)});if(!list.length)el('report').append(node('p','変更案の影響はまだありません。'));el('apply').disabled=!changed()}
+function render(){el('ic').textContent=data.ingredients.length;el('mc').textContent=data.recipes.filter(function(r){return r.kind==='menu'}).length;
+el('item').replaceChildren(...data.ingredients.map(function(i){return opt(i.id,i.name)}));if(!current())selected=data.ingredients[0]?.id||'';el('item').value=selected;
+if(!draft&&current())baseline(false);var x=current();el('before').textContent=x?'現在: '+x.supplier+' / '+x.revision+' / 登録 '+(x.tags.join('・')||'なし'):'材料を追加してください';
+if(draft){el('supplier').value=draft.supplier;el('revision').value=draft.revision;el('verified').checked=draft.verified}
+renderTags();renderImpact();el('ingredients').replaceChildren();
+data.ingredients.forEach(function(i){var row=node('div',i.name+' / '+i.supplier);row.className='row';var b=node('button','選択');b.onclick=function(){selected=i.id;baseline(false);render()};row.append(b);el('ingredients').append(row)});
+el('recipe').replaceChildren(...data.recipes.map(function(r){return opt(r.id,(r.kind==='menu'?'メニュー: ':'仕込み: ')+r.name)}));if(!findRec(recipe))recipe=data.recipes[0]?.id||'';el('recipe').value=recipe;
+renderParts();el('undo').disabled=!past.length}
+function renderParts(){var r=findRec(recipe);el('parts').replaceChildren();if(r)r.parts.forEach(function(p){var x=p.type==='ingredient'?findIng(p.id):findRec(p.id);var row=node('div',(p.type==='ingredient'?'材料: ':'仕込み: ')+(x?.name||'不明'));row.className='row';var b=node('button','外す');b.onclick=function(){snapshot();r.parts=r.parts.filter(function(z){return !(z.type===p.type&&z.id===p.id)});saved();render()};row.append(b);el('parts').append(row)});
+var typ=el('kind').value,arr=typ==='ingredient'?data.ingredients:data.recipes.filter(function(x){return x.kind==='prep'});el('target').replaceChildren(...arr.map(function(x){return opt(x.id,x.name)}))}
+function valid(d){if(!d||!Array.isArray(d.ingredients)||!Array.isArray(d.recipes)||d.ingredients.length>100||d.recipes.length>100)return false;
+var ids=[];for(var x of d.ingredients){if(!x||typeof x.id!=='string'||typeof x.name!=='string'||!Array.isArray(x.tags)||typeof x.verified!=='boolean'||x.tags.some(function(t){return tags.indexOf(t)<0})||ids.includes(x.id))return false;ids.push(x.id)}
+for(var r of d.recipes){if(!r||typeof r.id!=='string'||typeof r.name!=='string'||!Array.isArray(r.parts)||!['menu','prep'].includes(r.kind)||ids.includes(r.id))return false;ids.push(r.id)}
+var byId=new Map(d.recipes.map(function(r){return [r.id,r]}));var ingId=new Set(d.ingredients.map(function(i){return i.id}));for(var r of d.recipes){for(var part of r.parts){if(!part||!(part.type==='recipe'?byId.has(part.id):part.type==='ingredient'&&ingId.has(part.id)))return false}}
+var visiting=new Set(),done=new Set();function visit(id){if(visiting.has(id))return false;if(done.has(id))return true;visiting.add(id);for(var part of byId.get(id).parts){if(part.type==='recipe'&&!visit(part.id))return false}visiting.delete(id);done.add(id);return true}return d.recipes.every(function(r){return visit(r.id)})}
+function download(n,s,type){var u=URL.createObjectURL(new Blob([s],{type:type}));var a=node('a');a.href=u;a.download=n;document.body.append(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},800)}
+el('item').onchange=function(){selected=this.value;baseline(false);render()};
+el('supplier').oninput=function(){draft.supplier=this.value;renderImpact()};
+el('revision').oninput=function(){draft.revision=this.value;renderImpact()};
+el('verified').onchange=function(){draft.verified=this.checked;renderImpact()};
+el('restore').onclick=function(){baseline(false);render();info('変更案を元に戻しました')};
+el('apply').onclick=function(){if(!changed())return;snapshot();Object.assign(current(),copy(draft));saved();baseline(false);render();info('台帳のみを更新しました。現物の表示確認は別途必要です')};
+el('recipe').onchange=function(){recipe=this.value;renderParts()};el('kind').onchange=renderParts;
+el('addIng').onclick=function(){var n=el('newIng').value.trim();if(!n||data.ingredients.length>=100)return; snapshot();var i={id:'i'+Date.now().toString(36),name:n,supplier:el('newSup').value,revision:'',tags:[],verified:false};data.ingredients.push(i);selected=i.id;baseline(false);el('newIng').value='';el('newSup').value='';saved();render()};
+el('addRec').onclick=function(){var n=el('newRec').value.trim();if(!n||data.recipes.length>=100)return;snapshot();var r={id:'r'+Date.now().toString(36),name:n,kind:el('newType').value,parts:[]};data.recipes.push(r);recipe=r.id;el('newRec').value='';saved();render()};
+el('addPart').onclick=function(){var r=findRec(recipe),typ=el('kind').value,id=el('target').value;if(!r||!id)return;if(r.parts.some(function(p){return p.type===typ&&p.id===id}))return info('同じ項目は既に接続されています');var part={type:typ,id:id};r.parts.push(part);if(!valid(data)){r.parts.pop();return info('循環参照や不正な接続を防止しました')}r.parts.pop();snapshot();r.parts.push(part);saved();render();info('レシピの構成を追加しました')};
+el('outJson').onclick=function(){download('sashikae-ledger.json',JSON.stringify(data,null,2),'application/json')};
+el('outCsv').onclick=function(){var rows=[['メニュー','依存経路','追加タグ','削除タグ','未照合']];impact().forEach(function(r){rows.push([r.name,r.paths.map(function(p){return p.path.join(' > ')}).join(' / '),r.added.join('、'),r.removed.join('、'),r.missing.join('、')])});var csv='\ufeff'+rows.map(function(row){return row.map(function(cell){var s=String(cell);if(/^[=+@\-\t]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');download('sashikae-impact.csv',csv,'text/csv')};
+el('inJson').onclick=function(){el('file').click()};el('file').onchange=async function(){try{var f=this.files[0];if(!f)return;if(f.size>1e6)throw Error('1MB制限');var v=JSON.parse(await f.text());if(!valid(v))throw Error('循環または参照不正');snapshot();data=v;selected=v.ingredients[0]?.id||'';recipe=v.recipes[0]?.id||'';baseline(false);saved();render();info('JSON読込成功')}catch(e){info('JSON読込失敗: '+e.message)}this.value=''};
+el('undo').onclick=function(){if(!past.length)return;data=past.pop();selected=data.ingredients[0]?.id||'';recipe=data.recipes[0]?.id||'';baseline(false);saved();render()};
+el('reset').onclick=function(){if(!confirm('架空デモへ戻しますか？'))return;snapshot();data=seed();selected='i3';recipe='r2';baseline(true);saved();render()};
+try{var old=JSON.parse(localStorage.getItem(storage));data=valid(old)?old:seed()}catch(e){data=seed()}
+baseline(data.ingredients.some(function(x){return x.id==='i3'&&x.supplier==='調味料C（架空）'}));render();
+})();
+</script></body></html>
