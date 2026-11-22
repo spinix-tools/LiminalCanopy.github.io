@@ -16,6 +16,7 @@ test('per consignor sums and hold are independent',()=>{
  assert.equal(a.totals.gross,6*850);assert.equal(a.totals.fee,6*170);assert.equal(a.totals.share,4080);
 });
 test('CSV escapes spreadsheet cell delimiters',()=>{let a=M.makeCsv(M.analyze([{...ok,title:'X,"hello"\nrow'}]));assert.match(a,/"X,""hello""\nrow"/);assert.ok(a.startsWith('\uFEFF'));});
+test('CSV neutralizes spreadsheet formulas in user text',()=>{const s=M.makeCsv(M.analyze([{...ok,title:'=HYPERLINK("https://test.invalid")',consignor:'-1+1'}]));assert.match(s,/\'=HYPERLINK/);assert.match(s,/\'-1\+1/);});
 test('consignor statement distinguishes held',()=>{let s=M.makeStatementsCsv(M.analyze([ok,{...ok,consignor:'別',onHand:0}]));assert.match(s,/照合済/);assert.match(s,/要照合/)});
 test('valid import returns clean objects',()=>{let x=M.validateImport({format:'tanajimai-v1',title:'店舗A',items:[ok]});assert.equal(x.items[0].sku,'Z-1');assert.equal(x.title,'店舗A');});
 test('import disallows missing data',()=>assert.throws(()=>M.validateImport({format:'tanajimai-v1',items:[{...ok,sold:null}]})));
