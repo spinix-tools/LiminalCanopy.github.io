@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>キットまわし — 貸出セットの部品衝突を先読み</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <div class="topline"><div class="brand"><span class="brandmark">↗</span> キットまわし <small>KITMAWASHI</small></div><span class="label">ローカル完結・登録不要</span></div>
+    <div class="hero-grid"><div><p class="eyebrow">SHARED EQUIPMENT PLANNER · v1.0</p><h1>同じ部品を、<br><em>二度貸さない。</em></h1><p class="lead">マイクやバッテリーを複数の貸出セットで共用しても、日付の重なりから欠品を先読み。予約候補ごとに「確定できるか」と代替日をすぐに確認できます。</p></div>
+    <aside class="hero-note"><div class="dotrow"><span class="live-dot"></span> ワークスペース稼働中</div><p>アカウント・API・サーバー送信なし。<br>内容はこのブラウザ内に保存されます。</p><div class="flow-mini"><span>部品</span><b>→</b><span>キット</span><b>→</b><span>予約</span><b>→</b><span>不足検査</span></div></aside></div>
+  </div>
+</header>
+<main class="container">
+<div id="message" role="status" aria-live="polite" class="message" hidden></div>
+<section class="metric-grid" id="metrics"></section>
+<section class="layout main-layout" aria-label="予約と容量の概要">
+<div class="stack">
+  <section class="panel" id="reserve"><div class="panel-head"><div><p class="eyebrow dark">01 / REQUEST</p><h2>新しい貸出を試す</h2></div><span class="pill">まず候補で追加</span></div>
+  <form id="bookingForm" class="form-grid"><label class="wide">予約の呼び名 <input id="bName" maxlength="60" placeholder="例：週末ワークショップ" required></label>
+  <label class="wide">貸出キット <select id="bKit" required></select></label>
+  <label>開始日 <input type="date" id="bStart" required></label><label>返却予定日 <input type="date" id="bEnd" required></label>
+  <label>キット数 <input type="number" id="bQty" min="1" max="40" value="1" required></label>
+  <div class="form-action"><button type="submit" class="btn primary">＋ 候補を追加</button></div></form>
+  <p class="hint">貸出開始日と返却予定日を含む全日を占有として計算。返却当日の即時再貸出は想定しません。</p></section>
+  <section class="panel" id="bookings"><div class="panel-head"><div><p class="eyebrow dark">02 / BOOKINGS</p><h2>予約と衝突チェック</h2></div><span class="count" id="bookingCount"></span></div><div id="bookingList" class="booking-list"></div></section>
+</div>
+<div class="stack">
+  <section class="panel dark-panel"><div class="panel-head"><div><p class="eyebrow">CAPACITY HEALTH</p><h2>在庫を超える日は？</h2></div><span class="glyph">◴</span></div><div id="alerts"></div></section>
+  <section class="panel" id="calendar"><div class="panel-head"><div><p class="eyebrow dark">03 / TIMELINE</p><h2>部品ごとの使用量</h2></div></div><div class="timeline-controls"><label>表示開始日 <input type="date" id="viewStart"></label><label>表示モード <select id="viewMode"><option value="all">確定＋候補</option><option value="confirmed">確定のみ</option></select></label></div><div id="timeline" class="timeline"></div><p class="hint">分子＝予約で必要な数、分母＝保有数。赤は在庫超過。候補の重なりも確認できます。</p></section>
+</div></section>
+<section class="layout lower-layout" aria-label="マスターデータ">
+<section class="panel" id="inventory"><div class="panel-head"><div><p class="eyebrow dark">04 / INVENTORY</p><h2>部品の在庫</h2></div><span class="pill">種類別に管理</span></div><div id="itemList"></div><form id="itemForm" class="compact-form"><input id="iName" placeholder="新しい部品名" maxlength="54" aria-label="新しい部品名" required><input id="iQty" type="number" min="0" max="999" value="1" aria-label="在庫数" required><button class="btn secondary" type="submit">＋ 追加</button></form></section>
+<section class="panel" id="kits"><div class="panel-head"><div><p class="eyebrow dark">05 / RECIPES</p><h2>貸出キットの構成</h2></div><span class="pill">共有部品を指定</span></div><div class="kit-switch"><label>編集するキット <select id="kitSelect"></select></label><button id="deleteKit" class="btn tiny ghost" type="button">削除</button></div><div id="partList"></div><form id="kitForm" class="compact-form kit-add"><input id="kName" placeholder="新しいキット名" maxlength="54" aria-label="新しいキット名" required><button class="btn secondary" type="submit">＋ キット作成</button></form><p class="hint">構成数はキット1つあたりの必要数です。0にすると構成から除外します。</p></section>
+</section>
+<section class="panel tools"><div><p class="eyebrow dark">06 / YOUR DATA</p><h2>保存・持ち出し</h2><p class="muted">サンプルは架空データ。名称に氏名などの個人情報は入力しないでください。</p></div><div class="tool-actions"><button type="button" class="btn secondary" id="undo">↶ 元に戻す</button><button type="button" class="btn secondary" id="saveJson">JSON出力</button><button type="button" class="btn secondary" id="saveCsv">CSV出力</button><label class="btn secondary upload">JSON読込<input type="file" id="loadJson" accept="application/json,.json" hidden></label><button type="button" class="btn ghost" id="reset">デモに戻す</button></div></section>
+<footer>キットまわし <span>© 2026 · MIT License</span><p>数量・日付の計画支援のみ。破損・整備・移動時間・複数拠点・実物の個体識別は未対応です。</p></footer>
+</main>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
