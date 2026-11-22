@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>異本スコープ / IBON SCOPE</title>
+<style>
+:root{font-family:system-ui,"Yu Gothic",Meiryo,sans-serif;color:#193633;background:#f4f2ec}*{box-sizing:border-box}
+body{margin:0}header{background:#153d36;color:white;padding:20px max(18px,4vw);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:23px;margin:0}header small{display:block;font-size:10px;letter-spacing:.17em;color:#bed5cd}
+main{padding:22px max(15px,3vw);max-width:1500px;margin:auto}
+.lead{font-family:serif;font-size:23px;margin:0 0 7px}.sub{font-size:12px;color:#718179;line-height:1.8;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px}.card{background:white;border:1px solid #dce5dc;border-radius:15px;padding:20px;box-shadow:0 8px 25px #1936330c;min-width:0}
+h2{font-size:18px;margin:0 0 14px}.editor-tabs{display:flex;gap:5px;background:#eaf0ea;border-radius:10px;padding:5px;margin-bottom:12px}
+button{cursor:pointer;border:1px solid #d3e1d8;background:#fff;padding:9px 12px;border-radius:8px;color:#28574e;font-weight:700;font-size:12px}
+button.primary{background:#006d5e;color:white;border-color:#006d5e}button.active{background:#cdece0;border-color:#a2d7c4}
+.editor-tabs button{flex:1}.inputlabel{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#526c62}
+input[type=text],select,textarea{font:inherit;width:100%;padding:10px;border:1px solid #cbdad1;border-radius:8px;background:#fff;color:#233b32}
+textarea{font-family:serif;line-height:1.7;min-height:260px;resize:vertical;font-size:14px}.options{display:flex;gap:13px;flex-wrap:wrap;font-size:12px;margin:15px 0}
+.actionbar{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+.metric{background:#f0f5ef;border-radius:9px;padding:13px}.metric:nth-child(2){background:#fff0e2}.metric small{display:block;color:#78877e}.metric b{font-size:27px}
+.scroll{overflow:auto;max-height:590px;border:1px solid #dce5dc;border-radius:9px}
+table{border-collapse:collapse;width:100%;min-width:580px;table-layout:fixed}th,td{padding:11px 8px;vertical-align:top;border-bottom:1px solid #e9ede7;text-align:left;overflow-wrap:anywhere}
+th{position:sticky;top:0;background:#eaf0ea;z-index:2;font-size:11px}td{white-space:pre-wrap;font-size:13px;font-family:serif}
+tr[data-id]{cursor:pointer}tr[data-id]:hover{background:#ecf6f0}.diff{background:#fff3e8!important;border-left:3px solid #dd985f}.none{color:#9ca9a1;font-family:system-ui;font-size:10px}
+.line{color:#9aa69d;font-size:10px;font-family:system-ui;display:block;margin-bottom:3px}
+.pill{display:inline-block;border-radius:6px;padding:4px 6px;background:#edf0ec;font:10px system-ui;color:#63786d}.pill.checked{color:#08705e;background:#d9f2e6}
+.panel{background:#f0f8f1;border:1px solid #c4ddcc;padding:15px;border-radius:10px;margin-top:16px}
+.panel textarea{min-height:75px;font-family:inherit}.muted{font-size:11px;line-height:1.8;color:#82928a}
+#notice{color:#d1f5e3;font-size:11px}footer{text-align:center;color:#86958c;font-size:11px;padding:20px}
+@media(max-width:950px){.grid{grid-template-columns:minmax(0,1fr)}}@media(max-width:600px){.card{padding:13px}.metrics .metric{padding:9px}.lead{font-size:20px}}
+@media print{header .actionbar,.editor,.panel,.options,footer{display:none!important}.grid{display:block}.scroll{max-height:none;overflow:visible}.card{border:0;box-shadow:none}@page{size:A4 landscape}}
+</style></head><body>
+<header><div><h1>異本スコープ　<small>IBON SCOPE / TEXTUAL WITNESS LAB</small></h1></div><div><span id="notice">ローカル処理 / 送信なし</span>　<button id="json-save">JSON保存</button> <button id="json-load">JSON読込</button></div></header>
+<main><p class="lead">差異を見つける。<b style="color:#006d5e">根拠を混ぜない。</b></p>
+<p class="sub">稿本・初出・改訂版を並べ、資料の確認水準と編集上の判断を別々に記録します。各版は最大180行・24,000文字。</p>
+<div class="grid"><section class="card editor"><h2>01　比較する版</h2>
+<div class="editor-tabs"><button data-tab="a" class="active">A / 底本</button><button data-tab="b">B / 比較</button><button data-tab="c">C / 参考</button></div>
+<label class="inputlabel" for="w-name">版・資料名</label><input id="w-name" type="text" maxlength="60">
+<label class="inputlabel" for="w-level">確認水準（自己申告）</label><select id="w-level"><option value="unknown">未照合・不明</option><option value="transcription">電子翻刻・入力本文</option><option value="facsimile">原本画像と照合</option><option value="original">原本実物と照合</option><option value="editorial">校訂本文・編集版</option></select>
+<label class="inputlabel" for="w-text">本文（1行＝1比較単位）</label><textarea id="w-text" spellcheck="false"></textarea><div id="counter" class="muted"></div>
+<div class="options"><label><input type="checkbox" id="with-c" checked> Cを含める</label><label><input type="checkbox" id="ignore-space"> 空白だけの差を比較時に無視</label></div>
+<div class="actionbar"><button class="primary" id="compare">対照を再計算</button><button id="csv-save">CSV出力</button><button id="example">例文に戻す</button></div>
+<p class="muted">本文は端末内で処理します。本文変更後は旧メモと行番号の対応を確認してください。行の移動・真贋・版の時間順は自動確定しません。</p></section>
+<section class="card"><h2>02　本文の対照表</h2><div class="metrics"><div class="metric"><small>対照行</small><b id="count-all">0</b></div><div class="metric"><small>差異</small><b id="count-diff">0</b></div><div class="metric"><small>要判断</small><b id="count-open">0</b></div></div>
+<div class="actionbar" style="margin-bottom:13px"><button data-filter="all" class="active">すべて</button><button data-filter="diff">差異だけ</button><button data-filter="open">未判断</button></div>
+<div class="scroll"><table><thead><tr><th style="width:36px">#</th><th id="title-a">A</th><th id="title-b">B</th><th id="title-c">C</th><th style="width:65px">判断</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="muted">※ B/Cの追加行同士は順序による仮置きです。行を選択すると編集メモを保存できます。</div>
+<div class="panel" id="review" hidden><h3 id="review-title">差異を確認</h3><label class="inputlabel">編集判断<select id="review-status"><option value="open">未判断</option><option value="checked">差異を確認</option><option value="investigate">要再照合</option><option value="editorial">編集上の選択を記録</option></select></label>
+<label class="inputlabel">根拠・留保メモ<textarea id="review-note" maxlength="1400"></textarea></label><button class="primary" id="review-save">記録する</button><button id="review-close">閉じる</button></div>
+</section></div>
+<p class="muted" style="margin:18px 0">注意：位置合わせは近似です。資料の真正性・作者帰属・成立の順序・因果を自動判定しません。結論の引用には原本・翻刻の照合が必要です。</p>
+<input type="file" id="import-file" accept=".json,application/json" hidden>
+</main><footer>IBON SCOPE · No account / no network / no tracking · MIT</footer>
+<script>
+(()=>{
+"use strict";
+const $=x=>document.getElementById(x),key="ibonscope-lite-v1";
+const sample={a:{name:"草稿",level:"transcription",text:"川には薄い霧があった。\n橋の上で、私は彼を待った。\n時計は六時を指していた。\n彼は何も言わなかった。"},b:{name:"初出",level:"editorial",text:"川には薄い霧があった。\n橋の上で、私は彼女を待った。\n時計は七時を指していた。\n彼は何も言わなかった。"},c:{name:"改訂",level:"unknown",text:"川には薄い霧があった。\n橋の上で、私は彼を待った。\n彼は何も言わなかった。\nそれから雨が降りはじめた。"}};
+let state={w:JSON.parse(JSON.stringify(sample)),withC:true,ignore:false,notes:{}},tab="a",filter="all",chosen=null,rows=[];
+function safeLoad(v){if(!v||!v.w)throw Error("版情報なし");let x={w:{},withC:v.withC!==false,ignore:!!v.ignore,notes:{}};for(const k of ["a","b","c"]){let z=v.w[k];if(!z||typeof z.text!=="string"||typeof z.name!=="string")throw Error("版情報が不正");line(z.text);x.w[k]={name:z.name.slice(0,60),text:z.text,level:["unknown","transcription","facsimile","original","editorial"].includes(z.level)?z.level:"unknown"};}if(v.notes&&typeof v.notes==="object"){for(const [k,n] of Object.entries(v.notes).slice(0,700)){if(n&&typeof n==="object")x.notes[k]={status:["open","checked","investigate","editorial"].includes(n.status)?n.status:"open",note:typeof n.note==="string"?n.note.slice(0,1400):""};}}return x;}
+function line(s){if(s.length>24000)throw Error("文字数上限超過");if(!s)return[];let a=s.replace(/\r\n?/g,"\n").split("\n");if(a[a.length-1]==="")a.pop();if(a.length>180)throw Error("行数上限超過");return a;}
+function normalized(s){return state.ignore?s.replace(/\s+/gu,""):s}
+function similarity(x,y){x=Array.from(x);y=Array.from(y);if(!x.length||!y.length)return 0;const m=new Map();x.forEach(c=>m.set(c,(m.get(c)||0)+1));let n=0;y.forEach(c=>{const q=m.get(c)||0;if(q){n++;m.set(c,q-1)}});return 2*n/(x.length+y.length)}
+function align(a,b){const n=a.length,m=b.length,W=m+1,d=new Float64Array((n+1)*W),op=new Uint8Array((n+1)*W);for(let i=1;i<=n;i++){d[i*W]=i;op[i*W]=1}for(let j=1;j<=m;j++){d[j]=j;op[j]=2}for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){let x=normalized(a[i-1]),y=normalized(b[j-1]),sim=x===y?1:similarity(x,y),cost=x===y?0:sim>=.42?.84+.12*(1-sim):2.25;let z=i*W+j,A=d[(i-1)*W+j-1]+cost,B=d[(i-1)*W+j]+1,C=d[i*W+j-1]+1;if(A<=B+1e-8&&A<=C+1e-8){d[z]=A;op[z]=0}else if(B<=C+1e-8){d[z]=B;op[z]=1}else{d[z]=C;op[z]=2}}let i=n,j=m,eq=Array(n).fill(null),no=Array(n).fill(null),add=Array.from({length:n+1},()=>[]);while(i||j){let o=op[i*W+j];if(i&&j&&o===0){eq[i-1]=b[j-1];no[i-1]=j;i--;j--}else if(i&&(!j||o===1))i--;else{add[i].push({t:b[j-1],n:j});j--}}add.forEach(v=>v.reverse());return{eq,no,add}}
+function collect(){let a=line(state.w.a.text),b=line(state.w.b.text),c=state.withC?line(state.w.c.text):[],B=align(a,b),C=state.withC?align(a,c):null;rows=[];for(let i=0;i<=a.length;i++){for(let j=0;j<Math.max(B.add[i].length,state.withC?C.add[i].length:0);j++){let bb=B.add[i][j],cc=state.withC?C.add[i][j]:null;rows.push({id:"g-"+i+"-"+j,a:null,b:bb?.t??null,c:cc?.t??null,an:null,bn:bb?.n??null,cn:cc?.n??null,diff:true})}if(i===a.length)break;let x=a[i],y=B.eq[i],z=state.withC?C.eq[i]:null;rows.push({id:"a-"+i,a:x,b:y,c:z,an:i+1,bn:B.no[i],cn:state.withC?C.no[i]:null,diff:y===null||normalized(x)!==normalized(y)||(state.withC&&(z===null||normalized(x)!==normalized(z)))})}}
+function save(){try{localStorage.setItem(key,JSON.stringify(state))}catch(e){/* local storage may be denied; JSON export remains available */}}
+function edit(){let x=state.w[tab];x.name=$("w-name").value.slice(0,60);x.level=$("w-level").value;x.text=$("w-text").value;save();$("counter").textContent=x.text.length+"文字"}
+function selectTab(t){edit();tab=t;document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));showEditor()}
+function showEditor(){let x=state.w[tab];$("w-name").value=x.name;$("w-level").value=x.level;$("w-text").value=x.text;$("counter").textContent=x.text.length+"文字";$("with-c").checked=state.withC;$("ignore-space").checked=state.ignore}
+function textCell(t,num,base,diff){let td=document.createElement("td");if(t===null){td.textContent="—";td.className="none";return td}let small=document.createElement("span");small.className="line";small.textContent=num===null?"追加":num;td.append(small);let val=document.createElement("span");val.textContent=t===""?"〈空行〉":t;td.append(val);if(diff&&(base===null||t!==base))td.className="diff";return td}
+function show(){let body=$("rows");body.replaceChildren();let v=rows.filter(r=>filter==="all"||(filter==="diff"&&r.diff)||(filter==="open"&&r.diff&&(!state.notes[r.id]||state.notes[r.id].status==="open")));for(const r of v){let tr=document.createElement("tr");tr.dataset.id=r.id;tr.tabIndex=0;let n=document.createElement("td");n.textContent=r.an??"+";tr.append(n,textCell(r.a,r.an,r.a,r.diff),textCell(r.b,r.bn,r.a,r.diff));if(state.withC)tr.append(textCell(r.c,r.cn,r.a,r.diff));let status=document.createElement("td"),badge=document.createElement("span");badge.className="pill "+(state.notes[r.id]?.status||"");badge.textContent=!r.diff?"一致":({open:"未判断",checked:"確認",investigate:"要再照合",editorial:"編集判断"})[state.notes[r.id]?.status||"open"];status.append(badge);tr.append(status);tr.addEventListener("click",()=>review(r.id));tr.addEventListener("keydown",e=>{if(e.key==="Enter")review(r.id)});body.append(tr)}$("title-a").textContent="A / "+state.w.a.name;$("title-b").textContent="B / "+state.w.b.name;$("title-c").textContent="C / "+state.w.c.name;$("title-c").hidden=!state.withC;$("count-all").textContent=rows.length;$("count-diff").textContent=rows.filter(r=>r.diff).length;$("count-open").textContent=rows.filter(r=>r.diff&&(!state.notes[r.id]||state.notes[r.id].status==="open")).length}
+function run(){edit();state.withC=$("with-c").checked;state.ignore=$("ignore-space").checked;try{collect();chosen=null;$("review").hidden=true;save();show();$("notice").textContent="更新しました / ローカル処理"}catch(e){alert(e.message)}}
+function review(id){chosen=id;$("review").hidden=false;let r=rows.find(r=>r.id===id);$("review-title").textContent="比較行 "+(r.an??"追加")+"/"+id;let x=state.notes[id]||{};$("review-status").value=x.status||"open";$("review-note").value=x.note||""}
+function download(s,type,name){let u=URL.createObjectURL(new Blob([s],{type})),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+function csv(){let hdr=["row_id","base_line","base_text","B_line","B_text",...(state.withC?["C_line","C_text"]:[]),"status","note"],q=x=>'"'+String(x??"").replace(/"/g,'""')+'"';let data=rows.map(r=>[r.id,r.an,r.a,r.bn,r.b,...(state.withC?[r.cn,r.c]:[]),state.notes[r.id]?.status||"open",state.notes[r.id]?.note||""]);return "\uFEFF"+[hdr,...data].map(row=>row.map(q).join(",")).join("\r\n")+"\r\n"}
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>selectTab(b.dataset.tab)));for(const id of ["w-name","w-level","w-text"])$(id).addEventListener("input",edit);
+$("compare").onclick=run;$("with-c").onchange=run;$("ignore-space").onchange=run;
+document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));show()}));
+$("review-save").onclick=()=>{if(!chosen)return;state.notes[chosen]={status:$("review-status").value,note:$("review-note").value.slice(0,1400)};save();show();$("notice").textContent="判断を保存しました"};
+$("review-close").onclick=()=>{$("review").hidden=true};
+$("csv-save").onclick=()=>{run();download(csv(),"text/csv;charset=utf-8","ibonscope-variants.csv")};
+$("json-save").onclick=()=>{edit();download(JSON.stringify({format:"ibonscope-lite-v1",...state},null,2),"application/json","ibonscope-project.json")};
+$("json-load").onclick=()=>$("import-file").click();
+$("import-file").onchange=async e=>{let f=e.target.files?.[0];if(!f)return;try{if(f.size>160000)throw Error("ファイルが大きすぎます");state=safeLoad(JSON.parse(await f.text()));tab="a";showEditor();run();$("notice").textContent="JSONを読込ました"}catch(err){alert(err.message)}e.target.value=""};
+$("example").onclick=()=>{if(!confirm("入力と判断メモを例文に戻しますか？"))return;state={w:JSON.parse(JSON.stringify(sample)),withC:true,ignore:false,notes:{}};tab="a";showEditor();run()};
+try{let x=localStorage.getItem(key);if(x)state=safeLoad(JSON.parse(x))}catch(e){}
+showEditor();run();
+})();
+</script></body></html>
