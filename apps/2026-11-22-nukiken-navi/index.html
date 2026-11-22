@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>抜検ナビ | 小ロット抜取検査の確率と実行</title>
+<meta name="description" content="有限ロットの抜取検査リスクを厳密計算し、ランダム抽出と確認記録をローカルで完結。">
+<link rel="stylesheet" href="style.css">
+<script defer src="engine.js"></script><script defer src="app.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="brand"><span class="brand-icon" aria-hidden="true">◎</span><div><b>抜検ナビ</b><small>NUKIKEN NAVI / LOT INSPECTION LAB</small></div></div><span class="privacy">● ローカル完結・通信なし</span></header>
+<main class="shell">
+<section class="hero"><div class="hero-copy"><span class="eyebrow">SMALL LOT QUALITY / 01</span><h1>その抜き取りで、<br><em>何を見逃す？</em></h1><p>ロットの不良率を仮定し、抽出数ごとの「合格してしまう確率」を計算。実物のランダム抽出番号と検査記録まで、ひとつの画面で。</p><div class="hero-note">これはISO 2859-1/JISの認証済み検査計画ではありません。社内で検討するための参考計算です。</div></div><div class="hero-visual" aria-hidden="true"><div class="stack-head">PLAN · CHECK · DECIDE</div><div class="tile-grid"><span class="tile selected">07</span><span class="tile">08</span><span class="tile">09</span><span class="tile selected">10</span><span class="tile">11</span><span class="tile selected">12</span><span class="tile">13</span><span class="tile">14</span><span class="tile selected">15</span><span class="tile">16</span><span class="tile">17</span><span class="tile">18</span></div><div class="stack-footer">RANDOM SAMPLE <span>04 / 12</span></div></div></section>
+<div class="section-head"><span class="number">01</span><div><h2>計画をつくる</h2><p>有限ロット・復元なしの超幾何分布で算出</p></div></div>
+<div class="layout"><section class="panel controls" aria-label="検査条件">
+<div class="field-grid">
+<label>ロット総数 <span>個</span><input id="N" type="number" min="2" max="100000" step="1" value="240"></label>
+<label>抜取数 <span>個</span><input id="n" type="number" min="1" max="500" step="1" value="32"></label>
+<label>合格許容不良数 <span>個</span><input id="c" type="number" min="0" max="500" step="1" value="0"></label>
+<label>1個の検査時間 <span>分</span><input id="minutes" type="number" min="0.01" step="0.25" value="1.5"></label>
+<label>良品側の想定不良率 <span>%</span><input id="good" type="number" min="0" max="100" step="0.1" value="1"></label>
+<label>不良側の想定不良率 <span>%</span><input id="bad" type="number" min="0" max="100" step="0.1" value="9"></label>
+<label class="wide">不良側を合格させる確率の目標 <span>% 以下</span><input id="target" type="number" min="0.1" max="99.9" step="0.1" value="5"></label>
+</div>
+<div class="control-footer"><button type="button" class="button primary" id="recalc">リスクを再計算 <span>→</span></button><button type="button" class="button outline" id="suggest">目標を満たす抜取数を探索</button></div><p id="form-message" class="status-line" role="status" aria-live="polite"></p>
+</section>
+<section class="panel results" aria-label="確率比較"><div class="panel-kicker">THE PROBABILITY / 数字で見るリスク</div><div class="metric-row"><div class="metric"><span>良品側を誤って不合格</span><b id="producer-risk">—</b><small id="producer-detail">—</small></div><div class="metric danger"><span>不良側を合格させる</span><b id="consumer-risk">—</b><small id="consumer-detail">—</small></div></div><div class="metric-row summary"><div><span>推定検査時間</span><strong id="inspection-time">—</strong></div><div><span>ロットの検査割合</span><strong id="coverage">—</strong></div></div><h3>不良率別・ロットが合格する確率</h3><svg id="risk-chart" viewBox="0 0 640 252" role="img" aria-label="不良率に対する合格確率の曲線"><text x="20" y="35">計算中...</text></svg><div class="chart-caption"><span>横軸：ロット内不良率</span><span>縦軸：合格確率</span></div><p class="formula" id="formula">—</p></section></div>
+<div class="section-head second"><span class="number">02</span><div><h2>番号を抽出する</h2><p>1〜ロット総数のうち重複なくランダム抽出</p></div></div>
+<section class="panel draw-section"><div class="draw-top"><div><div class="panel-kicker">FIELDWORK / 実物と照合</div><h3>抽出 → 現物確認 → 判定</h3><p>すべての現物に一意の番号を振ってから抽出してください。検査未完了なら合否を確定しません。</p></div><button type="button" class="button dark" id="draw">新しく抽出する <span>↗</span></button></div>
+<div class="check-strip"><div><span>確認済み</span><strong id="done-count">0 / 0</strong></div><div><span>不良数</span><strong id="bad-count">0</strong></div><div><span>判定</span><strong id="decision">未抽出</strong></div><div><span>乱数方式</span><strong id="random-method">—</strong></div></div>
+<div class="progress-track"><div id="progress-bar"></div></div><div id="sample-info" class="sample-info">「新しく抽出する」から開始してください。</div><div class="sample-list" id="sample-list" aria-label="抜取番号と検査状態"></div>
+<div class="actions"><button type="button" class="button outline" id="export-csv" disabled>検査表CSV</button><button type="button" class="button outline" id="export-json">JSONを書き出す</button><label class="button outline file-button" for="import-json">JSONを読み込む</label><input class="sr-only" id="import-json" type="file" accept="application/json,.json"><button type="button" class="button quiet" id="reset">初期データに戻す</button><button type="button" class="button quiet" id="print">印刷</button></div><p class="status-line" role="status" id="storage-message" aria-live="polite"></p></section>
+<section class="foot-note"><div>IMPORTANT</div><p>想定不良率は実測値ではありません。抽出は無作為・全数が抽出可能であることが前提です。受入可否・重大欠陥・安全上の判断は、契約仕様や現行規格、責任者の承認を優先してください。</p></section>
+</main><footer>NUKIKEN NAVI · Free local-first experiment · 2026</footer>
+</body></html>
