@@ -1,20 +1,26 @@
 # 軸見 / JIKUMI — グラフの見え方を点検する
 
-2026-11-23 / MIT License / hourly-app-lab
+2026-11-23 / hourly-app-lab / MIT License
 
-**対象:** 学校新聞、授業教材、地域広報、社内プレゼンの制作担当者。
+## 対象と市場背景
 
-**選定理由:** 総務省の2026年度ICTリテラシー実態調査（2026-07-14公表）では情報の真偽判断と拡散に課題が報告された。これはグラフ監査ツール固有の市場規模を示さない。比較研究として [Datawrapper](https://www.datawrapper.de/academy/why-our-column-and-bar-charts-start-at-zero) は棒グラフの0起点を重視し、[FairCharts](https://www.faircharts.com/) はグラフ監査、[ChartHawk](https://charthawk.info/) は画像AI解析、[vibech.art](https://vibech.art/) は誤解を招くチャートの教材化を扱う。
+学校新聞、授業教材、地域広報、社内プレゼンの制作担当者。総務省が2026-07-14に公表したICTリテラシー実態調査は、偽・誤情報を拡散した経験とICTリテラシーテスト結果に関連があると報告した。これは本製品の市場規模や需要を直接示すものではない。
 
-**差別化仮説:** 画像をAI判定するのではなく、CSVの元数値・除外行・縦軸設定を保持したまま公開案と0起点の比較図を生成し、公開前チェックと証跡を一つにする。登録・課金・外部送信なし。需要と収益性は未検証。
+- 日本の背景：[総務省2026年度ICTリテラシー調査](https://prtimes.jp/main/html/rd/p/000000001.000161939.html)
+- 海外競合：[Datawrapper](https://www.datawrapper.de/academy/why-our-column-and-bar-charts-start-at-zero) は棒グラフの0起点を重視する作図サービス。[FairCharts](https://www.faircharts.com/) はグラフを診断するベータサービス。[ChartHawk](https://charthawk.info/) はAIで画像の縦軸切断等を調べる。[vibech.art](https://vibech.art/) は誤解を招く表示の教材を提供する。
 
-**MVP:** 日本語CSV取込、2〜40件の編集、棒／折れ線、出典・単位、縦軸上下限、2枚のSVG比較、0起点とクリッピングと省略の警告、CSV／JSON／SVG／TXT書出、印刷、端末保存、JSON復元。
+## 差別化仮説
 
-**起動:** `index.html` はgzipで完全な単独HTMLを格納したロスレス起動版。標準 `DecompressionStream` 対応ブラウザで実行できる。`python unpack.py` で `standalone.html` に復元可能。ローカル版の分割可読ソースとテストは配布ZIPに付属。
+画像にAIで判定を下す代わりに、**元の数値・非表示の項目・縦軸設定を明示し、公開案と0起点のSVGを横に並べる**。元データと注意事項の点検記録を、登録不要・追加課金不要・外部送信なしで持ち出せる。需要・収益性は未検証。
 
-**検証:** Node.js単体テスト24/24合格、固定シードのランダム800系列、Chromium操作38/38合格、GitHub圧縮起動版の展開・操作も確認、外部HTTP要求とJavaScript例外は0件。ブラウザテストは管理環境のfile://制限によりHTMLをインライン実行し端末保存をメモリ模擬。通常のGitHub Pages配信と実利用は未検証。棒の長さの比は幾何計算であり人間の知覚率ではない。統計上の真偽・出典の信頼性・サンプル恣意性は判定できない。
+## GitHub版の機能
 
-参考：[総務省2026-07-14発表](https://prtimes.jp/main/html/rd/p/000000001.000161939.html) / [Datawrapper Academy](https://www.datawrapper.de/academy/why-our-column-and-bar-charts-start-at-zero)
+単独の読みやすい `index.html`（ブラウザで開いて操作可能）。CSV貼付、2〜40行の項目・値・表示状態の編集、棒／折れ線、縦軸上下限、出典・単位、0起点の比較チャート、基本的な警告、端末保存、CSV／JSON／SVG／TXT保存、印刷を実装。`LICENSE` はMIT。
 
-### License
-MIT.
+**配布ZIPの完全版との違い：** GitHubの `index.html` は容量を抑えた独立の軽量実装。完全版にはCSVファイル選択、JSONファイル復元、表示行削除、チェック記録等がある。GitHub版にこれらの追加機能は含まれない。ZIPには完全版の可読な `index.html`, `core.js`, `app.js`, テスト、単独起動 `standalone.html` がある。完全版とGitHub版は同一バイナリではない。
+
+## 検証と制限
+
+完全版：`node --test test-core.js` **24/24合格**、固定シードランダム800例、Chromium操作 **38/38合格**。GitHub gzipパッケージ形式の完全版についても、ローカルで展開・操作を確認したが**これはGitHubに保存した軽量版とは別**。GitHub軽量版は保存ファイルの構造・重要機能の静的確認を行い、実ブラウザでの直接起動は未検証。
+
+管理環境ではfile://直接遷移が遮断され、完全版のChromium操作はHTMLをインライン実行し端末保存をメモリ模擬した。数値の真正性・集計対象の妥当性・人間の実際の知覚倍率は保証しない。折れ線を常に0起点にすべきという主張ではない。
