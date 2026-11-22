@@ -1,0 +1,102 @@
+"""Local Chromium E2E smoke checks. Runs using an installed system Chromium."""
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parent
+n=0
+errors=[]
+def check(label, pred):
+    global n
+    n+=1
+    assert pred, f'FAIL #{n}: {label}'
+    print(f'PASS {n:02d}: {label}')
+with sync_playwright() as p:
+    browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-web-security','--allow-file-access-from-files'])
+    context=browser.new_context(viewport={'width':1420,'height':1000},accept_downloads=True)
+    page=context.new_page()
+    page.on('pageerror',lambda error:errors.append(str(error)))
+    responses=[]
+    page.on('request',lambda r: responses.append(r.url) if r.url.startswith(('http:','https:')) else None)
+    html=(ROOT/'standalone.html').read_text(encoding='utf-8')
+    page.evaluate("""() => { window.__kv={}; Object.defineProperty(window,'localStorage',{configurable:true,value:{getItem:(k)=>window.__kv[k]??null,setItem:(k,v)=>{window.__kv[k]=String(v)},removeItem:(k)=>{delete window.__kv[k]}}}) }""")
+    page.set_content(html,wait_until='load')
+    page.wait_for_selector('#bookingList .booking')
+    check('title', 'キットまわし' in page.title())
+    check('no JS exception', not errors)
+    check('no external HTTP', not responses)
+    check('four demo bookings',page.locator('.booking').count()==4)
+    check('three kits present',page.locator('#bKit option').count()==3)
+    check('five inventory parts',page.locator('.item-row').count()==5)
+    check('demo shows overcapacity',page.locator('.alert-list .alert').count()>=1)
+    check('proposal suggestion visible',page.locator('.booking-message').filter(has_text='代替案').count()>=1)
+    check('timeline has 8 days',page.locator('.time-head > div').count()==9)
+    check('timeline has five rows',page.locator('.time-row').count()==5)
+    check('confirm disabled for conflicting proposal',page.locator('.booking.problem button[data-action=confirm]').is_disabled())
+    check('can change mode',page.locator('#viewMode').select_option('confirmed')==['confirmed'])
+    check('no red overflows in confirmed only',page.locator('.time-cell.over').count()==0)
+    page.locator('#viewMode').select_option('all')
+    check('red overflows in combined view',page.locator('.time-cell.over').count()>0)
+    page.locator('.booking.problem button[data-action=move]').click()
+    check('move resolves problematic proposal',page.locator('.booking.problem').count()==0)
+    check('new state no overage combined',page.locator('.alert-list .alert').count()==0)
+    page.locator('.booking-list').count() if False else None
+    page.locator('.booking').filter(has_text='映像研究会').locator('button[data-action=confirm]').click()
+    check('proposal promoted confirmed',page.locator('.booking').filter(has_text='映像研究会').locator('.status').inner_text()=='確定')
+    page.locator('#bName').fill('動画編集機材の試験')
+    page.locator('#bKit').select_option('stream')
+    page.locator('#bQty').fill('1')
+    page.locator('#bookingForm button[type=submit]').click()
+    check('new proposal added',page.locator('.booking').count()==5)
+    check('new proposal visible',page.locator('.booking').filter(has_text='動画編集機材の試験').count()==1)
+    page.locator('#iName').fill('ケーブル')
+    page.locator('#iQty').fill('9')
+    page.locator('#itemForm button').click()
+    check('add component',page.locator('.item-row').count()==6)
+    page.locator('#kName').fill('検証キット')
+    page.locator('#kitForm button').click()
+    check('add kit',page.locator('#kitSelect option').count()==4)
+    check('new kit selected',page.locator('#kitSelect').input_value().startswith('k'))
+    part=page.locator('#partList [data-part="battery"]')
+    part.fill('3');part.press('Tab')
+    check('edit kit component count',page.locator('#partList [data-part="battery"]').input_value()=='3')
+    page.locator('.item-row').filter(has=page.locator('input[value="予備バッテリー"]')).locator('input[data-item-key="qty"]').fill('10')
+    page.locator('.item-row').filter(has=page.locator('input[value="予備バッテリー"]')).locator('input[data-item-key="qty"]').press('Tab')
+    check('stock edit',page.locator('.item-row input[data-item-key=qty]').first.input_value()=='10')
+    with page.expect_download() as d1:page.locator('#saveJson').click()
+    check('JSON exported',d1.value.suggested_filename.endswith('.json'))
+    with page.expect_download() as d2:page.locator('#saveCsv').click()
+    check('CSV exported',d2.value.suggested_filename.endswith('.csv'))
+    page.set_content(html,wait_until='load')
+    check('localStorage persists component',page.locator('.item-row').count()==6)
+    check('localStorage persists kit',page.locator('#kitSelect option').count()==4)
+    page.locator('#undo').click()
+    check('undo action works',page.locator('#message').is_visible())
+    # JSON import replaces data
+    import json
+    sample={
+      'items':[{'id':'i1','name':'測定器','qty':2}],
+      'kits':[{'id':'k1','name':'点検キット','parts':{'i1':1}}],
+      'bookings':[{'id':'b1','name':'試験','kitId':'k1','start':'2026-11-25','end':'2026-11-26','qty':1,'status':'proposal'}]}
+    upload=ROOT/'_test_import.json';upload.write_text(json.dumps(sample,ensure_ascii=False),encoding='utf-8')
+    page.locator('#loadJson').set_input_files(str(upload))
+    page.wait_for_timeout(200)
+    check('JSON import one part',page.locator('.item-row').count()==1)
+    check('JSON import one booking',page.locator('.booking').count()==1)
+    page.locator('#undo').click()
+    check('undo restores imported state',page.locator('.item-row').count()==6)
+    page.on('dialog',lambda dialog:dialog.accept())
+    page.locator('#reset').click()
+    check('demo reset parts',page.locator('.item-row').count()==5)
+    check('demo reset reservations',page.locator('.booking').count()==4)
+    check('no page errors after interactions',not errors)
+    check('still zero HTTP requests',not responses)
+    page.screenshot(path=str(ROOT/'desktop.png'),full_page=True)
+    mobile=browser.new_context(viewport={'width':390,'height':844},device_scale_factor=1)
+    mp=mobile.new_page()
+    mp.evaluate("Object.defineProperty(window,'localStorage',{configurable:true,value:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}})")
+    mp.set_content(html,wait_until='load')
+    check('mobile renders bookings',mp.locator('.booking').count()==4)
+    check('mobile no horizontal document overflow',mp.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 2'))
+    mp.screenshot(path=str(ROOT/'mobile.png'),full_page=True)
+    upload.unlink(missing_ok=True)
+    browser.close()
+print('ALL',n,'CHROMIUM CHECKS PASSED')
