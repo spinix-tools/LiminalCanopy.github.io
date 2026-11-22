@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>桁まもり LITE | CSVの桁落ちを先読み</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;background:#f5f7f5;color:#203d33}*{box-sizing:border-box}
+body{margin:0}.wrap{max-width:1150px;margin:auto;padding:22px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d5e2da;padding-bottom:17px}header strong{font-size:21px}header small{font-size:11px;color:#487f67}
+.hero{margin:38px 0}.hero h1{font-size:clamp(26px,4vw,42px);margin:5px 0;color:#145b47;letter-spacing:-.04em}.hero p{color:#65796e;font-size:13px;line-height:1.8}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}.card{background:#fff;border:1px solid #e0e8e1;border-radius:13px;padding:22px;margin-bottom:15px;min-width:0}
+h2{font-size:17px;margin:0 0 16px}label{display:block;font-size:12px;font-weight:600;margin:16px 0 7px}input,select,textarea{font:inherit}select,textarea{width:100%;padding:10px;border-radius:7px;border:1px solid #cadacf;background:#fbfcfb}
+button{border:0;border-radius:8px;background:#16694f;color:white;padding:10px 14px;cursor:pointer;font-weight:650;font-size:12px;margin:4px 4px 4px 0}button.gray{background:#e9f3ec;color:#216850}
+fieldset{border:0;padding:0;margin-top:12px}fieldset label{display:inline-block;margin:4px 12px 4px 0}
+#drop{background:#f7fcf7;border:2px dashed #bdd8c7;border-radius:12px;padding:23px;text-align:center;cursor:pointer;font-size:13px}
+.small{font-size:11px;color:#7e9484;line-height:1.7}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.metric{border:1px solid #e6eee7;background:#fbfcfb;border-radius:9px;padding:13px}.metric strong{display:block;font-size:25px;margin-top:5px}.metric small{font-size:10px;color:#749081}
+#issues{max-height:400px;overflow:auto}.issue{padding:10px 0;border-bottom:1px solid #e9eee9;display:flex;justify-content:space-between;gap:10px;font-size:12px}.issue b{display:block}.issue small{color:#829987;display:block;margin-top:4px}.issue button{font-size:10px;padding:5px 9px;background:#e8f3ed;color:#286f55}.issue button.checked{background:#1d7857;color:white}
+.scroll{overflow:auto;max-width:100%;max-height:320px}table{border-collapse:collapse;min-width:520px;width:100%;font-size:11px}th,td{padding:9px;max-width:240px;border:1px solid #e5ebe6;overflow-wrap:anywhere;text-align:left}th{background:#eaf2eb}td.flag{background:#fff4de}
+footer{color:#899b91;font-size:11px;padding:25px 0}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.wrap{padding:13px}.card{padding:17px}.metric{padding:8px}.metric strong{font-size:20px}}
+</style></head><body><div class="wrap"><header><strong>◈ 桁まもり <small>KETAMAMORI LITE</small></strong><small>ブラウザ内で処理 / 送信なし</small></header>
+<section class="hero"><small>PRE-IMPORT DATA SAFETY</small><h1>CSVを開く前に、失われる桁を見つける。</h1><p>Excelなどの表計算ソフトによる先頭ゼロ・長い識別子・日付変換のリスクを、元の文字列のまま点検します。</p></section>
+<div class="layout"><aside><section class="card"><h2>01 ファイルを選ぶ</h2>
+<div id="drop" role="button" tabindex="0">⇧ CSV / TSV ファイルをクリックまたはドロップ<br><small>8MB以下・外部送信なし</small></div><input id="file" type="file" accept=".csv,.tsv,.txt" hidden><p id="fname" class="small">未選択</p><button id="sample" class="gray">サンプルを使う</button>
+<label for="code">読み込み文字コード</label><select id="code"><option value="utf-8">UTF-8</option><option value="shift_jis">Shift_JIS</option><option value="euc-jp">EUC-JP</option></select>
+<label for="sep">区切り文字</label><select id="sep"><option value="auto">自動検出</option><option value=",">カンマ</option><option value="tab">タブ</option><option value=";">セミコロン</option><option value="|">パイプ</option></select><label><input type="checkbox" id="head" checked> 先頭行は見出し</label>
+<button id="run">診断する</button></section>
+<section class="card"><h2>02 手順</h2><p class="small">Excelは「データ」→「テキストまたはCSVから」で読み、ID列をテキスト型にしてください。CSVをダブルクリックで開くと桁落ちする場合があります。</p>
+<label><input id="bom" type="checkbox" checked> UTF-8 BOMを付ける</label><label><input id="guard" type="checkbox" checked> 数式候補にはアポストロフィを追加（値変更）</label><label><input id="pad" type="checkbox"> 足りない列だけ空欄補完（値変更）</label></section></aside>
+<main><section class="card"><h2>診断サマリー</h2><div class="metrics"><div class="metric"><small>データ行</small><strong id="rows">—</strong></div><div class="metric"><small>列数</small><strong id="cols">—</strong></div><div class="metric"><small>要修正</small><strong id="errors">—</strong></div><div class="metric"><small>注意</small><strong id="warnings">—</strong></div></div><p id="meta" class="small"></p></section>
+<section class="card"><h2>リスクと確認 <small id="count"></small></h2><div id="issues" class="small">ファイルかサンプルを選んでください。</div></section>
+<section class="card"><h2>元の値をプレビュー</h2><div class="scroll"><table id="table"></table></div><p class="small">プレビューは値を変更しません。</p></section>
+<section class="card"><h2>03 レポートと整形CSV</h2><button id="report" class="gray">指摘一覧 CSV</button><button id="export">整形 CSV を出力</button><p class="small" id="message">列過多や引用符エラーの場合、整形出力を止めます。</p></section></main></div>
+<footer>KETAMAMORI LITE · MIT License · サーバー・CDN・課金・ログインなし</footer></div>
+<script>
+(()=>{'use strict';
+const $=x=>document.getElementById(x),state={bytes:null,text:'',audit:null,checked:new Set(),name:'data.csv'};
+const labels={zero:'先頭ゼロが消える可能性',long:'16桁以上の値が丸められる可能性',date:'日付に変換される可能性',exp:'指数表記へ変換される可能性',formula:'表計算ソフトで数式として解釈される危険',ragged:'列数の不一致',syntax:'引用符の構文エラー',blank:'空欄の見出し',dupe:'重複する見出し'};
+function parse(text,d){text=text.replace(/^\uFEFF/,'');let rows=[],errors=[],row=[],s='',state=0,line=1,start=1;
+ const push=()=>{row.push(s);rows.push({cells:row,line:start});row=[];s='';state=0};
+ for(let i=0;i<text.length;i++){let c=text[i];if(c==='\r'||c==='\n'){let pair=c==='\r'&&text[i+1]==='\n';if(state===2)s+=pair?'\r\n':c;else{push();start=line+1}line++;if(pair)i++;continue}
+ if(state===0){if(c===d)row.push('');else if(c==='"')state=2;else{s+=c;state=1}}
+ else if(state===1){if(c===d){row.push(s);s='';state=0}else{if(c==='"')errors.push({type:'syntax',line});s+=c}}
+ else if(state===2){if(c==='"'){if(text[i+1]==='"'){s+='"';i++}else state=3}else s+=c}
+ else if(c===d){row.push(s);s='';state=0}else{errors.push({type:'syntax',line});s+=c;state=1}
+ }if(state===2)errors.push({type:'syntax',line:start});if(text.length&&!/[\r\n]$/.test(text)||row.length||s)push();
+ return {rows,errors};}
+function guess(text){let best=',',max=-1;for(const d of [',','\t',';','|']){let p=parse(text.slice(0,6000),d),n=p.rows.slice(0,12).map(r=>r.cells.length);if(!n.length)continue;let score=Math.max(...n)*3+n.filter(x=>x===n[0]).length*2-p.errors.length*3;if(Math.max(...n)===1)score-=20;if(score>max){max=score;best=d}}return best}
+function risks(v){let out=[];if(/^0\d+$/.test(v))out.push('zero');if(/^\d{16,}$/.test(v))out.push('long');if(/^\d+[Ee][+-]?\d+$/.test(v))out.push('exp');if(/^\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?$/.test(v))out.push('date');let t=v.trimStart();if(/^[=+@-]/.test(t)&&!/^-[0-9]+(?:\.[0-9]+)?$/.test(t))out.push('formula');return out}
+function audit(){let text=state.text,d=$('sep').value;d=d==='auto'?guess(text):d==='tab'?'\t':d;let p=parse(text,d),issues=p.errors.map((x,i)=>({...x,key:'s'+i,level:'error',col:-1})),width=p.rows[0]?.cells.length||0,header=$('head').checked;
+ p.rows.forEach((r,i)=>{if(r.cells.length!==width)issues.push({type:'ragged',line:r.line,col:-1,key:'r'+i,level:'error'});r.cells.forEach((v,j)=>{if(i===0&&header)return;risks(v).forEach(type=>issues.push({type,line:r.line,col:j,key:type+'-'+i+'-'+j,level:type==='formula'?'error':'warning'}))})});
+ if(header&&p.rows.length){const seen=new Set();p.rows[0].cells.forEach((h,j)=>{if(!h)issues.push({type:'blank',line:1,col:j,key:'b'+j,level:'warning'});if(seen.has(h))issues.push({type:'dupe',line:1,col:j,key:'d'+j,level:'warning'});seen.add(h)})}
+ state.audit={...p,issues,width,d,header};render();}
+const n=(tag,txt,cls)=>{let x=document.createElement(tag);x.textContent=txt;if(cls)x.className=cls;return x};
+function render(){let a=state.audit;$('rows').textContent=Math.max(0,a.rows.length-(a.header?1:0));$('cols').textContent=a.width;$('errors').textContent=a.issues.filter(x=>x.level==='error').length;$('warnings').textContent=a.issues.filter(x=>x.level==='warning').length;$('meta').textContent='区切り: '+(a.d==='\t'?'タブ':a.d)+' · 元の値を保持 / 外部通信なし';$('count').textContent='('+a.issues.length+'件)';
+ const list=$('issues');list.replaceChildren();if(!a.issues.length)list.append(n('p','指摘なし'));
+ a.issues.slice(0,120).forEach(x=>{let r=n('div','','issue'),info=n('div','');info.append(n('b',labels[x.type]||x.type),n('small','行 '+x.line+(x.col<0?'':' · '+(x.col+1)+'列目')));let btn=n('button',state.checked.has(x.key)?'確認済':'確認する',state.checked.has(x.key)?'checked':'');btn.onclick=()=>{if(state.checked.has(x.key))state.checked.delete(x.key);else state.checked.add(x.key);render()};r.append(info,btn);list.append(r)});
+ const table=$('table');table.replaceChildren();const head=n('tr','');head.append(n('th','行'));for(let j=0;j<a.width;j++)head.append(n('th',a.header?a.rows[0].cells[j]||'列 '+(j+1):'列 '+(j+1)));table.append(head);
+ a.rows.slice(a.header?1:0,(a.header?1:0)+12).forEach(r=>{let tr=n('tr','');tr.append(n('td',r.line));for(let j=0;j<a.width;j++){let v=r.cells[j]??'（列不足）',td=n('td',v);if(risks(v).length)td.className='flag';tr.append(td)}table.append(tr)})}
+function quote(v,d){v=String(v);return v.includes(d)||/[\r\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function stringify(rows,d,guard,bom){return (bom?'\uFEFF':'')+rows.map(row=>row.map(x=>{let v=String(x);if(guard&&risks(v).includes('formula'))v="'"+v;return quote(v,d)}).join(d)).join('\r\n')+'\r\n'}
+function save(name,value){let url=URL.createObjectURL(new Blob([value],{type:'text/csv;charset=utf-8'})),a=n('a','');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('run').onclick=()=>state.text&&audit();$('head').onchange=()=>state.text&&audit();$('sep').onchange=()=>state.text&&audit();
+$('sample').onclick=()=>{state.bytes=null;state.name='sample.csv';state.text='コード,長いID,備考\r\n0012,123456789012345678,1/2\r\n0013,5,=2+3\r\n0014,7\r\n';$('fname').textContent='sample.csv';state.checked.clear();audit()};
+const load=async file=>{if(!file)return;if(file.size>8*1024*1024){$('message').textContent='8MBを超えました';return}state.bytes=await file.arrayBuffer();state.name=file.name;decode();};
+function decode(){if(!state.bytes)return;let str;try{str=new TextDecoder($('code').value,{fatal:true}).decode(state.bytes)}catch(e){$('message').textContent='この文字コードで復号できません。選び直してください';return}state.text=str;$('fname').textContent=state.name+' / '+$('code').value;state.checked.clear();audit()}
+$('code').onchange=decode;$('file').onchange=e=>load(e.target.files[0]);$('drop').onclick=()=>$('file').click();$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};$('drop').ondragover=e=>e.preventDefault();$('drop').ondrop=e=>{e.preventDefault();load(e.dataTransfer.files[0])};
+$('report').onclick=()=>{let a=state.audit;if(!a)return;let lines=[['line','column','level','rule','reviewed'],...a.issues.map(x=>[x.line,x.col<0?'':x.col+1,x.level,x.type,state.checked.has(x.key)?'yes':'no'])];save('ketamamori-report.csv',stringify(lines,',',false,true))};
+$('export').onclick=()=>{let a=state.audit;if(!a)return;if(a.errors.length){$('message').textContent='引用符エラーがあります。整形を停止しました';return}if(a.rows.some(r=>r.cells.length>a.width)){$('message').textContent='列が多い行があります。元のCSVを修正してください';return}if(a.rows.some(r=>r.cells.length<a.width)&&!$('pad').checked){$('message').textContent='列数が一致しません。空欄補完に同意してください';return}
+let rows=a.rows.map(r=>[...r.cells,...Array(a.width-r.cells.length).fill('')]);save('ketamamori-checked.csv',stringify(rows,a.d,$('guard').checked,$('bom').checked));$('message').textContent='整形CSVを出力しました。Excelで取り込む際は識別子列をテキスト型にしてください。'};
+})();
+</script></body></html>
