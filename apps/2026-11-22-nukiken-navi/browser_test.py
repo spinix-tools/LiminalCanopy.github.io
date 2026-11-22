@@ -78,6 +78,7 @@ with sync_playwright() as p:
     page=restored
     page.locator('#n').fill('0');page.locator('#recalc').click()
     check(page.locator('#form-message').inner_text().find('抽出数')>=0,'input validation')
+    check(page.locator('#consumer-risk').inner_text()=='—','invalid plan hides stale risk')
     page.locator('#n').fill('32');page.locator('#c').fill('1');page.locator('#recalc').click()
     check(page.locator('#consumer-risk').inner_text().endswith('%'),'recompute with c1')
     page.locator('#suggest').click()

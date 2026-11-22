@@ -56,7 +56,14 @@ function calculate({silent=false}={}){
     if(!silent)status('form-message',`計算しました。抽出数${plan.n}個、許容不良${plan.c}個。`);
     trySave();
     return plan;
-  } catch(err) {status('form-message',err.message,true);return null;}
+  } catch(err) {
+    if (state.sample) { clearSample('入力条件が無効になったため、前回の検査記録を無効化しました。'); trySave(); }
+    for(const id of ['producer-risk','consumer-risk','inspection-time','coverage'])$(id).textContent='—';
+    $('formula').textContent='入力値を修正すると計算を再開します。';
+    $('risk-chart').replaceChildren();
+    status('form-message',err.message,true);
+    return null;
+  }
 }
 function renderSample(){
   const list=$('sample-list'); list.replaceChildren();
@@ -108,7 +115,7 @@ function restoreLocal(){
   renderForm(state.plan); lastPlanFingerprint=fingerprint(state.plan);calculate({silent:true});renderSample();
 }
 function setup(){
-  FIELDS.forEach(id=>$(id).addEventListener('change',()=>calculate()));
+  FIELDS.forEach(id=>{ $(id).addEventListener('change',()=>calculate()); $(id).addEventListener('input',()=>calculate({silent:true})); });
   $('recalc').addEventListener('click',()=>calculate());
   $('suggest').addEventListener('click',()=>{
     const plan=calculate(); if(!plan)return;
