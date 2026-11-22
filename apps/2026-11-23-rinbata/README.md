@@ -17,8 +17,8 @@
 ## 動作とテスト（2026-11-23）
 - 完全版 `index.html`：Node.js 単体 22/22合格、固定シード3,000ケース合格。
 - Chromium操作：28/28チェック合格（登録・編集・Undo・インポート/エクスポート含む）。
-- GitHub版は完全版をgzipにロスレス格納した起動HTML。最新Chrome/Edge/Safari等の `DecompressionStream` 対応ブラウザで動作し、`python unpack.py` で可読HTMLに復元できる。
-- 環境制約：直接file://起動がブロックされたため、**Chromiumはインライン実行**。端末保存はメモリスタブで検証。実菜園での農学的精度は未検証。
+- GitHub版 `index.html` は可読な単一HTMLの**軽量・別実装**。作付履歴、連作チェック、候補地比較、編集、保存、JSON/CSV等の主要機能を実装。ZIPに含む完全版とは異なる。
+- 環境制約：直接file://起動がブロックされたため、**Chromiumはインライン実行**。端末保存はメモリスタブで検証。GitHub版は再取得・JavaScript構文・主要機能要素の静的確認のみで、実ブラウザ操作は未検証。完全版のテスト結果をGitHub版のテスト結果とはみなさない。実菜園での農学的精度も未検証。
 
 **注意**：初期「2年」はデモ用の仮設定で、栽培上の推奨値ではない。菌、品種、土壌、環境、土替え等は評価しない。「記録上の注意なし」は安全保証ではない。予定を実施履歴とはみなさない。
 
@@ -31,4 +31,4 @@
 - GrowVeg https://www.growveg.com/garden-planner-intro.aspx
 - GrowVeg価格 https://www.growveg.com/subscribeinfo.aspx
 
-MIT License. 可読ソース・テスト・画面画像は配布ZIP内に含む。
+MIT License. Github版の可読HTMLソースは `index.html`、より高機能な完全版・テスト・画面画像は配布ZIP内に含む。
