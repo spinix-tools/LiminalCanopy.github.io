@@ -1,0 +1,31 @@
+const test=require('node:test');const assert=require('node:assert/strict');const W=require('./engine.js');
+function base(){return W.defaults()}
+test('default model creates 4 valid rounds',()=>{const p=W.generate(base());assert.equal(p.schedule.length,4);assert.equal(W.analyze(p).waitingTotal,5);});
+test('stable seed produces identical plan',()=>{assert.deepEqual(W.generate(base()).schedule,W.generate(base()).schedule)});
+test('changing seed does not change attended headcounts',()=>{const a=W.generate(base()),b=W.generate({...base(),seed:77});for(let r=0;r<4;r++)assert.equal(a.schedule[r].groups.flat().length+b.schedule[r].waiting.length,base().attendance[r].length)});
+test('completed round is preserved when regenerating',()=>{let p=W.generate(base());const original=JSON.stringify(p.schedule.slice(0,2));p.locked=2;p.attendance[2]=p.attendance[2].slice(1);p=W.generate({...p,seed:82});assert.equal(JSON.stringify(p.schedule.slice(0,2)),original);});
+test('locked round rejects attendance changes',()=>{const p=W.generate(base());p.locked=1;p.attendance[0]=p.attendance[0].slice(1);assert.throws(()=>W.generate(p),/参加予定/)});
+test('invalid participants rejected',()=>{const p=base();p.participants=['A','A'];assert.throws(()=>W.generate(p),/重複/)});
+test('empty participant rejected',()=>{const p=base();p.participants=['A',' '];assert.throws(()=>W.generate(p),/参加者コード/)});
+test('too many people rejected',()=>{const p=base();p.participants=Array.from({length:41},(_,i)=>''+i);assert.throws(()=>W.generate(p),/2〜40/)});
+test('invalid rounds rejected',()=>{const p=base();p.rounds=9;p.attendance=Array.from({length:9},()=>p.participants);assert.throws(()=>W.generate(p),/1〜8/)});
+test('invalid seats rejected',()=>{const p=base();p.seats=1;assert.throws(()=>W.generate(p),/2〜8/)});
+test('duplicate attendance rejected',()=>{const p=base();p.attendance[0]=['P01','P01'];assert.throws(()=>W.generate(p),/参加予定/)});
+test('unknown participant attendance rejected',()=>{const p=base();p.attendance[0]=['UNKNOWN'];assert.throws(()=>W.generate(p),/参加予定/)});
+test('empty attendance supports 0 assignments',()=>{const p=base();p.attendance[0]=[];const result=W.generate(p);assert.equal(result.schedule[0].groups.flat().length,0);assert.equal(result.schedule[0].waiting.length,0)});
+test('one table still assigns participants correctly',()=>{const p=base();p.tables=1;p.seats=8;const r=W.generate(p);assert.equal(r.schedule[0].groups[0].length,8);assert.equal(r.schedule[0].waiting.length,5)});
+test('no forced idle where capacity enough',()=>{const p=base();p.tables=8;p.seats=3;const r=W.generate(p);assert.equal(W.analyze(r).waitingTotal,0)});
+test('every person has exactly one state per round',()=>{const p=W.generate(base()),a=W.analyze(p);for(const x of p.participants)assert.equal(a.byPerson[x].length,p.rounds)});
+test('sum unique+repeats equals all encounters',()=>{const a=W.analyze(W.generate(base()));assert.equal(a.unique+a.repeats,a.encounters)});
+test('valid normalized state retains input while copying arrays',()=>{const p=W.generate(base()),n=W.normalize(p);n.participants[0]='DIFFERENT';assert.notEqual(p.participants[0],n.participants[0])});
+test('tampered stored schedule rejected',()=>{const p=W.generate(base());p.schedule[0].groups[0].push('P01');assert.throws(()=>W.analyze(p))});
+test('csv includes waiting, absent and BOM-independent headers',()=>{const p=W.generate(base()),csv=W.csv(p);assert.match(csv,/"待機"/);assert.match(csv,/"不参加"/);assert.match(csv,/"参加者コード"/)});
+test('csv quotes cells safely',()=>{const p={participants:['a,"b','A'],tables:1,seats:2,rounds:1,attendance:[['a,"b','A']],locked:0,schedule:[]};assert.match(W.csv(W.generate(p)),/"a,""b"/)});
+test('coverage range valid',()=>{const s=W.analyze(W.generate(base()));assert(s.coverage>=0&&s.coverage<=1)});
+test('seeded random generator reproducible',()=>{const a=W.rng(25),b=W.rng(25);for(let i=0;i<30;i++)assert.equal(a(),b())});
+test('locked entirely returns original rounds',()=>{const p=W.generate(base());p.locked=4;assert.deepEqual(W.generate({...p,seed:123}).schedule,p.schedule)});
+test('score is finite and nonnegative',()=>{const p=W.generate(base());assert(Number.isFinite(W.scoreSchedule(p.schedule,p.participants,p.tables)))});
+test('JSON roundtrip preserves committed plans',()=>{const p=W.generate(base());p.locked=1;const q=JSON.parse(JSON.stringify(p));assert.deepEqual(W.analyze(q).byPerson,W.analyze(p).byPerson)});
+test('randomized constraints / late arrivals / locked prefix 500 scenarios',()=>{const random=W.rng(1199);for(let n=0;n<500;n++){const count=2+Math.floor(random()*29),tables=1+Math.floor(random()*6),seats=2+Math.floor(random()*6),rounds=1+Math.floor(random()*6);const people=Array.from({length:count},(_,i)=>'A'+i);const attendance=Array.from({length:rounds},()=>people.filter(()=>random()>.17));let s={participants:people,tables,seats,rounds,attendance,locked:0,schedule:[],seed:n+1};s=W.generate(s,{iterations:7});const actual=W.analyze(s);assert(actual.unique<=actual.encounters);assert(actual.coverage<=1);for(let i=0;i<rounds;i++){const assigned=s.schedule[i].groups.flat().concat(s.schedule[i].waiting);assert.deepEqual(assigned.slice().sort(),attendance[i].slice().sort());assert(s.schedule[i].groups.every(g=>g.length<=seats));}const lock=Math.floor(random()*(rounds+1));s.locked=lock;const preserved=JSON.stringify(s.schedule.slice(0,lock));for(let r=lock;r<rounds;r++)attendance[r]=people.filter(()=>random()>.3);s.attendance=attendance;s=W.generate(s,{iterations:3});assert.equal(JSON.stringify(s.schedule.slice(0,lock)),preserved);W.analyze(s);}});
+
+test('control characters in IDs rejected',()=>{const p=base();p.participants[0]='A\u0001B';assert.throws(()=>W.generate(p),/参加者コード/)});
