@@ -1,0 +1,11 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>苗席 — 読み込み中</title><style>body{font:16px system-ui,"Yu Gothic",sans-serif;background:#f4f5ed;color:#264e35;margin:0;padding:18vh 24px;text-align:center}h1{font-size:44px}small{color:#637663}</style></head><body><h1>苗席 🌱</h1><p id="loadText">アプリを読み込んでいます…</p><small>接続・登録不要のローカル育苗計画</small>
+<script src="payload-1.js"></script><script src="payload-2.js"></script><script src="payload-3.js"></script><script>
+(async function(){try{
+ if(!window.NAESEKI_PARTS||window.NAESEKI_PARTS.length!==3||window.NAESEKI_PARTS.some(x=>!x))throw Error('payload-*.js が見つかりません');
+ if(!window.DecompressionStream)throw Error('このブラウザはgzip展開に対応していません。unpack.pyをご利用ください');
+ const raw=atob(window.NAESEKI_PARTS.join('')),bytes=new Uint8Array(raw.length);
+ for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+ const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+ const html=await new Response(stream).text();document.open();document.write(html);document.close();
+ }catch(e){document.getElementById('loadText').textContent='起動できませんでした：'+e.message;console.error(e);}})();
+</script></body></html>
