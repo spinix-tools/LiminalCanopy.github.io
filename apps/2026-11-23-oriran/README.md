@@ -4,6 +4,7 @@
 ## 市場・競合・仮説
 - 国内：[ZINE白書2026](https://zinez.org/report/2026)は2026-11-11時点のBOOTH等に掲載されたZINE 3,505点・1,651作者を集計。ただし標本であり日本市場全体の推計ではない。
 - 国内競合：[てもとツール 小冊子印刷メーカー](https://temototool.com/tools/booklet-maker/)（PDF中綴じ・右綴じ・自動白紙）、[PodoLay](https://podolay.com/ja/)（日本語組版）。
+- 海外需要の手がかり：[Printed MatterのNY Art Book Fair 2026](https://nyabf2026.printedmatterartbookfairs.org/about)（2026年9月24〜27日）は、独立出版者・作家等の**310超の出展者**を主催者が報告。ただしアプリへの有料需要を示す数字ではない。
 - 海外競合：[BookletMaker](https://bookletmaker.app/) と [BookletPro](https://bookletpro.app/) はPDF面付け・冊子印刷を提供。
 - 差別化仮説：既存PDFの加工だけでなく、ページ原稿を直接編集して、**読順・用紙表裏・追加白紙・印刷チェック**まで同時に扱う。右綴じや端末内処理自体は既存競合も対応。需要・収益性は未検証。
 
