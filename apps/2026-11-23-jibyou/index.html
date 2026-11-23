@@ -1,0 +1,8 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>字秒 / JIBYOU — 字幕QC</title></head><body><p style="font:16px system-ui;padding:3rem">字秒を読み込み中…（端末内だけで完了します）</p><script src="payload.js"></script><script>
+(async function(){try{
+if(!window.__JIBYOU_B64)throw new Error('payload.js が見つかりません');
+const data=Uint8Array.from(atob(window.__JIBYOU_B64),c=>c.charCodeAt(0));
+const source=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+document.open();document.write(source);document.close();
+}catch(e){document.body.textContent='gzip展開に非対応か、配布ファイルが不足しています。python3 unpack.py で standalone.html を復元してください。 '+e.message;}})();
+</script></body></html>
