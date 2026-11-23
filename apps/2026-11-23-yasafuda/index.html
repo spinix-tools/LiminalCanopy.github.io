@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>やさ札｜掲示の検品室</title>
+<style>
+:root{--ink:#18343a;--bg:#f7f5ed;--red:#c56240;--line:#dddcd1}*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:var(--bg);font-family:system-ui,"Yu Gothic",Meiryo,sans-serif;line-height:1.65}
+main{max-width:1230px;margin:auto;padding:25px}header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:17px}
+.brand{font-size:24px;font-weight:900}.sub{font-size:12px;color:#5d6b67}.eyebrow{font-size:11px;color:var(--red);letter-spacing:.16em;font-weight:900}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.3;margin:20px 0 8px}h2{font-size:15px;margin:0}.intro{display:flex;gap:20px;justify-content:space-between;align-items:end;margin:22px 0 25px;flex-wrap:wrap}.intro p{font-size:13px;color:#61716b;margin:8px 0}
+button{font:inherit;cursor:pointer;padding:9px 12px;background:white;color:var(--ink);border:1px solid var(--line);border-radius:9px;font-size:12px;font-weight:800}
+button:hover{background:#eef4ee}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #467d84;outline-offset:2px}
+.primary{background:var(--ink);color:white;border-color:var(--ink)}.accent{background:var(--red);color:white;border-color:var(--red)}
+.buttons{display:flex;flex-wrap:wrap;gap:7px}.columns{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;align-items:start}
+.panel{background:#fffefa;border:1px solid #e5e3da;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px #1233330b;margin-bottom:18px}
+.panel-head{padding:15px 20px;border-bottom:1px solid #eae8dd;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.panel-body{padding:19px 20px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+label.field{display:block;margin-bottom:12px;font-size:12px;font-weight:800}input:not([type=checkbox]),select,textarea{display:block;width:100%;padding:10px 11px;border:1px solid #d9dcd5;background:#fff;border-radius:9px;font:13px/1.7 system-ui,"Yu Gothic",sans-serif;color:var(--ink);margin-top:5px;resize:vertical}
+textarea{min-height:94px}textarea#draft{min-height:155px}textarea.short{min-height:77px}
+.note{font-size:11px;color:#697773}.rule{font-weight:900;font-size:13px;border-top:1px solid var(--line);padding-top:14px;margin:13px 0}
+.stats{display:flex;gap:8px}.stat{flex:1;border-radius:12px;padding:13px;background:#e3eee5}.stat:nth-child(2){background:#fae8d8}.stat:nth-child(3){background:#e1ecf1}.stat b{display:block;font-size:28px;line-height:1.2}.stat small{display:block;font-size:11px;color:#52645e}
+.issue{display:flex;gap:10px;border-bottom:1px solid #e9e8e0;padding:12px 0;font-size:12px}.issue:last-child{border:0}.issue .symbol{color:#ac5b39;background:#f8e8dc;padding:0 6px;height:24px;border-radius:6px}.issue p{margin:4px 0;color:#61706c;font-size:11px}.issue code{font:inherit;font-weight:800;background:#f5efe7;padding:2px 4px}
+.sheet-area{background:#e6e7de;padding:22px}.sheet{background:#fff;min-height:310px;padding:30px;box-shadow:0 4px 16px #10202022;overflow-wrap:anywhere}.sheet strong.cap{display:block;border-top:5px solid var(--red);padding-top:11px;color:var(--red);letter-spacing:.16em;font-size:11px}
+.sheet h2{font-size:28px;line-height:1.35;margin:12px 0}.sheet p{white-space:pre-wrap}.sheet .text{font-size:15px;line-height:1.9;border-top:1px solid #eee;padding-top:12px}.sheet.large .text{font-size:20px}.detail{display:grid;grid-template-columns:94px 1fr;gap:8px;border-top:1px solid #eee;padding:9px 0;font-size:13px}.detail b{color:#a55134}
+.check{display:block;border:1px solid #e6e8e1;border-radius:9px;padding:10px;margin:8px 0;font-size:12px;font-weight:700}.check input{margin-right:8px}
+footer{font-size:11px;color:#6d7771;margin:20px 0}#status{font-size:11px;color:#53755e}#file{display:none}
+@media(max-width:890px){.columns{grid-template-columns:1fr}}@media(max-width:540px){main{padding:14px}.twocol{grid-template-columns:1fr}.sheet-area{padding:12px}.sheet{padding:19px}.panel-body{padding:15px}.panel-head{padding:14px 15px}}
+@media print{header,.intro,.editor,.audit,.verify,.preview .panel-head,footer{display:none!important}body{background:white}main{padding:0;max-width:none}.columns{display:block}.panel{border:0;box-shadow:none}.sheet-area{background:#fff;padding:0}.sheet{box-shadow:none;padding:15px}.sheet h2{font-size:36px}.sheet .text{font-size:20px}}
+</style></head><body><main>
+<header><div><span class="brand">やさ札 <span style="font-size:12px;color:#b25c3b">YASAFUDA</span></span><div class="sub">NOTICE QUALITY STUDIO</div></div><span class="sub">● 通信なし・端末内で編集</span></header>
+<div class="intro"><div><span class="eyebrow">NOTICE QUALITY CHECKER</span><h1>伝える文から、<br>動ける掲示へ。</h1><p>表現と行動情報を別々に検品。最後は人の確認で仕上げます。</p></div><div class="buttons"><button id="reset">サンプルへ戻す</button><button id="import">JSON読込</button><button id="json">JSON保存</button><button id="posterOut" class="primary">掲示HTML出力</button><input type="file" id="file" accept=".json,application/json"></div></div>
+<div class="columns"><section class="panel editor"><div class="panel-head"><h2>01 / 原稿を整える</h2><span class="sub">入力は自動保存</span></div><div class="panel-body">
+<div class="twocol"><label class="field">掲示のタイトル<input id="title" maxlength="90"></label><label class="field">掲示の種類<select id="kind"><option value="event">イベント・行事</option><option value="procedure">手続き・申し込み</option><option value="facility">施設のお知らせ</option><option value="general">その他</option></select></label></div>
+<label class="field">元の文章<textarea id="original"></textarea></label><label class="field">編集する文章<textarea id="draft"></textarea></label>
+<div class="buttons"><button id="restore">原文を編集欄に戻す</button><button id="copy">編集文をコピー</button><span id="length" class="sub"></span></div>
+<div class="rule">読む人が行動するための情報</div>
+<div class="twocol"><label class="field">何をするか<textarea class="short" id="action"></textarea></label><label class="field">いつ<textarea class="short" id="when"></textarea></label><label class="field">どこで<textarea class="short" id="where"></textarea></label><label class="field">困ったとき（担当窓口）<textarea class="short" id="contact"></textarea></label></div>
+<label class="field">だれに伝えるか（任意）<input id="audience"></label><p class="note">翻訳・品質認定ではありません。文意・事実・緊急時の正確さは人が確認してください。</p>
+</div></section><div>
+<section class="panel audit"><div class="panel-head"><h2>02 / 確認したい箇所</h2><span id="status"></span></div><div class="panel-body"><div class="stats"><div class="stat"><b id="issuesCount">0</b><small>表現の注意点</small></div><div class="stat"><b id="missingCount">0</b><small>必要情報の空欄</small></div><div class="stat"><b id="checksCount">0/3</b><small>人の確認済み</small></div></div><div class="rule">具体的な見直し候補</div><div id="issues" aria-live="polite"></div><p class="note">簡易語句辞書と55文字の基準による注意喚起です。0件でもわかりやすさは保証しません。</p></div></section>
+<section class="panel preview"><div class="panel-head"><h2>03 / 掲示プレビュー</h2><div><label class="sub"><input type="checkbox" id="large"> 文字を大きく</label> <button id="print">印刷</button></div></div><div class="sheet-area"><div class="sheet" id="sheet"></div></div></section>
+<section class="panel verify"><div class="panel-head"><h2>04 / 人が確かめる</h2><span class="sub">自動では完了にしません</span></div><div class="panel-body">
+<label class="check"><input type="checkbox" id="facts">日時・場所・行動の事実を確認</label>
+<label class="check"><input type="checkbox" id="wording">言い換えで意味が変わらないことを確認</label>
+<label class="check"><input type="checkbox" id="layout">実際の掲示の読みやすさを確認</label>
+<div class="buttons"><button id="report">検品TXT保存</button><button class="accent" id="print2">印刷する</button></div>
+</div></section></div></div>
+<footer>やさ札 — JavaScriptのみで動作。AI API・外部CDN・個人情報送信なし。端末内のブラウザ保存には共有端末で注意してください。</footer>
+</main><script>
+(function(){
+'use strict';
+var K='yasafuda-github-v1', names=['title','kind','original','draft','action','when','where','contact','audience'], flags=['facts','wording','layout'];
+var SAMPLE={version:1,title:'交流会のお知らせ',kind:'event',original:'地域のみなさまへ。12月6日に交流会を実施いたします。該当者は速やかに受付へお越しください。詳細は後日ご案内いたします。',draft:'地域のみなさまへ。12月6日に交流会を実施いたします。該当者は速やかに受付へお越しください。詳細は後日ご案内いたします。',action:'参加する人は受付へ来てください。',when:'2026年12月6日（日）10:00〜11:30',where:'地域交流センター1階',contact:'',audience:'地域のみなさん',facts:false,wording:false,layout:false,large:false};
+var VOCAB=[['実施','行います'],['該当者','対象となる人'],['速やかに','できるだけ早く'],['お越しください','来てください'],['ご案内','お知らせ'],['ご持参','持ってきて'],['申請','申し込み'],['各位','みなさん'],['原則','基本的には'],['遵守','守って'],['予め','前もって'],['当該','その'],['お問い合わせ','質問'],['お問合せ','質問'],['受付を終了','受け付けを終わり']];
+var AMBIG=['後日','明日','本日','来週','近日中','随時','当日','至急','お早めに','こちら'];
+var NEED={event:['action','when','where'],procedure:['action','when','where','contact'],facility:['action','when','where'],general:['action']};
+var LABEL={action:'何をするか',when:'いつ',where:'どこで',contact:'困ったとき'};
+var p, found=[], timer;
+function el(id){return document.getElementById(id)}
+function clean(v,n){return typeof v==='string'?v.slice(0,n||6000):''}
+function normal(x){var o={};x=x&&typeof x==='object'&&!Array.isArray(x)?x:{};names.forEach(function(k){o[k]=clean(x[k],k==='title'?90:6000)});o.kind=NEED[o.kind]?o.kind:'general';flags.forEach(function(k){o[k]=x[k]===true});o.large=x.large===true;o.version=1;return o}
+function persist(){try{localStorage.setItem(K,JSON.stringify(p))}catch(e){}}
+function restore(){try{var s=localStorage.getItem(K);return s?normal(JSON.parse(s)):normal(SAMPLE)}catch(e){return normal(SAMPLE)}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function node(tag,txt){var x=document.createElement(tag);x.textContent=txt;return x}
+function scan(txt){
+ var out=[];VOCAB.forEach(function(pair){var i=0,j;while((j=txt.indexOf(pair[0],i))>=0){out.push({pos:j,end:j+pair[0].length,word:pair[0],alt:pair[1],type:'言葉の見直し'});i=j+pair[0].length}});
+ AMBIG.forEach(function(word){var i=0,j;while((j=txt.indexOf(word,i))>=0){out.push({pos:j,end:j+word.length,word:word,type:'日時・場所があいまい'});i=j+word.length}});
+ var re=/[^。！？!?\n]+[。！？!?]?/g,m;while((m=re.exec(txt))){if(Array.from(m[0]).length>55)out.push({pos:m.index,end:m.index+m[0].length,word:m[0].slice(0,22)+'…',type:'長い文（55文字超）'})}
+ return out.sort(function(a,b){return a.pos-b.pos});
+}
+function sync(){names.forEach(function(k){el(k).value=p[k]});flags.forEach(function(k){el(k).checked=p[k]});el('large').checked=p.large;draw()}
+function invalidate(){flags.forEach(function(k){p[k]=false;el(k).checked=false})}
+function change(k,v){p[k]=v;invalidate();persist();draw()}
+function draw(){
+ found=scan(p.draft);var missing=NEED[p.kind].filter(function(k){return !p[k].trim()});
+ el('issuesCount').textContent=found.length;el('missingCount').textContent=missing.length;el('checksCount').textContent=flags.filter(function(k){return p[k]}).length+'/3';
+ el('status').textContent=flags.every(function(k){return p[k]})?'3項目確認済み':'人の確認は未完了';
+ el('length').textContent=Array.from(p.draft).length+'文字';
+ var dest=el('issues');dest.replaceChildren();
+ missing.forEach(function(k){var row=node('div','');row.className='issue';row.appendChild(node('span','!'));var box=node('div','');box.appendChild(node('strong','「'+LABEL[k]+'」が空欄です'));box.appendChild(node('p','この掲示で必要な行動情報を確認してください。'));var btn=node('button','入力する');btn.onclick=function(){el(k).focus()};box.appendChild(btn);row.appendChild(box);dest.appendChild(row)});
+ found.forEach(function(i){var row=node('div','');row.className='issue';var box=node('div','');box.appendChild(node('strong',i.type+'：'+i.word));box.appendChild(node('p',i.alt?'候補は「'+i.alt+'」。置き換え後の意味を確認してください。':'日付・場所・長い文を具体的に見直してください。'));if(i.alt){var btn=node('button','「'+i.alt+'」に置き換える');btn.onclick=function(){if(p.draft.slice(i.pos,i.end)!==i.word)return;change('draft',p.draft.slice(0,i.pos)+i.alt+p.draft.slice(i.end));el('draft').value=p.draft};box.appendChild(btn)}row.appendChild(box);dest.appendChild(row)});
+ if(!missing.length&&!found.length)dest.appendChild(node('p','自動検出はありません。人が事実と文意を確かめてください。'));
+ var sheet=el('sheet');sheet.replaceChildren();sheet.className='sheet'+(p.large?' large':'');var cap=node('strong','やさしい おしらせ');cap.className='cap';sheet.appendChild(cap);sheet.appendChild(node('h2',p.title||'お知らせ'));if(p.audience)sheet.appendChild(node('p',p.audience+'へ'));var body=node('p',p.draft);body.className='text';sheet.appendChild(body);
+ Object.keys(LABEL).forEach(function(k){if(!p[k].trim())return;var div=node('div','');div.className='detail';div.appendChild(node('b',LABEL[k]));div.appendChild(node('span',p[k]));sheet.appendChild(div)});
+}
+function download(data,ext,mime){var b=new Blob([data],{type:mime}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='yasafuda-'+new Date().toISOString().slice(0,10)+'.'+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1200)}
+function poster(){var d='<!doctype html><html lang="ja"><meta charset="utf-8"><title>'+esc(p.title)+'</title><style>body{max-width:800px;margin:5% auto;padding:2em;font:20px/1.9 sans-serif;white-space:pre-wrap}h1{border-bottom:5px solid #c56240}dt{font-weight:bold;margin-top:1em}</style><h1>'+esc(p.title)+'</h1><p>'+esc(p.draft)+'</p><dl>';Object.keys(LABEL).forEach(function(k){if(p[k].trim())d+='<dt>'+LABEL[k]+'</dt><dd>'+esc(p[k])+'</dd>'});return d+'</dl><p style="font-size:12px">作成者による確認が必要です。</p></html>'}
+names.forEach(function(k){el(k).addEventListener('input',function(e){change(k,e.target.value)})});
+flags.forEach(function(k){el(k).onchange=function(e){p[k]=e.target.checked;persist();draw()}});
+el('large').onchange=function(e){p.large=e.target.checked;p.layout=false;el('layout').checked=false;persist();draw()};
+el('restore').onclick=function(){change('draft',p.original);el('draft').value=p.draft};
+el('reset').onclick=function(){if(!confirm('サンプルに戻しますか？'))return;p=normal(SAMPLE);persist();sync()};
+el('json').onclick=function(){download(JSON.stringify(p,null,2),'json','application/json')};
+el('posterOut').onclick=function(){download(poster(),'html','text/html')};
+el('report').onclick=function(){var a=scan(p.draft),t='# やさ札 検品\n\n'+p.title+'\n\n注意点\n'+a.map(function(x){return '- '+x.type+' '+x.word}).join('\n')+'\n\n人の確認\n'+flags.map(function(x){return '- '+x+': '+(p[x]?'確認済み':'未確認')}).join('\n');download(t,'txt','text/plain')};
+el('print').onclick=el('print2').onclick=function(){print()};
+el('import').onclick=function(){el('file').click()};
+el('file').onchange=async function(){var file=this.files[0];if(!file)return;try{if(file.size>100000)throw Error('サイズ超過');var data=JSON.parse(await file.text());if(!data||data.version!==1)throw Error('形式が違います');p=normal(data);persist();sync()}catch(e){alert('読み込めません：'+e.message)}this.value=''};
+el('copy').onclick=async function(){try{await navigator.clipboard.writeText(p.draft)}catch(e){el('draft').focus();el('draft').select()}};
+p=restore();sync();
+})();
+</script></body></html>
