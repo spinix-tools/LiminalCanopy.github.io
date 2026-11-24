@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const solve=vm.runInNewContext(fs.readFileSync(__dirname+'/index.html','utf8').match(/<script id="core">([\s\S]*?)<\/script>/)[1]+';solve');
+const sample=[[-2,0,0,0,0,0],[-2,0,0,0,-2,-2]],r=Array.from({length:6},()=>[1,.9,1.12,1.25,1.4]);
+const s=solve(sample,r,3);assert.equal(s.count,15625);assert.equal(s.chosen.changes,3);assert.ok(Math.abs(s.chosen.max-.12)<1e-9);assert.ok(Math.abs(s.baseline.max-(1-2**(-1/3)))<1e-9);assert.throws(()=>solve([[13,0,0,0,0,0]],r,3));assert.throws(()=>solve(sample,r,7));
+let seed=37;const random=()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/2**32);let checks=0;
+for(let trial=0;trial<100;trial++){const t=Array.from({length:1+Math.floor(random()*3)},()=>Array.from({length:6},()=>Math.floor(random()*9)-4)),rr=Array.from({length:6},()=>[1,.8+random()*.6]),ans=solve(t,rr,6);for(let k=0;k<=6;k++){let best=Infinity;for(let mask=0;mask<64;mask++){let used=0,worst=0;for(let i=0;i<6;i++){const j=(mask>>i)&1;used+=j;for(const row of [[0,0,0,0,0,0],...t])worst=Math.max(worst,Math.abs(rr[i][j]*Math.pow(Math.pow(2,1/12),2*row[i])-1))}if(used<=k)best=Math.min(best,worst)}assert.ok(Math.abs(ans.best[k].max-best)<1e-9);assert.ok(ans.best[k].changes<=k);checks++}}
+console.log('6 fixed assertions; '+checks+' randomized budget comparisons passed. Sample '+s.baseline.max+' -> '+s.chosen.max);
