@@ -1,0 +1,10 @@
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+root=Path(__file__).parent
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']); page=b.new_page(viewport={'width':1280,'height':1000},accept_downloads=True); errors=[]; external=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:external.append(r.url) if r.url.startswith(('http://','https://')) else None)
+ page.set_content((root/'index.html').read_text().replace('<script id="core">','<script>Object.defineProperty(window,"localStorage",{value:{data:{},setItem(k,v){this.data[k]=v},getItem(k){return this.data[k]||null}}})</script><script id="core">')); assert page.locator('.stat').count()==3;print('sample:',page.locator('#out').inner_text().splitlines()[:8]);page.screenshot(path=str(root/'desktop.png'),full_page=True)
+ page.locator('#max').fill('1');assert page.locator('#csv').is_disabled();page.locator('#run').click();assert '最低' in page.locator('#out').inner_text();page.locator('#sample').click();assert page.locator('#csv').is_enabled();page.locator('#mode').select_option('single');page.locator('#run').click();assert '見開き内' not in page.locator('#out').inner_text();page.locator('#rows').fill('<img src=x>,1,0\nB,1,1.2');page.locator('#run').click();assert page.locator('#out img').count()==0;assert '<img src=x>' in page.locator('#out').inner_text();page.locator('#save').click();page.locator('#sample').click();page.evaluate("apply(JSON.parse(localStorage.getItem(key)));calculate()");assert '<img src=x>' in page.locator('#rows').input_value();page.locator('#sample').click()
+ with page.expect_download() as d:page.locator('#csv').click()
+ content=Path(d.value.path()).read_text(encoding='utf-8-sig');assert 'short_seconds' in content and 'page' in content
+ page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(root/'mobile.png'),full_page=True);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors and not external,(errors,external);print('browser checks passed; no page errors or HTTP(S) requests');b.close()
