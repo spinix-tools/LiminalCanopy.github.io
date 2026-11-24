@@ -1,0 +1,9 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+const api=vm.runInNewContext(html.match(/<script id="engine">([\s\S]*?)<\/script>/)[1]+'\n;({edge,assess,solve,pieces,validate,defaults})');
+let seed=123456; const rand=n=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)%n);
+function ref(L,t,g,a){let x=0,z=a,widths=[];while(x<L){widths.push(Math.min(z,L-x));x+=z;if(x>=L) return {last:widths.at(-1),min:Math.min(...widths),ok:true};x+=g;z=t;}return {last:0,min:0,ok:false};}
+assert.equal(api.edge(305,300,3,300).last,2);assert.equal(api.edge(303,300,3,300).ok,false);assert.equal(api.edge(300,300,3,300).ok,true);assert.equal(api.edge(5,300,3,300).min,5);assert.throws(()=>api.validate({...api.defaults,w1:1}));assert.throws(()=>api.validate({...api.defaults,g:21}));
+for(let i=0;i<2000;i++){let t=1+rand(50),g=rand(8),a=1+rand(t),L=1+rand(300),x=api.edge(L,t,g,a),y=ref(L,t,g,a);for(let k of ['last','min','ok'])assert.equal(x[k],y[k]);}
+for(let i=0;i<300;i++){let t=1+rand(50),g=rand(8),lo=1+rand(250),hi=lo+rand(20),m=1+rand(t);const s=api.solve(lo,hi,t,g,m).best;let candidates=[];for(let a=1;a<=t;a++){let vals=[];for(let L=lo;L<=hi;L++)vals.push(ref(L,t,g,a));let n=ref(Math.floor((lo+hi)/2),t,g,a);candidates.push({a,score:[vals.filter(v=>v.ok&&v.min>=m).length,vals.filter(v=>v.ok).length,Math.min(...vals.map(v=>v.min)),-Math.abs(Math.min(Math.floor((lo+hi)/2),a)-n.last),-a]});}candidates.sort((a,b)=>{for(let j=0;j<a.score.length;j++)if(a.score[j]!==b.score[j])return b.score[j]-a.score[j];return 0});assert.equal(s.a,candidates[0].a);}
+console.log('6 fixed assertions, 2000 edge cases, 300 independent exhaustive comparisons: PASS'); console.log(JSON.stringify([api.solve(1820,1840,300,3,75),api.solve(1170,1190,200,3,75)],null,2));
