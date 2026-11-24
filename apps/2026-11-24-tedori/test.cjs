@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx=vm.createContext({});vm.runInContext(fs.readFileSync(__dirname+'/index.html','utf8').match(/<script id="engine">([\s\S]*?)<\/script>/)[1],ctx);
+const {parse,reach,analyze,propose}=ctx;
+const {n,c}=parse('A | 駅前 | 0 | 0\nB | 古書店 | 1 | 0\nC | 時計塔 | 1 | 0\nD | 隠し部屋 | 2 | 1','A | B | 地図 | 古書店への地図\nA | C | 証人 | 時計塔の証言\nB | D | 台帳 | 鍵の記録\nC | D | 証人 | 合言葉\nB | D | 写真 | 扉の写真');
+const a=analyze(n,c,'group');assert.equal(a.total,4);assert.equal(a.passed,3);assert.equal(a.cases[0].ok,true);assert.equal(analyze(n,c,'clue').passed,4);assert.equal(analyze(n,c,'pair').total,10);const p=propose(n,c,a)[0];assert.equal(p.rescued,1);assert.equal(analyze(n,[...c,p.clue],'group').passed,5);assert.throws(()=>parse('A | a | 1 | 1',''));assert.throws(()=>parse('A | a | 0 | 1','A | Z | x | y'));assert.throws(()=>parse('A | a | 0 | 1','A | A | x | y\nA | A | x | y'));
+// Independent asynchronous fixed point (one new node per iteration).
+let seed=194;const rnd=k=>(((seed=(Math.imul(seed,1664525)+1013904223)>>>0)>>>8)%k);let checks=0;
+for(let t=0;t<250;t++){const nn=Array.from({length:2+rnd(8)},(_,i)=>({id:String(i),need:i===0?0:1+rnd(3),goal:i>0}));const cc=Array.from({length:rnd(20)},(_,i)=>({from:String(rnd(nn.length)),to:String(rnd(nn.length)),group:'g'+rnd(5),name:String(i)}));for(const f of analyze(nn,cc,'pair').cases){const seen=new Set();while(true){const next=nn.find(x=>!seen.has(x.id)&&cc.filter(y=>seen.has(y.from)&&y.to===x.id&&!f.groups.includes(y.group)).length>=x.need);if(!next)break;seen.add(next.id)}assert.deepEqual([...f.seen].sort(),[...seen].sort());checks++}}
+console.log('10 fixed assertions passed; '+checks+' independent reachability comparisons passed');console.log('sample',a.passed,a.total,'proposal',p,analyze(n,[...c,p.clue],'group').passed);
