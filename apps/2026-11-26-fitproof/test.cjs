@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const code=fs.readFileSync(__dirname+'/index.html','utf8').match(/<script id="core">([\s\S]*?)<\/script>/)[1];const c=vm.createContext({});vm.runInContext(code+';this.api={parse,fit,analyze}',c);const {parse,analyze}=c.api;let n=0;function test(fn){fn();n++}const train=[5,10,20,30].map(x=>({x,y:.98*x-.2,role:'fit'}));const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8);
+test(()=>{const r=analyze(train,15,.1);assert.equal(r.best.type,'affine');near(r.cad,15.2/.98);near(r.best.cv,0)});
+test(()=>assert.equal(analyze(train,15,.1).status,'unverified'));
+test(()=>assert.equal(analyze([...train,{x:15,y:14.5,role:'check'}],15,.1).status,'pass'));
+test(()=>assert.equal(analyze([...train,{x:15,y:14,role:'check'}],15,.1).status,'fail'));
+test(()=>assert.equal(analyze(train,50,.1).status,'outside'));
+test(()=>assert.equal(analyze([...train,{x:50,y:49,role:'check'}],15,.1).status,'unverified'));
+test(()=>assert.throws(()=>analyze(train.slice(0,2),15,.1)));
+test(()=>assert.throws(()=>parse('5,,fit')));
+test(()=>assert.throws(()=>parse('5,4,other')));
+test(()=>assert.equal(parse('5,4,fit\n10\t9\tcheck').length,2));
+test(()=>{const a=analyze(train,15,.1),b=analyze([...train,{x:10,y:100,role:'check'}],15,.1);near(a.cad,b.cad);near(a.best.cv,b.best.cv)});
+test(()=>{const rows=Array.from({length:80},(_,i)=>({x:i+1,y:i+1-.1,role:'fit'}));near(analyze(rows,20,.1).cad,20.1)});
+console.log(`${n} tests passed`);
