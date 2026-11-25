@@ -1,0 +1,16 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');const ctx=vm.createContext({});vm.runInContext(html.match(/<script id="core">([\s\S]*?)<\/script>/)[1]+'\nthis.api={normalize,parse,overlap,relation,audit}',ctx);const {normalize,parse,relation,audit}=ctx.api;
+let count=0;function test(fn){fn();count++}const r=(id,app,mode,key)=>({id,app,mode,key,name:'x'});
+test(()=>assert.equal(normalize(' Shift + Control + P ','win'),'ctrl+shift+p'));
+test(()=>assert.equal(normalize('Mod+K Cmd+C','mac'),'meta+k meta+c'));
+test(()=>assert.throws(()=>normalize('ctrl+ctrl+k','win')));
+test(()=>assert.throws(()=>normalize('ctrl+k a b c','win')));
+test(()=>assert.throws(()=>parse('*|edit|a|x','win')));
+test(()=>assert.equal(relation(r(1,'*','*','ctrl+k'),r(2,'a','edit','ctrl+k c')),'prefix'));
+test(()=>assert.equal(relation(r(1,'a','edit','a'),r(2,'a','debug','a')),null));
+test(()=>assert.equal(relation(r(1,'a','*','a'),r(2,'b','*','a')),null));
+test(()=>assert.equal(relation(r(1,'a','*','a'),r(2,'a','edit','a')),'exact'));
+test(()=>assert.equal(relation(r(1,'a','*','a b'),r(2,'a','*','a c')),null));
+test(()=>{const a=audit([r(1,'*','*','a'),r(2,'x','*','a b'),r(3,'x','*','c')],['a','a b','b','c']);assert.deepEqual(JSON.parse(JSON.stringify(a.suggestions)),[{id:1,keys:['b']},{id:2,keys:['b']}])});
+test(()=>assert.equal(audit(Array.from({length:200},(_,i)=>r(i+1,'*','*','a')),[]).issues.length,19900));
+console.log(`${count}/${count} passed`);
