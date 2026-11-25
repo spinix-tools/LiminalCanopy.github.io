@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>味順 / AJIJUN 控えファイル試作</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f1e8;color:#292a24;font:15px/1.6 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:24px}header{padding:26px 0}h1{font-size:36px;line-height:1.15;margin:8px 0}h2{font-size:19px;margin:0 0 12px}p{margin:8px 0}.eyebrow{font-size:12px;letter-spacing:.15em;color:#795736;font-weight:700}.panel{background:#fffdf8;border:1px solid #dfd8c9;border-radius:16px;padding:20px;margin:0 0 16px}.formgrid,.metrics,.matrices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-weight:600}input,textarea,select,button{font:inherit}input,textarea,select{width:100%;padding:9px;border:1px solid #b8b1a3;border-radius:7px;background:white;color:inherit}textarea{min-height:90px;resize:vertical}button{border:1px solid #79674e;border-radius:8px;padding:9px 14px;background:#fffdf8;color:#493d2e;cursor:pointer}button.primary{background:#315a47;color:white;border-color:#315a47}button:disabled{opacity:.45;cursor:default}.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.hint,small{color:#6f6b60;font-size:13px}.metric{padding:12px;background:#f0eee5;border-radius:10px}.metric strong{display:block;font-size:26px;color:#315a47}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:center;padding:7px;border-bottom:1px solid #e5dfd4;white-space:nowrap}th{font-size:12px;color:#615d52}.heat td{border:2px solid #fffdf8;border-radius:5px}.heat th,.heat td{padding:5px}.err{color:#a02f26;font-weight:700}.key{border:1px dashed #a98960;padding:12px;border-radius:8px}.tag{background:#e8eee5;padding:3px 7px;border-radius:5px;font-size:12px}footer{color:#6f6b60;font-size:12px;padding:8px 0 24px}@media(max-width:600px){main{padding:12px}.panel{padding:14px}.formgrid,.matrices{grid-template-columns:1fr}h1{font-size:29px}}@media print{body{background:white}main{max-width:none;padding:0}header,#setup,#analysis,#keybox,.buttons,footer{display:none!important}.panel{border:0;padding:0}#result{margin:0}tr{break-inside:avoid}}
+@media print { body.printNewOnly #schedule tr.fixed{display:none!important} }
+</style><main><header><div class="eyebrow">SENSORY SESSION PLANNER · 01</div><h1>味順 <span style="font-size:.55em;color:#795736">AJIJUN</span></h1><p>試飲の順番を、全員同じにしない。実施済みの順番を残して、次の試飲者の提示順を調整する。</p></header>
+<section class="panel" id="setup"><h2>01 / 試飲会の条件</h2><div class="formgrid"><label>サンプル数（2〜6）<input id="n" type="number" min="2" max="6" value="4"></label><label>最終人数（1〜60）<input id="total" type="number" min="1" max="60" value="8"></label><label>隣接順の重み<select id="weight"><option value="0">位置だけ</option><option value="1" selected>位置と隣接順を同等に</option><option value="3">隣接順を重視</option></select></label><label>乱数シード（1〜999999）<input id="seed" type="number" min="1" max="999999" value="42"></label></div><p><label>変更しない実施済み順序（任意）<p>転記した控えは1行目を含めて主催者だけで保管してください。試料数・シード・試料コードが違うと再計算を止めます。従来の文字順だけを入れる場合は、以前と同じシードかを手元の対応表で確かめてください。</p><label>主催者の控えを読み込む<input id="ownerFile" type="file" accept=".txt,text/plain"></label><div id="ownerStatus" role="status"></div><textarea id="locked" placeholder="例：ABCD&#10;BCDA"></textarea></label><small>1行にA〜Fのうち使用する文字を1回ずつ。参加者名は不要。欠席行は除き、実際に行った順だけ残してください。サンプル数・シードは同一セッション中に変えないでください。</small></p><div class="buttons"><button class="primary" id="run">提示順を作成</button><button id="demo">サンプル条件</button><button id="reset">初期化</button></div><p class="err" id="error" role="alert"></p></section>
+<section class="panel" id="result" hidden><h2>02 / 試飲者用 提示順</h2><p class="hint">番号だけを配布します。固定＝実施済み、新規＝これから実施。各人は左から順に試飲。</p><div id="schedule" class="scroll"></div><div class="buttons"><button id="csv">全員の順番CSV</button><button id="csvNew">新規だけのCSV</button><button id="print">全員を印刷</button><button id="printNew">新規だけを印刷</button><button id="copy">次回用に全順序を固定欄へ</button><button id="saveOwner">主催者の控えを保存</button></div></section>
+<section class="panel" id="analysis" hidden><h2>03 / 偏りの比較</h2><p class="hint">比較対象：実施済みはそのまま、残り全員をABC…順にした場合。差は独自の設計指標で、味覚バイアスの実測値ではありません。</p><div class="metrics" id="metrics"></div><p class="hint" id="detail"></p><div class="matrices"><div><h3>各位置の出現回数</h3><div id="pos" class="scroll"></div></div><div><h3>直前→直後の出現回数</h3><div id="adj" class="scroll"></div></div></div></section>
+<section class="panel" id="keybox" hidden><h2>04 / 主催者専用</h2><p class="hint">対応表は参加者に見せないでください。共通コード方式で、試飲者同士の会話による識別は防げません。</p><button id="reveal">対応表を表示 / 非表示</button><div class="key" id="key" hidden></div><div class="buttons"><button id="keycsv">主催者用CSV（対応表）</button></div></section><footer>ローカル実行専用 · 外部通信なし · 公式試験手順や統計的妥当性を保証するものではありません。</footer></main>
+<script id="core">
+const ABC='ABCDEF';
+function permutations(a){if(!a.length)return [[]];return a.flatMap((v,i)=>permutations(a.filter((_,j)=>j!==i)).map(p=>[v,...p]));}
+function rng(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
+function shuffle(a,r){for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function counts(n,rows=[]){const p=Array(n*n).fill(0),a=Array(n*n).fill(0);const c={p,a};for(const row of rows)change(c,row,n,1);return c;}
+function change(c,row,n,d){row.forEach((v,i)=>{c.p[i*n+v]+=d;if(i)c.a[row[i-1]*n+v]+=d;});}
+function score(c,w){return c.p.reduce((s,x)=>s+x*x,0)+w*c.a.reduce((s,x)=>s+x*x,0);}
+function lower(n,t,w){const q=Math.floor(t/n),r=t%n;const v=(n-r)*q*q+r*(q+1)*(q+1);return (n+w*(n-1))*v;}
+function parseLocked(text,n){return text.split(/\r?\n/).map(x=>x.trim().toUpperCase()).filter(Boolean).map((s,i)=>{if(s.length!==n||new Set(s).size!==n||[...s].some(x=>!ABC.slice(0,n).includes(x)))throw Error('固定順序の'+(i+1)+'行目が不正です。');return [...s].map(x=>ABC.indexOf(x));});}
+function encodeHandover(p,seed){return '#AJIJUN-LOCK-V1 '+p.n+' '+seed+' '+p.codes.join(',')+'\n'+p.rows.map(row=>row.map(v=>ABC[v]).join('')).join('\n');}
+function runHandover(n,t,w,seed,raw){
+ const lines=raw.trim().split(/\r?\n/),first=lines[0];
+ if(!first.startsWith('#'))return plan(n,t,w,seed,parseLocked(raw,n));
+ const m=first.match(/^#AJIJUN-LOCK-V1 ([2-6]) ([1-9]\d{0,5}) ((?:[1-9]\d{2},){1,5}[1-9]\d{2})$/);
+ if(!m)throw Error('引き継ぎ行が不正です。保存した控えを1行目から貼ってください。');
+ if(Number(m[1])!==n||Number(m[2])!==seed)throw Error('試料数かシードが控えと違います。試料数 '+m[1]+'、シード '+m[2]+' に戻してください。');
+ const saved=parseLocked(lines.slice(1).join('\n'),n);
+ if(!saved.length)throw Error('引き継ぐ固定順がありません。控えをすべて貼ってください。');
+ const p=plan(n,t,w,seed,saved);
+ if(p.codes.join(',')!==m[3])throw Error('試料コードが控えと一致しません。前回配った表を維持し、控えを確認してください。');
+ return p;
+}
+function decodeOwnerFile(raw){
+ if(typeof raw!=='string'||raw.length>4096)throw Error('控えは4 KBまでの味順のテキストに限ります。');
+ const cleaned=raw.replace(/^\uFEFF/,'').trim();
+ const lines=cleaned.split(/\r?\n/),m=lines[0].match(/^#AJIJUN-LOCK-V1 ([2-6]) ([1-9]\d{0,5}) /);
+ if(!m)throw Error('味順で保存した主催者の控えを選んでください。');
+ const n=Number(m[1]),seed=Number(m[2]),t=lines.slice(1).filter(x=>x.trim()).length;
+ const plan=runHandover(n,t,1,seed,cleaned);
+ if(plan.locked!==t||!t)throw Error('固定順の読み込みに失敗しました。');
+ return {n,seed,t,raw:encodeHandover(plan,seed)};
+}
+function plan(n,t,w,seed,locked){if(!Number.isInteger(n)||n<2||n>6||!Number.isInteger(t)||t<1||t>60||![0,1,3].includes(w)||!Number.isInteger(seed)||seed<1||seed>999999||locked.length>t||locked.some(row=>row.length!==n||new Set(row).size!==n||row.some(x=>!Number.isInteger(x)||x<0||x>=n)))throw Error('人数・サンプル数・固定行・シードの範囲を確認してください。');const natural=Array.from({length:n},(_,i)=>i),r=rng(seed),all=shuffle(permutations(natural),r),base=[...locked,...Array.from({length:t-locked.length},()=>natural)],bc=counts(n,base);let rows=locked.slice(),c=counts(n,rows);
+function best(){let min=Infinity,chosen;for(const row of all){let delta=0;for(let i=0;i<n;i++){delta+=2*c.p[i*n+row[i]]+1;if(i)delta+=w*(2*c.a[row[i-1]*n+row[i]]+1);}if(delta<min){min=delta;chosen=row;}}return chosen;}
+while(rows.length<t){const row=best();rows.push(row);change(c,row,n,1);}for(let pass=0;pass<2;pass++){for(let i=locked.length;i<t;i++){change(c,rows[i],n,-1);rows[i]=best();change(c,rows[i],n,1);}}if(score(bc,w)<score(c,w)){rows=base;c=bc;}const codes=shuffle(Array.from({length:900},(_,i)=>100+i),rng(seed+12345)).slice(0,n);return {rows,c,baseScore:score(bc,w),score:score(c,w),lower:lower(n,t,w),codes,locked:locked.length,n,w};}
+</script>
+<script>
+const $=id=>document.getElementById(id);let current=null;
+function clear(){current=null;for(const id of ['result','analysis','keybox'])$(id).hidden=true;$('key').hidden=true;$('error').textContent='';}
+function table(headers,rows){const el=document.createElement('table'),head=el.createTHead().insertRow();headers.forEach(x=>{const th=document.createElement('th');th.textContent=x;head.append(th);});const body=el.createTBody();rows.forEach(row=>{const tr=body.insertRow();row.forEach(x=>{tr.insertCell().textContent=x;});});return el;}
+function matrix(id,arr,n,codes,adj){const head=[''].concat(codes),rows=Array.from({length:n},(_,i)=>[adj?codes[i]:i+1,...Array.from({length:n},(_,j)=>adj&&i===j?'—':arr[i*n+j])]);const el=table(head,rows);el.className='heat';const max=Math.max(1,...arr);Array.from(el.tBodies[0].rows).forEach((tr,i)=>Array.from(tr.cells).slice(1).forEach((td,j)=>{if(!(adj&&i===j))td.style.background='rgba(49,90,71,'+(.05+.28*arr[i*n+j]/max)+')';}));$(id).replaceChildren(el);}
+function orderCSV(p,newOnly=false){const start=newOnly?p.locked:0;return [['participant','status',...Array.from({length:p.n},(_,i)=>'position'+(i+1))],...p.rows.slice(start).map((row,i)=>[i+start+1,i+start<p.locked?'fixed':'new',...row.map(v=>p.codes[v])])];}
+function render(p){current=p;for(const id of ['result','analysis','keybox'])$(id).hidden=false;$('key').hidden=true;$('schedule').replaceChildren(table(['番号','状態',...Array.from({length:p.n},(_,i)=>'順 '+(i+1))],p.rows.map((row,i)=>[i+1,i<p.locked?'固定':'新規',...row.map(v=>p.codes[v]) ])));Array.from($('schedule').querySelectorAll('tbody tr')).slice(0,p.locked).forEach(row=>row.classList.add('fixed'));$('csvNew').disabled=$('printNew').disabled=p.locked===p.rows.length;$('metrics').innerHTML='<div class="metric">同一順の偏り<strong>'+(p.baseScore-p.lower)+'</strong></div><div class="metric">調整後の偏り<strong>'+(p.score-p.lower)+'</strong></div>';$('detail').textContent='理論下限からの超過二乗和。'+(p.score===p.lower?'両指標の重み付き理論下限に到達。':'近似探索。最適性は未保証。')+' 固定 '+p.locked+' 人 / 新規 '+(p.rows.length-p.locked)+' 人。';matrix('pos',p.c.p,p.n,p.codes,false);matrix('adj',p.c.a,p.n,p.codes,true);$('key').replaceChildren(table(['サンプル','共通コード'],p.codes.map((v,i)=>[ABC[i],v])));}
+function run(){clear();try{if(['n','total','seed'].some(id=>!$(id).value.trim()))throw Error('必須項目を入力してください。');const n=Number($('n').value);if(!Number.isInteger(n)||n<2||n>6)throw Error('サンプル数は2〜6です。');render(runHandover(n,Number($('total').value),Number($('weight').value),Number($('seed').value),$('locked').value));}catch(e){$('error').textContent=e.message;}}
+function saveBlob(name,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function download(name,rows){const blob=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});saveBlob(name,blob);}
+async function restoreOwnerFile(file){
+ if(!file)return;
+ try{
+  if(file.size>4096)throw Error('控えは4 KBまでです。');
+  const a=decodeOwnerFile(await file.text());
+  $('n').value=a.n;$('total').value=a.t;$('seed').value=a.seed;$('locked').value=a.raw;run();
+  $('ownerStatus').textContent=a.t+'人分の固定順を読み込みました。「最終人数」を増やせます。';
+ }catch(e){$('ownerStatus').textContent=e.message;}
+}
+$('ownerFile').onchange=async e=>{const f=e.currentTarget.files?.[0];e.currentTarget.value='';await restoreOwnerFile(f);};
+$('saveOwner').onclick=()=>{if(current)saveBlob('ajijun-organizer-handover.txt',new Blob([encodeHandover(current,Number($('seed').value))],{type:'text/plain;charset=utf-8'}));};
+$('run').onclick=run;$('reset').onclick=()=>{$('n').value=4;$('total').value=8;$('seed').value=42;$('weight').value=1;$('locked').value='';clear();};$('demo').onclick=()=>{$('reset').click();$('locked').value='ABCD\nABCD';run();};$('csv').onclick=()=>{if(current)download('ajijun-orders.csv',orderCSV(current));};$('csvNew').onclick=()=>{if(current&&current.rows.length>current.locked)download('ajijun-new-participants.csv',orderCSV(current,true));};$('keycsv').onclick=()=>{if(current)download('ajijun-key.csv',[['sample','code'],...current.codes.map((v,i)=>[ABC[i],v])]);};$('reveal').onclick=()=>$('key').hidden=!$('key').hidden;function printOrders(isNew){if(!current||(isNew&&current.rows.length===current.locked))return;document.body.classList.toggle('printNewOnly',isNew);window.print();}
+window.addEventListener('afterprint',()=>document.body.classList.remove('printNewOnly'));$('print').onclick=()=>printOrders(false);$('printNew').onclick=()=>printOrders(true);$('copy').onclick=()=>{if(current){$('locked').value=encodeHandover(current,Number($('seed').value));clear();}};for(const id of ['n','total','seed','weight','locked'])$(id).addEventListener('input',clear);run();
+</script></html>
