@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx={module:{exports:{}}};vm.runInNewContext(fs.readFileSync(__dirname+'/index.html','utf8').split('<script>')[1].split('</script>')[0],ctx);const {DEMO,parse,audit,summarize,swapped}=ctx.module.exports;
+const plain=x=>JSON.parse(JSON.stringify(x));let count=0;const test=(name,fn)=>{fn();count++;console.log('PASS',name)};
+test('demo intermediate loops and missing',()=>{const s=audit(DEMO);assert.deepEqual(plain(s.map(x=>x.rows.map(r=>r.status))),[['chain','ok','ok'],['loop','loop','ok'],['ok','chain','ok'],['ok','chain','missing'],['ok','chain','ok']]);assert.deepEqual(plain(summarize(s)),{baseline:3,final:3,hidden:3,badSteps:2,total:3})});
+test('swap first two removes loops',()=>{const s=audit(swapped(DEMO,2));assert.equal(summarize(s).hidden,1);assert(s.every(x=>x.rows.every(r=>r.status!=='loop')))});
+test('wrong terminal and rule priority',()=>{const s=audit({pages:'/a\n/b',rules:'/a /b',changes:'',checks:'/a /a'});assert.equal(s[0].rows[0].status,'wrong')});
+test('page publication and deletion',()=>{const s=audit({pages:'',rules:'/a /b',changes:'1 P /b\n2 D /a\n2 P /a',checks:'/a /b'});assert.deepEqual(plain(s.map(x=>x.rows[0].status)),['missing','ok','wrong'])});
+test('self loop',()=>assert.equal(audit({pages:'/a',rules:'/a /a',changes:'',checks:'/a /a'})[0].rows[0].status,'loop'));
+test('same phase atomic',()=>assert.equal(audit({pages:'/a',rules:'',changes:'1 R /a /b\n1 P /b',checks:'/a /b'})[1].rows[0].status,'ok'));
+test('duplicate conflict',()=>assert.throws(()=>parse({...DEMO,changes:'1 R /a /b\n1 D /a'})));
+test('reject unsafe and unsupported paths',()=>{for(const p of ['//a','/a?b','/../a','/a*','https://a','/a%20','/a#b'])assert.throws(()=>parse({...DEMO,pages:p}))});
+test('max inputs',()=>{const rules=Array.from({length:200},(_,i)=>'/r'+i+' /end').join('\n'),checks=Array.from({length:100},(_,i)=>'/r'+i+' /end').join('\n'),changes=Array.from({length:300},(_,i)=>(1+Math.floor(i/10))+' R /r'+(200+i)+' /end').join('\n');const s=audit({pages:'/end',rules,checks,changes});assert.equal(s.length,31);assert.equal(summarize(s).final,100)});
+test('sort sparse phases',()=>assert.deepEqual(plain(audit({...DEMO,changes:'9 P /x\n2 P /y'}).map(s=>s.n)),[0,2,9]));
+console.log(count+' tests passed');
