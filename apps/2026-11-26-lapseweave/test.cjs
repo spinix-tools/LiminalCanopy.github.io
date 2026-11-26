@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),test=require('node:test');
+const c={};vm.createContext(c);vm.runInContext(fs.readFileSync(__dirname+'/index.html','utf8').match(/<script id="engine">([\s\S]*?)<\/script>/)[1],c);const plan=c.plan;
+const row=(duration,min,pref,max)=>({duration,min,pref,max});const sample=[row(600,3,10,30),row(300,1,2,6),row(900,5,15,40)];
+test('sample target and constraints',()=>{const p=plan(sample,240,300);assert.equal(p.ok,true);assert.equal(p.rows.reduce((s,r)=>s+r.n,0),240);for(const r of p.rows)assert.ok(r.interval>=r.min&&r.interval<=r.max)});
+test('budget rejects target',()=>assert.equal(plan(sample,240,239).ok,false));
+test('impossible bounds',()=>assert.equal(plan([row(1,2,2,3)],1,1).ok,false));
+test('minimum target',()=>assert.equal(plan(sample,1,300).ok,false));
+test('invalid preference',()=>assert.throws(()=>plan([row(10,3,2,5)],2,4)));
+test('zero budget',()=>assert.equal(plan(sample,100,0).ok,false));
+test('maximum 10000 frames',()=>{const p=plan(Array.from({length:12},()=>row(1000,.1,1,100)),10000,10000);assert.equal(p.rows.reduce((s,r)=>s+r.n,0),10000)});
+test('200 exhaustive comparisons',()=>{let seed=37;const rand=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed%n};for(let t=0;t<200;t++){const rs=Array.from({length:3},()=>row(4+rand(9),1,2+rand(3),5));const target=3+rand(20);let best=Infinity;for(let a=1;a<=rs[0].duration;a++)for(let b=1;b<=rs[1].duration;b++){const ns=[a,b,target-a-b];if(ns.some((n,i)=>n<1||rs[i].duration/n<1||rs[i].duration/n>5))continue;best=Math.min(best,ns.reduce((s,n,i)=>{const q=rs[i].duration/rs[i].pref;return s+(n-q)**2/q},0))}const p=plan(rs,target,30);assert.equal(p.ok,Number.isFinite(best));if(p.ok)assert.ok(Math.abs(p.cost-best)<1e-8)}});
