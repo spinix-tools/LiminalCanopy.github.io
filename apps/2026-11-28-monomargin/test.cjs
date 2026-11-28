@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx=vm.createContext({});vm.runInContext(fs.readFileSync(__dirname+'/index.html','utf8').match(/<script id="core">([\s\S]*?)<\/script>/)[1],ctx);
+const {sample,windows,retention,plan,monoWav,parseWav}=ctx;
+const s=sample(),w=windows(s,1),p=plan(w,30,-6);assert.equal(w.length,4);assert.equal(retention(w[0],.5),0);assert.equal(retention(w[1],.5),-120);assert.equal(plan(w,0,-6).met,false);assert.equal(plan([{energy:0,active:false}],30,-6),null);
+const direct=(s,w,k)=>{let a=0,b=0;for(let i=Math.round(w.start*s.rate);i<Math.round(w.end*s.rate);i++){let l=s.pcm[i*2],r=s.pcm[i*2+1];a+=(k*l+(1-k)*r)**2;b+=(l*l+r*r)/2}return 10*Math.log10(Math.max(1e-12,a/b))};
+let seed=43;const rand=()=>((seed=Math.imul(seed,1664525)+1013904223|0)>>>0)/2**32;
+for(let t=0;t<100;t++){const pcm=new Int16Array(160);for(let i=0;i<pcm.length;i++)pcm[i]=Math.round(rand()*20000-10000);const s={pcm,rate:80},ws=windows(s,.25),bias=t%51,target=-t%31,best=plan(ws,bias,target);let candidates=[];for(let k=50-bias;k<=50+bias;k++){let scores=ws.filter(w=>w.active).map(w=>{let a=direct(s,w,k/100);assert.ok(Math.abs(a-retention(w,k/100))<1e-8);return a});candidates.push({k,v:Math.min(...scores)})}let ok=candidates.filter(x=>x.v>=target-1e-9);if(ok.length)assert.equal(Math.abs(best.k-50),Math.min(...ok.map(x=>Math.abs(x.k-50))));else assert.ok(Math.abs(best.worst-Math.max(...candidates.map(x=>x.v)))<1e-8);assert.equal(best.met,!!ok.length)}
+const m=new DataView(monoWav(s,p.k/100));assert.equal(m.getUint16(22,true),1);assert.equal(m.getUint32(24,true),8000);assert.equal(m.getUint32(40,true),64000);for(let i=0;i<32000;i++)assert.equal(m.getInt16(44+i*2,true),Math.round(p.k/100*s.pcm[i*2]+(1-p.k/100)*s.pcm[i*2+1]));assert.throws(()=>parseWav(m.buffer));
+console.log('100 random plans + fixed assertions PASS',JSON.stringify(p));
