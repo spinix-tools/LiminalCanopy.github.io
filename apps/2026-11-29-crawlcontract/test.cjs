@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('node:vm');
+const code=fs.readFileSync(__dirname+'/index.html','utf8').split('<script>')[1].split('const $=')[0];const ctx=vm.createContext({});vm.runInContext(code,ctx);const {parse,decide,matches,contracts,audit}=ctx;
+const check=(p,b,path,want)=>assert.equal(decide(parse(p),b,path).allow,want);
+check('User-agent: *\nDisallow: /','Bot','/x',false);
+check('User-agent: *\nDisallow: /\nUser-agent: Bot\nAllow: /','bot','/x',true);
+check('User-agent: Bot\nDisallow: /x\nUser-agent: BOT\nAllow: /xy','Bot','/xy',true);
+check('User-agent: Bot\nUser-agent: Other\nDisallow: /x','Other','/x',false);
+check('User-agent: *\nDisallow: /x\nAllow: /x','Bot','/x',true);
+check('User-agent: *\nDisallow: /X','Bot','/x',true);
+check('User-agent: *\nDisallow: /','Bot','/robots.txt',true);
+check('User-agent: *\nDisallow: /\nUser-agent: Bot','Bot','/x',true);
+check('User-agent: *\nDisallow: \nUser-agent: Bot\nDisallow: /','Other','/x',true);
+check('User-agent: *\nSitemap: example\nDisallow: /','Bot','/x',false);
+check('User-agent: *\nDisallow: /*?draft=*','Bot','/a?draft=1',false);
+assert.throws(()=>parse('User-agent: *\nDisallow: /%20'));
+assert.throws(()=>contracts('Bot /日本 allow'));
+assert.throws(()=>contracts('Bot /x maybe'));
+assert.equal(audit('User-agent: *\nDisallow: /','User-agent: *\nAllow: /','Bot /x keep').rows[0].pass,false);
+let seed=20261129;const rnd=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return (seed>>>8)%n};
+for(let i=0;i<1000;i++){let p='/'+Array.from({length:rnd(12)},()=> 'ab/*'[rnd(4)]).join('')+(rnd(2)?'$':'');let s='/'+Array.from({length:rnd(15)},()=> 'ab/'[rnd(3)]).join('');const end=p.endsWith('$');let re='^'+(end?p.slice(0,-1):p).split('*').join('.*')+(end?'$':'');assert.equal(matches(p,s),new RegExp(re).test(s),JSON.stringify({p,s}));}
+console.log('PASS: 15 fixed assertions + 1000 generated glob checks');
