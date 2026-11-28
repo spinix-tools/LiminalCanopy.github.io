@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>RowGuard | 編み物の増減目計画</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f1e9;color:#273e3b;font:16px/1.6 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:24px}header{background:#23423d;color:#fff;padding:30px;border-radius:20px}h1{margin:0;font-size:36px}h2{font-size:20px;margin:0 0 12px}p{margin:8px 0}.layout{display:grid;grid-template-columns:1fr 1.25fr;gap:16px;margin-top:16px}section{background:#fff;border:1px solid #ddd8cc;border-radius:16px;padding:20px;min-width:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-size:13px;font-weight:700}input,select,button{font:inherit;color:inherit}input,select{width:100%;padding:9px;border:1px solid #aab5ad;border-radius:8px;background:#fff}button{border:0;border-radius:8px;background:#246756;color:#fff;padding:10px 15px;cursor:pointer;font-weight:700}button.secondary{background:#e5eee7;color:#23423d}button:disabled{opacity:.45;cursor:default}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.hint{font-size:13px;color:#52665e}.stat{font-size:27px;font-weight:750}.warn{color:#a33b24}#map{display:grid;grid-template-columns:repeat(auto-fill,minmax(37px,1fr));gap:4px;margin:12px 0}.tile{text-align:center;padding:5px 1px;border-radius:5px;background:#e9eee8;font-size:12px}.blocked{background:#ebdfd4;color:#78533e}.event{background:#246756;color:white}.locked{outline:2px solid #d09a39;outline-offset:-2px}#list{max-height:330px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;border-bottom:1px solid #e3e8e1;padding:6px}footer{font-size:12px;margin:20px 0}@media(max-width:700px){main{padding:12px}.layout{grid-template-columns:1fr}header{padding:20px}section{padding:14px}}@media print{header{color:#000;background:white}.layout{display:block}button,form{display:none}#list{max-height:none;overflow:visible}}
+</style><main><header><small>ROWGUARD / KNITTING WORKBENCH</small><h1>模様を守る、増減目計画。</h1><p>避けたい段・固定段・最低間隔を守りながら、増減目を均等に近づけます。</p></header><div class="layout"><section><h2>01 / 条件を入力</h2><form id="form"><div class="fields">
+<label>総段数<input id="R" type="number" min="1" max="300" value="32" required></label><label>開始目数<input id="S" type="number" min="1" max="10000" value="48" required></label><label>終了目数<input id="T" type="number" min="1" max="10000" value="60" required></label><label>1回の増減目数<input id="D" type="number" min="1" max="10" value="2" required></label><label>増減段の最低間隔<input id="G" type="number" min="1" max="300" value="3" required></label><label>許可する段<select id="P"><option value="all">全段 / 輪編み</option><option value="odd" selected>奇数段のみ</option><option value="even">偶数段のみ</option></select></label><label>模様の周期（段）<input id="C" type="number" min="1" max="300" value="8" required></label><label>周期内の禁止段（例 1,5）<input id="B" value="1,5"></label><label>必ず増減する段<input id="L" value="7,23"></label><label>個別の禁止段<input id="X" value="15"></label></div><p class="hint">段番号は1から。模様の第1段＝全体の第1段。カンマ区切り。奇数／偶数は編み始めの面に合わせて選択。</p><div class="actions"><button type="submit">計画を計算</button><button id="sampleBtn" type="button" class="secondary">サンプル</button></div></form></section><section><h2>02 / 段ごとの作業計画</h2><div id="status" role="status" aria-live="polite"></div><div id="map" aria-label="段の配置"></div><p class="hint">緑：増減目　茶：禁止段　金枠：固定段</p><div id="list"></div><div class="actions"><button id="save" disabled>CSV保存</button><button class="secondary" id="print" disabled>印刷</button></div></section></div><footer>外部通信なし。目数と段の配置のみを計算します。模様の編み方、左右対称性、糸やゲージ、実際の編みやすさは別途確認してください。</footer></main>
+<script id="core">
+function solve(o){
+ const {R,S,T,D,G,P,C,B,L,X}=o;
+ for(const [v,min,max] of [[R,1,300],[S,1,10000],[T,1,10000],[D,1,10],[G,1,300],[C,1,300]])if(!Number.isInteger(v)||v<min||v>max)throw Error('数値が範囲外です');
+ if(!['all','odd','even'].includes(P))throw Error('段の指定が不正です');
+ for(const [a,max] of [[B,C],[L,R],[X,R]])if(!Array.isArray(a)||a.some(v=>!Number.isInteger(v)||v<1||v>max))throw Error('段番号が範囲外です');
+ const K=Math.abs(T-S)/D;if(!Number.isInteger(K))throw Error('目数差を1回の増減目数で割り切れません');
+ const locks=new Set(L),blocked=Array.from({length:R+1},(_,r)=>r===0||B.includes((r-1)%C+1)||X.includes(r)||(P==='odd'&&r%2===0)||(P==='even'&&r%2===1));
+ if([...locks].some(r=>blocked[r]))throw Error('固定段が禁止段と重複しています');
+ const none=()=>({events:null,blocked});
+ if(K>R||locks.size>K)return none();if(K===0)return {events:[],blocked,cost:0};
+ const prevLock=[0];for(let r=1;r<=R;r++)prevLock[r]=locks.has(r)?r:prevLock[r-1];
+ let prev=Array(R+1).fill(Infinity);prev[0]=0;const back=[];
+ for(let i=1;i<=K;i++){
+  const cur=Array(R+1).fill(Infinity),parent=Array(R+1).fill(-1);
+  for(let r=1;r<=R;r++)if(!blocked[r]){
+   const a=i===1?0:Math.max(1,prevLock[r-1]),b=i===1?0:r-G;
+   if(i===1&&prevLock[r-1])continue;
+   for(let p=a;p<=b;p++)if(prev[p]<cur[r]){cur[r]=prev[p];parent[r]=p;}
+   if(parent[r]>=0)cur[r]+=(2*K*r-((2*i-1)*R+K))**2;
+  }back.push(parent);prev=cur;
+ }
+ let end=-1,cost=Infinity;for(let r=Math.max(1,prevLock[R]);r<=R;r++)if(prev[r]<cost){end=r;cost=prev[r];}
+ if(end<0)return none();const events=[];for(let i=K-1;i>=0;i--){events.push(end);end=back[i][end];}return {events:events.reverse(),blocked,cost};
+}
+function plan(o,events){let n=o.S;const set=new Set(events);return Array.from({length:o.R},(_,i)=>{const r=i+1,d=set.has(r)?Math.sign(o.T-o.S)*o.D:0;n+=d;return [r,d,n];});}
+</script><script>
+const $=id=>document.getElementById(id),form=$('form');let rows=null;
+const nums=s=>s.trim()===''?[]:s.split(/[,、\s]+/).map(v=>/^\d+$/.test(v)?Number(v):NaN);
+function read(){const o={};for(const k of ['R','S','T','D','G','C'])o[k]=$(k).valueAsNumber;o.P=$('P').value;for(const k of ['B','L','X'])o[k]=nums($(k).value);return o;}
+function clear(message){rows=null;$('status').textContent=message;$('map').replaceChildren();$('list').replaceChildren();$('save').disabled=$('print').disabled=true;}
+function run(){clear('');try{const o=read(),v=solve(o);if(!v.events){$('status').textContent='条件を満たす計画がありません。最低間隔・禁止段・固定段を見直してください。';return;}rows=plan(o,v.events);$('status').textContent=`${v.events.length}回の増減目で ${o.S} → ${o.T} 目。計画成立。`;
+ const set=new Set(v.events);for(const [r,d,n] of rows){const el=document.createElement('div');el.className='tile '+(set.has(r)?'event':v.blocked[r]?'blocked':'')+(o.L.includes(r)?' locked':'');el.textContent=r+(d?'*':'');el.title=`${r}段: ${d?`${d>0?'+':''}${d}目`:'変更なし'} / ${n}目`; $('map').append(el);}
+ const table=document.createElement('table');for(const data of [['段','増減','段終了時の目数'],...rows]){const tr=table.insertRow();for(const cell of data){const td=document.createElement(data[0]==='段'?'th':'td');td.textContent=cell;tr.append(td);}}$('list').append(table);$('save').disabled=$('print').disabled=false;
+ }catch(e){clear(e.message);}}
+form.addEventListener('submit',e=>{e.preventDefault();run()});form.addEventListener('input',()=>clear('条件変更：再計算してください。'));$("sampleBtn").onclick=()=>{form.reset();run()};$('print').onclick=()=>window.print();$('save').onclick=()=>{if(!rows)return;const url=URL.createObjectURL(new Blob(['\uFEFFrow,change,stitches\r\n'+rows.map(r=>r.join(',')).join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='rowguard-plan.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};run();
+</script></html>
